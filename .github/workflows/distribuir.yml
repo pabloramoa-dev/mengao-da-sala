@@ -1,0 +1,29 @@
+name: Distribuir pacote
+
+# Recebe pacote.tar.xz enviado pelo "Upload files" (o navegador achata pastas)
+# e espalha os arquivos nas pastas certas. Workflows NAO vao no pacote:
+# o GITHUB_TOKEN nao pode gravar em .github/workflows.
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["pacote.tar.xz"]
+
+permissions:
+  contents: write
+
+jobs:
+  distribuir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extrair e commitar
+        run: |
+          test -f pacote.tar.xz || { echo "sem pacote"; exit 0; }
+          tar xJf pacote.tar.xz --exclude='./.github'
+          git rm -q pacote.tar.xz
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Distribui pacote do motor" || echo "nada a commitar"
+          git push
