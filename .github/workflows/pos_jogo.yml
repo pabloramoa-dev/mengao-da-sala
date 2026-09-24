@@ -1,0 +1,25 @@
+name: Coletor pos-jogo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Coletar e analisar
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python src/flamengo/coletor/pos_jogo.py
+      - name: Guardar analise
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analise-pos-jogo
+          path: data/analise.json
+          if-no-files-found: ignore
