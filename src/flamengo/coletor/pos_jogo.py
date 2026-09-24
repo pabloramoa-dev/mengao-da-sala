@@ -36,7 +36,10 @@ RSS = [
     "https://news.google.com/rss/search?q=Flamengo+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419",
 ]
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODELO = "llama-3.3-70b-versatile"
+GROQ_MODELOS = "https://api.groq.com/openai/v1/models"
+# ordem de preferência; o coletor usa o primeiro que a chave enxergar
+PREFERIDOS = ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "moonshotai/kimi-k2-instruct",
+              "qwen/qwen3-32b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"]
 
 
 def pegar(url: str, json_ok: bool = True, dados: bytes | None = None, cab: dict | None = None):
@@ -49,7 +52,7 @@ def pegar(url: str, json_ok: bool = True, dados: bytes | None = None, cab: dict 
             corpo = r.read().decode("utf-8", "ignore")
             return r.status, (json.loads(corpo) if json_ok else corpo)
     except urllib.error.HTTPError as exc:
-        print(f"[http {exc.code}] {url[:90]}")
+        print(f"[http {exc.code}] {url[:90]} {exc.read().decode('utf-8', 'ignore')[:200]}")
         return exc.code, None
     except Exception as exc:
         print(f"[erro] {url[:90]}: {exc}")
@@ -95,9 +98,10 @@ def detalhes(jogo: dict) -> dict:
         minuto = (ev.get("clock") or {}).get("displayValue")
         texto = ev.get("text") or ev.get("shortText") or ""
         if "substitution" in tipo and nosso:
-            m = re.search(r"\. (.+?) replaces (.+?)\.", texto)
+            m = re.search(r"\. (.+?) replaces (.+?)(?: because of an injury)?\.", texto)
             subs.append({"minuto": minuto, "entrou": m.group(1) if m else None,
-                         "saiu": m.group(2) if m else None})
+                         "saiu": m.group(2) if m else None,
+                         "lesao": "injury" in texto.lower()})
         elif "goal" in tipo:
             gols.append({"minuto": minuto, "nosso": nosso, "texto": texto})
         elif "card" in tipo and nosso:
@@ -185,13 +189,29 @@ FORMATO = {
 }
 
 
+def escolher_modelo(chave: str) -> str | None:
+    cod, lista = pegar(GROQ_MODELOS, cab={"Authorization": f"Bearer {chave}"})
+    ids = [m.get("id", "") for m in (lista or {}).get("data", []) if m.get("active", True)]
+    print(f"[groq] modelos visíveis: {len(ids)} (http {cod})")
+    for pref in PREFERIDOS:
+        if pref in ids:
+            return pref
+    texto = [i for i in ids if not any(x in i for x in ("whisper", "tts", "guard", "playai"))]
+    return texto[0] if texto else None
+
+
 def analisar(pacote: dict) -> dict | None:
     chave = os.environ.get("GROQ_API_KEY")
     if not chave:
         print("[groq] sem GROQ_API_KEY — pulando análise")
         return None
+    modelo = escolher_modelo(chave)
+    if not modelo:
+        print("[groq] nenhum modelo de texto disponível para esta chave")
+        return None
+    print(f"[groq] usando {modelo}")
     corpo = {
-        "model": GROQ_MODELO, "temperature": 0.4, "max_tokens": 900,
+        "model": modelo, "temperature": 0.4, "max_tokens": 900,
         "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SISTEMA},
