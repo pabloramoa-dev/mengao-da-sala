@@ -1,0 +1,111 @@
+name: Video pos-jogo
+
+# Modo ENSAIO: gera o Reel e a legenda depois de cada jogo e guarda como
+# artefato do workflow. NAO publica em lugar nenhum.
+# A cada 3 horas: coleta (ESPN + Cartola + noticias + Groq checada), tabela,
+# e so renderiza se o ultimo jogo encerrado ainda nao tiver video.
+
+on:
+  schedule:
+    - cron: "20 */3 * * *"
+  workflow_dispatch:
+    inputs:
+      forcar:
+        description: "Gerar mesmo se o jogo ja tiver video"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-pos-jogo
+  cancel-in-progress: false
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Coletar e analisar
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          python src/flamengo/coletor/pos_jogo.py
+          python src/flamengo/coletor/tabela.py data/analise.json
+
+      - name: Tem jogo novo?
+        id: novo
+        env:
+          FORCAR: ${{ inputs.forcar }}
+        run: |
+          python - <<'PY'
+          import json, os, pathlib
+          a = json.load(open("data/analise.json"))
+          jogo = a.get("jogo") or {}
+          ult = pathlib.Path("data/ultimo_video.json")
+          feito = json.loads(ult.read_text()).get("id") if ult.exists() else None
+          novo = bool(jogo.get("id")) and (jogo.get("id") != feito or os.environ.get("FORCAR") == "true")
+          print(f"jogo {jogo.get('id')} ({jogo.get('nome')}) | ultimo video {feito} | novo={novo}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"novo={'true' if novo else 'false'}\n")
+              f.write(f"id={jogo.get('id', 'x')}\n")
+          PY
+
+      - name: Dependencias de render
+        if: steps.novo.outputs.novo == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng
+          python -m pip install -q -U pip setuptools wheel
+          python -m pip install -q -r requirements.txt
+
+      - name: Cache do modelo de voz
+        if: steps.novo.outputs.novo == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/flamengo_kokoro
+          key: kokoro-v1
+
+      - name: Gerar video (voz do Bira)
+        if: steps.novo.outputs.novo == 'true'
+        run: |
+          mkdir -p saida
+          python -m src.flamengo.gerar --analise data/analise.json --formato pos_jogo_v2 \
+            --out saida/pos_jogo_${{ steps.novo.outputs.id }}.mp4
+          echo "----- LEGENDA -----"
+          cat saida/pos_jogo_${{ steps.novo.outputs.id }}.txt
+
+      - name: Guardar video e legenda
+        if: steps.novo.outputs.novo == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reel-pos-jogo-${{ steps.novo.outputs.id }}
+          path: |
+            saida/*.mp4
+            saida/*.txt
+            data/analise.json
+          retention-days: 30
+
+      - name: Marcar jogo como feito
+        if: steps.novo.outputs.novo == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          a = json.load(open("data/analise.json"))
+          j = a["jogo"]
+          json.dump({"id": j["id"], "nome": j.get("nome"), "data": j.get("data"),
+                     "resultado": j.get("resultado")},
+                    open("data/ultimo_video.json", "w"), ensure_ascii=False, indent=2)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ultimo_video.json
+          git commit -m "Video pos-jogo gerado: ${{ steps.novo.outputs.id }}" || echo "nada a commitar"
+          git push
