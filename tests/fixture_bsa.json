@@ -1,0 +1,24 @@
+{
+  "_nota": "Fixture de TESTE no formato da API v4 do football-data.org. Numeros tirados do Lance!/ge em 22/09/2026 (60 pts, 28 jogos, Palmeiras 57, 2x1 no Bragantino). Saldo e ids sao ficticios.",
+  "tabela": {
+    "competition": {"name": "Campeonato Brasileiro Série A"},
+    "standings": [{"type": "TOTAL", "table": [
+      {"position": 1, "team": {"name": "CR Flamengo", "shortName": "Flamengo"}, "playedGames": 28, "won": 18, "draw": 6, "lost": 4, "points": 60, "goalDifference": 0},
+      {"position": 2, "team": {"name": "SE Palmeiras", "shortName": "Palmeiras"}, "playedGames": 28, "won": 17, "draw": 6, "lost": 5, "points": 57, "goalDifference": 0},
+      {"position": 3, "team": {"name": "CA Paranaense", "shortName": "Athletico-PR"}, "playedGames": 28, "won": 14, "draw": 7, "lost": 7, "points": 49, "goalDifference": 0}
+    ]}]
+  },
+  "jogos": {"matches": [
+    {"id": 1, "status": "FINISHED", "utcDate": "2026-09-20T21:30:00Z", "matchday": 28,
+     "season": {"currentMatchday": 29},
+     "competition": {"name": "Campeonato Brasileiro Série A"},
+     "homeTeam": {"name": "CR Flamengo", "shortName": "Flamengo"},
+     "awayTeam": {"name": "RB Bragantino", "shortName": "Bragantino"},
+     "score": {"fullTime": {"home": 2, "away": 1}}},
+    {"id": 2, "status": "TIMED", "utcDate": "2026-10-08T22:00:00Z", "matchday": 29,
+     "competition": {"name": "Campeonato Brasileiro Série A"},
+     "homeTeam": {"name": "Santos FC", "shortName": "Santos"},
+     "awayTeam": {"name": "CR Flamengo", "shortName": "Flamengo"},
+     "score": {"fullTime": {"home": null, "away": null}}}
+  ]}
+}

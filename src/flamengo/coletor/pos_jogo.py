@@ -175,7 +175,8 @@ SISTEMA = (
     "Flamengo e manchetes/trechos de notícias. Responda SOMENTE com um objeto JSON válido. "
     "Regras: escreva tudo com palavras suas, nunca copie frases das matérias; não invente "
     "fatos nem falas de pessoas reais; se algo não estiver nos dados, use null; nada de "
-    "ofensa a jogador, técnico ou torcida rival."
+    "ofensa a jogador, técnico ou torcida rival. Gol, gol contra, cartão e substituição só "
+    "podem ser citados se estiverem em jogo.gols, jogo.cartoes ou jogo.substituicoes."
 )
 FORMATO = {
     "resumo_do_jogo": "2 frases, tom de torcedor",
@@ -211,7 +212,7 @@ def analisar(pacote: dict) -> dict | None:
         return None
     print(f"[groq] usando {modelo}")
     corpo = {
-        "model": modelo, "temperature": 0.4, "max_tokens": 900,
+        "model": modelo, "temperature": 0.4, "max_tokens": 3000,
         "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SISTEMA},
@@ -219,6 +220,8 @@ def analisar(pacote: dict) -> dict | None:
              + "\n\nDados:\n" + json.dumps(pacote, ensure_ascii=False)[:14000]},
         ],
     }
+    if modelo.startswith("openai/gpt-oss"):
+        corpo["reasoning_effort"] = "low"  # sobra token para a resposta, que vinha cortada
     cod, resp = pegar(GROQ_URL, dados=json.dumps(corpo).encode("utf-8"),
                       cab={"Authorization": f"Bearer {chave}", "Content-Type": "application/json"})
     if not resp:
@@ -229,6 +232,74 @@ def analisar(pacote: dict) -> dict | None:
     except (KeyError, json.JSONDecodeError) as exc:
         print(f"[groq] resposta inesperada: {exc}")
         return None
+
+
+# ---------------------------------------------------------------- checagem
+PALAVRAS_DE_FATO = ("gol contra", "contra o próprio", "expuls", "cartão vermelho", "pênalti",
+                    "penalti", "lesão", "lesionad")
+
+
+def _nomes_validos(jogo: dict, cartola: dict | None) -> set[str]:
+    nomes = set()
+    for j in (cartola or {}).get("jogadores", []):
+        nomes.add((j.get("nome") or "").lower())
+    for s_ in jogo.get("substituicoes", []):
+        for k in ("saiu", "entrou"):
+            if s_.get(k):
+                nomes.add(s_[k].lower())
+                nomes.add(s_[k].split()[-1].lower())
+    return {n for n in nomes if n}
+
+
+def _fatos_do_jogo(jogo: dict) -> str:
+    return " ".join([g.get("texto", "") for g in jogo.get("gols", [])]
+                    + [c.get("texto", "") for c in jogo.get("cartoes", [])]).lower()
+
+
+def checar(analise: dict | None, jogo: dict, cartola: dict | None) -> tuple[dict, list[str]]:
+    """Só passa o que os DADOS confirmam. Devolve (analise_validada, descartes)."""
+    if not analise:
+        return {}, []
+    ok, fora = {}, []
+    nomes = _nomes_validos(jogo, cartola)
+    fatos = _fatos_do_jogo(jogo)
+
+    def nome_ok(n):
+        n = (n or "").lower()
+        return bool(n) and any(n in v or v in n for v in nomes)
+
+    def texto_ok(t):
+        t = (t or "").lower()
+        suspeitos = [p for p in PALAVRAS_DE_FATO if p in t]
+        # palavra de fato só passa se o próprio registro da ESPN tiver o mesmo tipo de evento
+        return all(("own goal" in fatos) if "contra" in p else
+                   ("red" in fatos) if ("expuls" in p or "vermelho" in p) else
+                   ("penalty" in fatos) if "nalti" in p else True for p in suspeitos)
+
+    for chave in ("melhor_em_campo", "pior_em_campo"):
+        item = analise.get(chave) or {}
+        if nome_ok(item.get("nome")) and texto_ok(item.get("por_que")):
+            ok[chave] = item
+        elif item:
+            fora.append(f"{chave}: {item}")
+
+    mex = analise.get("mexida_do_tecnico") or {}
+    bate = any((s_.get("saiu") or "").lower().endswith((mex.get("saiu") or "#").lower().split()[-1])
+               for s_ in jogo.get("substituicoes", [])) if mex.get("saiu") else False
+    if bate:
+        ok["mexida_do_tecnico"] = mex
+    elif mex:
+        fora.append(f"mexida_do_tecnico: {mex}")
+
+    for chave in ("resumo_do_jogo", "polemica_do_dia", "o_que_a_imprensa_diz"):
+        t = analise.get(chave)
+        if t and texto_ok(t):
+            ok[chave] = t
+        elif t:
+            fora.append(f"{chave}: {t}")
+    if analise.get("temas_para_video"):
+        ok["temas_para_video"] = analise["temas_para_video"]
+    return ok, fora
 
 
 # ------------------------------------------------------------------- main
@@ -243,8 +314,9 @@ def main() -> int:
     if jogo["liga"] == "bra.1":
         saida["cartola"] = notas_cartola(jogo["data"])
     saida["noticias"] = noticias()
-    saida["analise"] = analisar({"jogo": jogo, "notas_cartola": saida.get("cartola"),
-                                 "noticias": saida["noticias"]})
+    bruta = analisar({"jogo": jogo, "notas_cartola": saida.get("cartola"),
+                      "noticias": saida["noticias"]})
+    saida["analise"], saida["descartados"] = checar(bruta, jogo, saida.get("cartola"))
 
     Path("data").mkdir(exist_ok=True)
     Path("data/analise.json").write_text(json.dumps(saida, ensure_ascii=False, indent=2),
@@ -267,6 +339,8 @@ def main() -> int:
         print(json.dumps(a, ensure_ascii=False, indent=2))
     else:
         print("GROQ: sem análise")
+    for d in saida["descartados"]:
+        print(f"[checagem] DESCARTADO (dado não confirma): {d}")
     print("=" * 64)
     return 0
 

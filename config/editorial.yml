@@ -1,0 +1,46 @@
+# Plano editorial do canal do Flamengo — v0.2 (24/09/2026)
+# Regra-mãe: nenhum formato se repete dois dias seguidos; frases, CTAs e
+# cenários saem de bancos com memória das últimas usadas.
+
+formatos:
+  # ---------------------------------------------------------- dia de jogo
+  hoje_tem_mengao:   {quando: dia de jogo, manha, humor: euforico, cenario: sala_tv}
+  segue_o_lider:     {quando: vitoria, humor: euforico, cta: "Quem foi o melhor em campo?",
+                      dado: sofascore.notas[0]}
+  quem_foi_o_pior:   {quando: derrota_ou_empate, humor: indignado, cta: "Quem foi o pior? Comenta o nome.",
+                      dado: sofascore.notas[-1]}
+  mexeu_certo:       {quando: dia seguinte ao jogo com substituicao, humor: debochado,
+                      dado: sofascore.substituicoes, cta: "Acertou ou errou?"}
+
+  # ------------------------------------------------------- dia sem jogo
+  a_nacao_falou:     {fonte: comentarios dos nossos posts, humor: debochado}
+  imprensa_x_nacao:  {fonte: colunas (trafilatura) + comentarios, humor: indignado}
+  conta_do_titulo:   {fonte: football-data, humor: tenso}
+  resenha_mercado:   {fonte: noticias, regra: "rumor sempre dito como rumor"}
+
+  # --------------------------------------------------- zoeira e criativos
+  zoeira_de_segunda: {quando: rival perdeu na rodada, fonte: football-data (resultado real),
+                      rivais: [Fluminense, Vasco, Botafogo, Palmeiras], humor: debochado}
+  o_secador:         {quando: jogo do vice-lider, humor: tenso, ideia: "torcedor secando na frente da TV"}
+  primo_rival:       {ideia: "dupla fixa — o torcedor e o primo de outro time discutindo",
+                      primo: personagem original, cores genericas, sem escudo}
+  tribunal_da_nacao: {ideia: "julgamento de um jogador ou do tecnico; a Nacao da o veredito nos comentarios"}
+  hoje_na_historia:  {fonte: data comemorativa, regra: "fato conferido na web antes; cena desenhada, nunca foto de arquivo"}
+  mito_ou_verdade:   {fonte: historia do clube, cta: "Voce sabia?"}
+
+# ------------------------------------------------------------------ regras
+zoeira:
+  pode: [placar real do rival, tabela, "secar", provocacao de arquibancada sem ofensa]
+  nunca:
+    - xingamento, grito homofobico, racista ou regional (inclusive os de estadio)
+    - incitar briga ou violencia entre torcidas
+    - tragedia de qualquer clube (acidentes, mortes, incendio do Ninho do Urubu, Chapecoense)
+    - inventar fala ou fato sobre jogador, tecnico ou pessoa real
+    - letra do hino (ainda protegida por direito autoral)
+
+imprensa_e_torcida:
+  - texto de comentarista so entra como analise; no video, sempre com palavras nossas
+  - comentario de torcedor entra agregado ("a maioria votou em..."), sem @ nem nome
+
+girias: [Segue o lider, Mengao, Da-lhe Mengo, a Nacao, o time do povo, Mais Querido,
+         secar, vice (para o rival), resenha]
