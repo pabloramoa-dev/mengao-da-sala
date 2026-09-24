@@ -1,0 +1,25 @@
+name: Teste Sofascore
+
+on:
+  workflow_dispatch:
+
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Rodar teste
+        id: teste
+        continue-on-error: true
+        run: python src/flamengo/coletor/sofascore_teste.py
+      - name: Guardar resultado
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sofascore-teste
+          path: data/sofascore_teste.json
+          if-no-files-found: ignore
