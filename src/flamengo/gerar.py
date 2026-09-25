@@ -31,9 +31,7 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
     elif formato == "pos_jogo":
         pauta = roteiro.pos_jogo(snapshot)
     elif formato == "pos_jogo_v2":
-        analise = snapshot["analise"]
-        tabela = analise.get("tabela") or (snapshot.get("snapshot") or {}).get("tabela")
-        pauta = roteiro.pos_jogo_v2(analise, tabela)
+        pauta = roteiro.pos_jogo_v2(snapshot["analise"], (snapshot.get("snapshot") or {}).get("tabela"))
     else:
         raise SystemExit(f"formato desconhecido: {formato}")
     if pauta is None:
@@ -64,7 +62,6 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
                     "-c:a", "aac", "-b:a", "160k", "-ar", "48000",
                     "-movflags", "+faststart", "-shortest", str(destino)], check=True)
 
-    destino.with_suffix(".txt").write_text(legenda_post(pauta, snapshot), encoding="utf-8")
     (destino.with_suffix(".json")).write_text(json.dumps({
         "formato": pauta["formato"], "humor": pauta["humor"], "capa": pauta["capa"],
         "voz": voz.PRESET_BIRA, "filtro": voz.FILTRO_BIRA,
@@ -73,35 +70,14 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
     return destino
 
 
-HASHTAGS = "#Flamengo #Mengão #NaçãoRubroNegra #Brasileirão #CRF"
-
-
-def legenda_post(pauta: dict, snapshot: dict) -> str:
-    """Legenda do post, montada só com o que está no roteiro (dado já checado)."""
-    capa = pauta["capa"].replace("\n", " · ")
-    linhas = [f"{capa} 🔴⚫", ""]
-    for b in pauta["batidas"]:
-        if b["tipo"] in ("placar", "nota", "mexida"):
-            linhas.append(b["legenda"])
-    pergunta = next((b["legenda"] for b in pauta["batidas"] if b["tipo"] == "pergunta"), None)
-    cta = next((b["legenda"] for b in pauta["batidas"] if b["tipo"] == "cta"), None)
-    linhas.append("")
-    if pergunta:
-        linhas.append(pergunta + " 👇")
-    if cta:
-        linhas.append(cta)
-    linhas += ["", HASHTAGS]
-    return "\n".join(linhas) + "\n"
-
-
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--snapshot", help="snapshot do football-data (opcional no pos_jogo_v2)")
+    ap.add_argument("--snapshot", required=True)
     ap.add_argument("--formato", choices=["situacao", "pos_jogo", "pos_jogo_v2"], default="situacao")
     ap.add_argument("--analise", help="data/analise.json do coletor (formato pos_jogo_v2)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    snap = json.loads(Path(a.snapshot).read_text(encoding="utf-8")) if a.snapshot else {}
+    snap = json.loads(Path(a.snapshot).read_text(encoding="utf-8"))
     if a.formato == "pos_jogo_v2":
         if not a.analise:
             raise SystemExit("pos_jogo_v2 precisa de --analise")
