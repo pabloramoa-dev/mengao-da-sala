@@ -22,11 +22,13 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           EXPECTED_IG_USERNAME: mengaodasala
-        run: python -m src.flamengo.comunidade
+        run: |
+          python -m src.flamengo.comunidade
+          python -m src.flamengo.relatorio
       - name: Guardar agregados sem dados pessoais
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/comunidade.json data/metricas.json
+          git add data/comunidade.json data/metricas.json docs/RESULTADOS_30_DIAS.md
           git diff --cached --quiet || git commit -m 'Atualiza votos agregados e métricas'
           git pull --rebase -q && git push

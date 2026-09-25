@@ -218,7 +218,10 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         abre = f"{grito} {placar_fala} pro {adv}, {onde}."
         humor = "indignado"
 
-    batidas = [batida(abre, legenda=abre.replace(placar_fala, placar_tela.replace(" x ", " a ")),
+    gancho = {"vitoria":"O sofá sobreviveu. Agora vamos falar dessa vitória!",
+              "empate":"Um ponto na tabela. E uma pergunta na sala: o que faltou?",
+              "derrota":"O jogo acabou. O que você mudaria para o próximo?"}[res]
+    batidas = [batida(gancho, tipo="abre"), batida(abre, legenda=abre.replace(placar_fala, placar_tela.replace(" x ", " a ")),
                       tipo="placar", placar=placar_tela)]
 
     # melhor (vitória) ou pior (empate/derrota) — número do Cartola, sempre

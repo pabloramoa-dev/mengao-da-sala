@@ -71,12 +71,13 @@ def encontrar_publicado(legenda: str, limite: int = 100) -> str | None:
                  if " ".join((m.get("caption") or "").split()).casefold() == alvo), None)
 
 
-def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None) -> str:
+def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None, story=False) -> str:
     user, token, base, _ = _cfg()
     meta = meta or {}
-    cont = _req("POST", f"{base}/{user}/media", {
-        "media_type": "REELS", "video_url": video_url, "caption": legenda,
-        "share_to_feed": "true", "access_token": token})["id"]
+    params = {"media_type":"STORIES", "image_url":video_url, "access_token":token} if story else {
+        "media_type":"REELS", "video_url":video_url, "caption":legenda,
+        "share_to_feed":"true", "access_token":token}
+    cont = _req("POST", f"{base}/{user}/media", params)["id"]
     estado.registrar(legenda, meta, "processando", container_id=cont)
     print(f"[ig] container {cont} criado, aguardando processamento")
     fim = time.time() + espera_max
@@ -99,6 +100,7 @@ def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--video-url")
+    ap.add_argument("--story", action="store_true", help="video-url aponta para PNG de Story")
     ap.add_argument("--legenda", help="arquivo .txt com a legenda")
     ap.add_argument("--so-verificar", action="store_true")
     a = ap.parse_args()
@@ -113,13 +115,13 @@ def main() -> int:
     meta_path = Path(a.legenda).with_suffix(".json")
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
     anterior = next((x for x in estado.ler()['itens'] if x['chave'] == estado.chave(legenda, meta)), {})
-    media = anterior.get("media_id") if anterior.get("status") == "publicado" else encontrar_publicado(legenda)
+    media = anterior.get("media_id") if anterior.get("status") == "publicado" else (None if a.story else encontrar_publicado(legenda))
     if not media:
         if anterior.get("status") == "publicacao_pendente":
             raise RuntimeError("Publicação anterior inconclusiva: reconciliar container antes de reenviar")
         estado.registrar(legenda, meta, "gerado")
         try:
-            media = publicar_reel(a.video_url, legenda, meta=meta)
+            media = publicar_reel(a.video_url, legenda, meta=meta, story=a.story)
         except Exception:
             atual = next(x for x in estado.ler()['itens'] if x['chave'] == estado.chave(legenda,meta))
             if atual.get('status') != 'publicacao_pendente':
@@ -128,7 +130,7 @@ def main() -> int:
     estado.registrar(legenda, meta, "publicado", media_id=media)
     print(f"[ig] PUBLICADO: media_id {media}")
     with open(os.environ.get("GITHUB_STEP_SUMMARY", os.devnull), "a") as f:
-        f.write(f"- Reel publicado no @mengaodasala: media_id `{media}`\n")
+        f.write(f"- Conteúdo publicado no @mengaodasala: media_id `{media}`\n")
     return 0
 
 

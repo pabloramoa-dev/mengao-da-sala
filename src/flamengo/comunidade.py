@@ -36,10 +36,16 @@ def comentarios(media, base, token):
 
 def main():
     verificar_destino()
-    _,token,base,_ = _cfg()
+    user,token,base,_ = _cfg()
     agora = datetime.now(timezone.utc)
     votos, metricas, erros = [], [], []
-    for post in ler()['itens']:
+    posts = ler()['itens']
+    conhecidos = {x.get('media_id') for x in posts}
+    # Inclui publicações anteriores à adoção do registro, sem inventar formato.
+    recentes = _req('GET',f'{base}/{user}/media',{'fields':'id,timestamp,media_product_type','limit':100,'access_token':token})
+    posts += [{'status':'publicado','media_id':m['id'],'formato':'anterior_sem_classificacao',
+               'atualizado_em':m['timestamp']} for m in recentes.get('data',[]) if m['id'] not in conhecidos and m.get('media_product_type') == 'REELS']
+    for post in posts:
         if post['status'] != 'publicado' or not post.get('media_id'): continue
         if agora-datetime.fromisoformat(post['atualizado_em']) > timedelta(days=30): continue
         mid = post['media_id']

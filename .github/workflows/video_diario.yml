@@ -81,6 +81,10 @@ jobs:
           echo "----- LEGENDA -----"
           cat saida/diario_${{ steps.pauta.outputs.tag }}.txt
 
+      - name: Gerar cards de Stories
+        if: steps.pauta.outputs.tem == 'true'
+        run: python -m src.flamengo.stories --pauta data/pauta_diario.json
+
       - name: Guardar video e legenda
         if: steps.pauta.outputs.tem == 'true'
         uses: actions/upload-artifact@v4
@@ -90,6 +94,7 @@ jobs:
             saida/*.mp4
             saida/*.txt
             saida/*.json
+            saida/stories/*.png
             data/pauta_diario.json
           retention-days: 30
 
@@ -106,12 +111,23 @@ jobs:
           python -m src.flamengo.publicar --so-verificar
           TAG="diario-$T"
           cp "saida/diario_$T.mp4" REEL.mp4
-          gh release create "$TAG" REEL.mp4 --title "$TAG" --notes "Reel diario @mengaodasala"
+          gh release create "$TAG" REEL.mp4 saida/stories/story_do_dia.png --title "$TAG" --notes "Reel diario @mengaodasala"
           URL="https://github.com/${{ github.repository }}/releases/download/$TAG/REEL.mp4"
           python -m src.flamengo.publicar --video-url "$URL" --legenda "saida/diario_$T.txt"
           gh release list --limit 100 --json tagName --jq '.[10:][].tagName' | while read -r R; do
             gh release delete "$R" --cleanup-tag --yes || true
           done
+
+      - name: Publicar Story com convite para a resenha
+        if: steps.pauta.outputs.tem == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
+        continue-on-error: true
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+        run: |
+          URL="https://github.com/${{ github.repository }}/releases/download/diario-${{ steps.pauta.outputs.tag }}/story_do_dia.png"
+          python -m src.flamengo.publicar --story --video-url "$URL" --legenda saida/stories/story_do_dia.txt
 
       - name: Registrar formato do dia
         if: steps.pauta.outputs.tem == 'true' && (vars.PUBLICAR == 'true' && inputs.ensaio != true)

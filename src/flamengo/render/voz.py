@@ -49,9 +49,11 @@ def narrar(batidas: list[dict], trabalho: Path, raiz: Path) -> dict:
     bruto, narr = trabalho / "raw.wav", trabalho / "narracao.wav"
     master, segs, lip = trabalho / "narracao_master.wav", trabalho / "segs.json", trabalho / "lip.json"
 
+    elenco = trabalho / "elenco.json"
+    elenco.write_text(json.dumps([b.get("personagem", "rubro") for b in batidas]))
     p = PRESET_BIRA
     _run([sys.executable, "-m", f"{PACOTE}.kokoro", roteiro, "--voz", p["voice"],
-          "--speed", p["speed"], "--gap", p["gap"], "--out", bruto, "--seg-json", segs], raiz)
+          "--elenco-json", elenco, "--speed", p["speed"], "--gap", p["gap"], "--out", bruto, "--seg-json", segs], raiz)
     _run(["ffmpeg", "-y", "-v", "error", "-i", bruto, "-af", FILTRO_BIRA,
           "-ar", "44100", "-ac", "1", narr], raiz)
     _run([sys.executable, "-m", f"{PACOTE}.amplitude", narr, lip, "--fps", "22"], raiz)

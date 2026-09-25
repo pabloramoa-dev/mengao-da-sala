@@ -38,6 +38,8 @@ jobs:
           mkdir -p saida
           python -c "import json; from src.flamengo.quadros import primo,dirigir; json.dump(dirigir(primo('teste')),open('saida/pauta.json','w'))"
           python -m src.flamengo.gerar --formato diario --pauta saida/pauta.json --out saida/primo_rival_teste.mp4
+          python -m src.flamengo.stories --pauta saida/pauta.json
+          ffmpeg -y -ss 2 -i saida/primo_rival_teste.mp4 -frames:v 1 saida/frame_teste.png
       - uses: actions/upload-artifact@v4
         with:
           name: amostra-editorial-v3
@@ -45,4 +47,31 @@ jobs:
             saida/*.mp4
             saida/*.json
             saida/*.txt
+            saida/*.png
+            saida/stories/*.png
           retention-days: 30
+
+  integracao_leitura:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validar destino e permissões existentes sem publicar
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+        run: |
+          python -m src.flamengo.publicar --so-verificar
+          python -m src.flamengo.comunidade
+          python -m src.flamengo.relatorio
+      - uses: actions/upload-artifact@v4
+        with:
+          name: diagnostico-integracao
+          path: |
+            data/metricas.json
+            data/comunidade.json
+            docs/RESULTADOS_30_DIAS.md
