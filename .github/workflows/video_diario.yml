@@ -1,0 +1,123 @@
+name: Video diario
+
+# Post do dia do @mengaodasala (dias em que o pos-jogo nao fala): conta do
+# titulo, contagem pro proximo jogo, zoeira com rival que perdeu, "Voce sabia?"
+# e "Hoje tem Mengao" em dia de jogo. Nunca o mesmo formato dois dias seguidos.
+# PUBLICA SOMENTE se a variavel do repositorio PUBLICAR=true. Sem ela: modo ensaio.
+
+on:
+  schedule:
+    - cron: "7 14 * * *"        # 11h07 de Brasilia
+  workflow_dispatch:
+    inputs:
+      formato:
+        description: "Forcar um formato (vazio = rodizio automatico)"
+        type: choice
+        default: ""
+        options: ["", "conta_do_titulo", "contagem", "zoeira_rival", "voce_sabia", "hoje_tem_mengao"]
+      forcar:
+        description: "Gerar mesmo se o post de hoje ja foi feito"
+        type: boolean
+        default: false
+      ensaio:
+        description: "Nao publicar, mesmo com PUBLICAR=true"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-pos-jogo          # mesma fila do pos-jogo: os dois fazem commit
+  cancel-in-progress: false
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Pauta do dia
+        id: pauta
+        run: |
+          set +e
+          ARGS=""
+          [ -n "${{ inputs.formato }}" ] && ARGS="$ARGS --formato ${{ inputs.formato }}"
+          [ "${{ inputs.forcar }}" = "true" ] && ARGS="$ARGS --forcar"
+          python -m src.flamengo.diario --out data/pauta_diario.json $ARGS
+          cod=$?
+          set -e
+          if [ $cod -eq 3 ]; then echo "tem=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          [ $cod -ne 0 ] && exit $cod
+          echo "tem=true" >> "$GITHUB_OUTPUT"
+          echo "tag=$(date -u +%Y%m%d%H%M)" >> "$GITHUB_OUTPUT"
+
+      - name: Dependencias de render
+        if: steps.pauta.outputs.tem == 'true'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng
+          python -m pip install -q -U pip setuptools wheel
+          python -m pip install -q -r requirements.txt
+
+      - name: Cache do modelo de voz
+        if: steps.pauta.outputs.tem == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/flamengo_kokoro
+          key: kokoro-v1
+
+      - name: Gerar video (voz do Bira)
+        if: steps.pauta.outputs.tem == 'true'
+        run: |
+          mkdir -p saida
+          python -m src.flamengo.gerar --formato diario --pauta data/pauta_diario.json \
+            --out saida/diario_${{ steps.pauta.outputs.tag }}.mp4
+          echo "----- LEGENDA -----"
+          cat saida/diario_${{ steps.pauta.outputs.tag }}.txt
+
+      - name: Guardar video e legenda
+        if: steps.pauta.outputs.tem == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reel-diario-${{ steps.pauta.outputs.tag }}
+          path: |
+            saida/*.mp4
+            saida/*.txt
+            data/pauta_diario.json
+          retention-days: 30
+
+      - name: Publicar no Instagram
+        if: steps.pauta.outputs.tem == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+        run: |
+          set -euo pipefail
+          T=${{ steps.pauta.outputs.tag }}
+          python -m src.flamengo.publicar --so-verificar
+          TAG="diario-$T"
+          cp "saida/diario_$T.mp4" REEL.mp4
+          gh release create "$TAG" REEL.mp4 --title "$TAG" --notes "Reel diario @mengaodasala"
+          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/REEL.mp4"
+          python -m src.flamengo.publicar --video-url "$URL" --legenda "saida/diario_$T.txt"
+          gh release list --limit 100 --json tagName --jq '.[10:][].tagName' | while read -r R; do
+            gh release delete "$R" --cleanup-tag --yes || true
+          done
+
+      - name: Registrar formato do dia
+        if: steps.pauta.outputs.tem == 'true' && (vars.PUBLICAR == 'true' && inputs.ensaio != true)
+        run: |
+          python -m src.flamengo.diario --registrar data/pauta_diario.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/diario.json
+          git commit -m "Post diario: $(python -c "import json;print(json.load(open('data/pauta_diario.json'))['formato'])")" || echo "nada a commitar"
+          git pull --rebase -q && git push
