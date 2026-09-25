@@ -98,6 +98,12 @@ def _cartao(batida):
                                  fill_color=NEGRO, fill_opacity=1, stroke_color=RUBRO,
                                  stroke_width=8).move_to(g)
         return VGroup(fundo, g).move_to([0, 4.5, 0])
+    if d.get("cartao"):                    # cartão genérico dos formatos diários
+        t_ = _texto(str(d["cartao"]), 64, WHITE, 6.4)
+        fundo = RoundedRectangle(width=t_.width + 0.9, height=t_.height + 0.6, corner_radius=0.2,
+                                 fill_color=NEGRO if tipo in ("hora", "jogo") else RUBRO,
+                                 fill_opacity=1, stroke_color=INK, stroke_width=6).move_to(t_)
+        return VGroup(fundo, t_).move_to([0, 4.4, 0])
     if tipo == "pergunta":
         t_ = _texto("ACERTOU OU ERROU?", 58, WHITE, 6.6)
         fundo = RoundedRectangle(width=t_.width + 0.9, height=t_.height + 0.6, corner_radius=0.2,

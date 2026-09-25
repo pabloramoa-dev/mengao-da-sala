@@ -30,6 +30,8 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
         pauta = roteiro.situacao(snapshot)
     elif formato == "pos_jogo":
         pauta = roteiro.pos_jogo(snapshot)
+    elif formato == "diario":
+        pauta = snapshot["pauta"]            # pronta pelo src.flamengo.diario
     elif formato == "pos_jogo_v2":
         analise = snapshot["analise"]
         tabela = analise.get("tabela") or (snapshot.get("snapshot") or {}).get("tabela")
@@ -64,7 +66,8 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
                     "-c:a", "aac", "-b:a", "160k", "-ar", "48000",
                     "-movflags", "+faststart", "-shortest", str(destino)], check=True)
 
-    destino.with_suffix(".txt").write_text(legenda_post(pauta, snapshot), encoding="utf-8")
+    destino.with_suffix(".txt").write_text(pauta.get("legenda_post") or legenda_post(pauta, snapshot),
+                                           encoding="utf-8")
     (destino.with_suffix(".json")).write_text(json.dumps({
         "formato": pauta["formato"], "humor": pauta["humor"], "capa": pauta["capa"],
         "voz": voz.PRESET_BIRA, "filtro": voz.FILTRO_BIRA,
@@ -97,8 +100,9 @@ def legenda_post(pauta: dict, snapshot: dict) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--snapshot", help="snapshot do football-data (opcional no pos_jogo_v2)")
-    ap.add_argument("--formato", choices=["situacao", "pos_jogo", "pos_jogo_v2"], default="situacao")
+    ap.add_argument("--formato", choices=["situacao", "pos_jogo", "pos_jogo_v2", "diario"], default="situacao")
     ap.add_argument("--analise", help="data/analise.json do coletor (formato pos_jogo_v2)")
+    ap.add_argument("--pauta", help="data/pauta_diario.json do src.flamengo.diario (formato diario)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     snap = json.loads(Path(a.snapshot).read_text(encoding="utf-8")) if a.snapshot else {}
@@ -106,6 +110,10 @@ def main():
         if not a.analise:
             raise SystemExit("pos_jogo_v2 precisa de --analise")
         snap = {"snapshot": snap, "analise": json.loads(Path(a.analise).read_text(encoding="utf-8"))}
+    if a.formato == "diario":
+        if not a.pauta:
+            raise SystemExit("diario precisa de --pauta")
+        snap = {"pauta": json.loads(Path(a.pauta).read_text(encoding="utf-8"))}
     saida = gerar(snap, a.formato, Path(a.out))
     if saida is None:
         sys.exit(3)
