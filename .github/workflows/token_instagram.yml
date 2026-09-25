@@ -1,0 +1,58 @@
+name: Token Instagram
+
+# Renova o token de longa duracao (60 dias) nos dias 1 e 15 e grava de volta no
+# secret IG_ACCESS_TOKEN. Precisa do secret GH_PAT_SECRETS (PAT fine-grained com
+# permissao "Secrets: read and write" neste repositorio), criado por voce.
+# Rodando manualmente com "so_verificar", apenas confere o destino (@mengaodasala).
+
+on:
+  schedule:
+    - cron: "0 9 1,15 * *"
+  workflow_dispatch:
+    inputs:
+      so_verificar:
+        description: "So conferir se o token aponta para @mengaodasala"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  token:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Conferir destino
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+        run: python -m src.flamengo.publicar --so-verificar
+
+      - name: Renovar token
+        if: github.event_name == 'schedule' || inputs.so_verificar == false
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT_SECRETS }}
+        run: |
+          set -euo pipefail
+          resp=$(curl -sS -G "https://graph.instagram.com/refresh_access_token" \
+            --data-urlencode "grant_type=ig_refresh_token" \
+            --data-urlencode "access_token=${IG_ACCESS_TOKEN}")
+          novo=$(echo "$resp" | jq -r '.access_token // empty')
+          exp=$(echo "$resp" | jq -r '.expires_in // empty')
+          if [ -z "$novo" ]; then
+            echo "::error::Falha ao renovar o token do Instagram."
+            echo "$resp" | jq 'del(.access_token)'
+            exit 1
+          fi
+          echo "::add-mask::$novo"
+          dias=$(( exp / 86400 ))
+          printf '%s' "$novo" | gh secret set IG_ACCESS_TOKEN --repo "$GITHUB_REPOSITORY"
+          echo "Token renovado. Validade: ${dias} dias."
+          echo "- Token renovado, validade **${dias} dias**." >> "$GITHUB_STEP_SUMMARY"

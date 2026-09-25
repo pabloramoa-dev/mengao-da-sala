@@ -1,7 +1,8 @@
 name: Video pos-jogo
 
-# Modo ENSAIO: gera o Reel e a legenda depois de cada jogo e guarda como
-# artefato do workflow. NAO publica em lugar nenhum.
+# Gera o Reel e a legenda depois de cada jogo e guarda como artefato.
+# PUBLICA no @mengaodasala SOMENTE se a variavel do repositorio PUBLICAR=true
+# (Settings > Secrets and variables > Actions > Variables). Sem ela: modo ensaio.
 # A cada 3 horas: coleta (ESPN + Cartola + noticias + Groq checada), tabela,
 # e so renderiza se o ultimo jogo encerrado ainda nao tiver video.
 
@@ -92,6 +93,27 @@ jobs:
             saida/*.txt
             data/analise.json
           retention-days: 30
+
+      - name: Publicar no Instagram
+        if: steps.novo.outputs.novo == 'true' && vars.PUBLICAR == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+        run: |
+          set -euo pipefail
+          ID=${{ steps.novo.outputs.id }}
+          python -m src.flamengo.publicar --so-verificar
+          TAG="reel-$ID-$(date -u +%Y%m%d%H%M)"
+          cp "saida/pos_jogo_$ID.mp4" REEL.mp4
+          gh release create "$TAG" REEL.mp4 --title "$TAG" --notes "Reel pos-jogo @mengaodasala"
+          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/REEL.mp4"
+          python -m src.flamengo.publicar --video-url "$URL" --legenda "saida/pos_jogo_$ID.txt"
+          # guarda so os 10 releases mais recentes
+          gh release list --limit 100 --json tagName --jq '.[10:][].tagName' | while read -r T; do
+            gh release delete "$T" --cleanup-tag --yes || true
+          done
 
       - name: Marcar jogo como feito
         if: steps.novo.outputs.novo == 'true'
