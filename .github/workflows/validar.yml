@@ -1,0 +1,48 @@
+name: Validar evolucao editorial
+on:
+  push:
+    paths: ['src/**', 'tests/**', 'config/**', '.github/workflows/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -v
+      - run: python -m compileall -q src
+  render:
+    needs: testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng
+          python -m pip install -q -r requirements.txt
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/flamengo_kokoro
+          key: kokoro-v1
+      - name: Gerar amostra sem publicar
+        run: |
+          mkdir -p saida
+          python -c "import json; from src.flamengo.quadros import primo,dirigir; json.dump(dirigir(primo('teste')),open('saida/pauta.json','w'))"
+          python -m src.flamengo.gerar --formato diario --pauta saida/pauta.json --out saida/primo_rival_teste.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: amostra-editorial-v3
+          path: |
+            saida/*.mp4
+            saida/*.json
+            saida/*.txt
+          retention-days: 30

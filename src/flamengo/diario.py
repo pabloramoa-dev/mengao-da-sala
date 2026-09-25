@@ -28,6 +28,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from src.flamengo.roteiro import batida, ordinal, por_extenso
+from src.flamengo import quadros
 
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer"
 STANDINGS = "https://site.api.espn.com/apis/v2/sports/soccer/bra.1/standings"
@@ -38,7 +39,7 @@ LIGAS = {"bra.1": "Brasileirão", "conmebol.libertadores": "Libertadores",
 RIVAIS = {"3445": "Fluminense", "3454": "Vasco", "6086": "Botafogo", "2029": "Palmeiras"}
 BRT = timezone(timedelta(hours=-3))
 ESTADO = Path("data/diario.json")
-ORDEM = ["conta_do_titulo", "voce_sabia", "contagem", "zoeira_rival"]
+ORDEM = ["o_sofa_nao_aguenta", "conta_do_titulo", "primo_rival", "voce_sabia", "a_nacao_escala", "zoeira_rival", "contagem", "eu_avisei", "a_nacao_respondeu"]
 HASHTAGS = "#Flamengo #Mengão #NaçãoRubroNegra #Brasileirão #CRF"
 NOMES = {"Red Bull Bragantino": "Bragantino", "Estudiantes de La Plata": "Estudiantes",
          "Vasco da Gama": "Vasco", "Athletico Paranaense": "Athletico",
@@ -203,7 +204,7 @@ def _contra(j: dict) -> str:
 def hoje_tem_mengao(prox: dict, t: dict | None) -> dict:
     onde = "no Maracanã" if prox["em_casa"] and "Maracan" in (prox.get("estadio") or "") else \
            ("em casa" if prox["em_casa"] else "fora de casa")
-    b = [batida("Hoje tem Mengão!", tipo="abre"),
+    b = [batida("Já separou o lugar no sofá? Hoje tem Mengão!", tipo="abre"),
          batida(f"É contra o {prox['adversario']}, {onde}, pelo {prox['competicao']}.",
                 tipo="jogo", cartao=_contra(prox).upper()),
          batida(f"A bola rola {_hora_fala(prox)}.",
@@ -215,7 +216,7 @@ def hoje_tem_mengao(prox: dict, t: dict | None) -> dict:
     b.append(batida("Crava aí nos comentários: qual vai ser o placar?", tipo="pergunta",
                     cartao="CRAVA O PLACAR"))
     return {"formato": "hoje_tem_mengao", "humor": "euforico",
-            "capa": f"HOJE TEM MENGÃO\n{_contra(prox)}".upper(), "batidas": b}
+            "capa": f"HOJE TEM MENGÃO\n{_contra(prox)}".upper(), "jogo_id": prox["id"], "batidas": b}
 
 
 def conta_do_titulo(t: dict, prox: dict | None) -> dict:
@@ -310,13 +311,25 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
     ultimo = feitos[-1] if feitos else None
     prox = futuros[0] if futuros else None
 
-    if ultimo and not so and (agora - _utc(ultimo["utc"])) < timedelta(hours=30):
-        return None, f"jogo encerrado há menos de 30h ({ultimo['adversario']}) — pós-jogo cobre"
+    # Um Reel diário distinto pode complementar o pós-jogo, sem repetir placar.
+    retorno = quadros.resposta(estado)
+    if retorno and so in (None, "a_nacao_respondeu"):
+        return retorno, "resposta a votação real"
 
     if prox and _utc(prox["utc"]).astimezone(BRT).date() == hoje and so in (None, "hoje_tem_mengao"):
         return hoje_tem_mengao(prox, tabela()), "dia de jogo"
 
-    candidatos: dict[str, dict] = {}
+    usados = estado.get("episodios", [])
+    candidatos = {"o_sofa_nao_aguenta": quadros.sofa(hoje, usados),
+                  "primo_rival": quadros.primo(hoje, usados),
+                  "a_nacao_escala": quadros.nacao_escala()}
+    if retorno: candidatos["a_nacao_respondeu"] = retorno
+    registro = Path("data/publicacoes.json")
+    publicados = json.loads(registro.read_text()).get("itens", []) if registro.exists() else []
+    if ultimo and (agora - _utc(ultimo["utc"])) < timedelta(hours=36):
+        ultimo["resultado"] = ("vitoria" if ultimo["gols_nossos"] > ultimo["gols_deles"] else "derrota" if ultimo["gols_nossos"] < ultimo["gols_deles"] else "empate")
+        volta = quadros.eu_avisei(ultimo, publicados)
+        if volta and volta["episodio"] not in usados: candidatos["eu_avisei"] = volta
     t = tabela()
     if t:
         candidatos["conta_do_titulo"] = conta_do_titulo(t, prox)
@@ -371,6 +384,7 @@ def main() -> int:
     print(f"[diario] {motivo}")
     if pauta is None:
         return 3
+    pauta = quadros.dirigir(pauta)
     pauta["legenda_post"] = legenda_post(pauta)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(pauta, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -387,6 +401,10 @@ def registrar(pauta_path: str) -> None:
     estado = json.loads(ESTADO.read_text(encoding="utf-8")) if ESTADO.exists() else {}
     estado["data"] = datetime.now(timezone.utc).astimezone(BRT).date().isoformat()
     estado["formato"] = pauta["formato"]
+    if pauta.get("episodio"):
+        estado["episodios"] = (estado.get("episodios", []) + [pauta["episodio"]])[-30:]
+    if pauta.get("responde_media_id"):
+        estado["respondidas"] = (estado.get("respondidas", []) + [pauta["responde_media_id"]])[-100:]
     if pauta.get("fato"):
         estado["fatos_usados"] = (estado.get("fatos_usados", []) + [pauta["fato"]])[-(len(FATOS) - 1):]
     if pauta.get("jogo_rival"):

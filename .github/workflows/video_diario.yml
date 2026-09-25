@@ -14,7 +14,7 @@ on:
         description: "Forcar um formato (vazio = rodizio automatico)"
         type: choice
         default: ""
-        options: ["", "conta_do_titulo", "contagem", "zoeira_rival", "voce_sabia", "hoje_tem_mengao"]
+        options: ["", "conta_do_titulo", "contagem", "zoeira_rival", "voce_sabia", "hoje_tem_mengao", "o_sofa_nao_aguenta", "primo_rival", "a_nacao_escala", "a_nacao_respondeu", "eu_avisei"]
       forcar:
         description: "Gerar mesmo se o post de hoje ja foi feito"
         type: boolean
@@ -89,6 +89,7 @@ jobs:
           path: |
             saida/*.mp4
             saida/*.txt
+            saida/*.json
             data/pauta_diario.json
           retention-days: 30
 
@@ -118,6 +119,17 @@ jobs:
           python -m src.flamengo.diario --registrar data/pauta_diario.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/diario.json
+          git add data/diario.json data/publicacoes.json
           git commit -m "Post diario: $(python -c "import json;print(json.load(open('data/pauta_diario.json'))['formato'])")" || echo "nada a commitar"
           git pull --rebase -q && git push
+
+      - name: Preservar recibo inclusive em falha
+        if: always()
+        run: |
+          if [ -f data/publicacoes.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/publicacoes.json
+            git diff --cached --quiet || git commit -m "Atualiza recibos de publicação"
+            git pull --rebase -q && git push
+          fi

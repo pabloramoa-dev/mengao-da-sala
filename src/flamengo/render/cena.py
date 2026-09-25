@@ -26,7 +26,7 @@ config.frame_height = 14.222
 config.pixel_width = 1080
 config.pixel_height = 1920
 
-PRE_ROLL = 0.8          # capa sozinha antes da primeira fala
+PRE_ROLL = 0.0          # capa sozinha antes da primeira fala
 TAIL = 1.2
 ABERTURA = {"X": 0.0, "B": 0.25, "F": 0.35, "C": 0.55, "E": 0.7, "D": 1.0}
 
@@ -82,7 +82,7 @@ def _cartao(batida):
     if tipo == "nota":
         nome = _texto(str(d.get("nome", "")).upper(), 46, WHITE, 5.6)
         nota = _texto(f"{d.get('nota', 0):.1f}".replace(".", ","), 96, OURO, 5.6)
-        rot = _texto("MELHOR DO CARTOLA" if d.get("nota", 0) >= 5 else "PIOR DO CARTOLA",
+        rot = _texto(d.get("rotulo", "PONTUAÇÃO CARTOLA"),
                      22, WHITE, 5.6)
         g = VGroup(rot, nome, nota).arrange(DOWN, buff=0.14)
         fundo = RoundedRectangle(width=max(g.width + 0.9, 4.2), height=g.height + 0.6,
@@ -150,6 +150,16 @@ class ReelFlamengo(Scene):
         g = p["grupo"]
         g.scale(5.4 / g.height).move_to([0, -2.6, 0])
         self.add(g)
+        dupla = any(b.get("personagem") == "primo" for b in batidas)
+        primo = expressao(torcedor("primo"), "debochado") if dupla else None
+        if dupla:
+            g.scale(.72).move_to([-1.8, -2.7, 0])
+            primo["grupo"].scale(4.0 / primo["grupo"].height).move_to([1.8,-2.7,0])
+            self.add(primo["grupo"])
+            primo["grupo"].add_updater(lambda m,dt: None)
+        elenco = {"rubro":p}
+        if primo: elenco["primo"] = primo
+        bases = {k:{"y":v["grupo"].get_center()[1], "width":v["grupo"].width} for k,v in elenco.items()}
         base_y = g.get_center()[1]
 
         # ---- capa: título grande já no quadro 0 ----
@@ -164,7 +174,8 @@ class ReelFlamengo(Scene):
         g.add_updater(lambda m, dt: None)
         motor = Dot(radius=0.001, fill_opacity=0).set_opacity(0)
         motor.t = 0.0
-        estado = {"resp": 0.0, "pisc": 1.0}
+        estado = {"resp": 0.0, "pisc": 1.0, "indice": -1}
+        for v in bases.values(): v.update(resp=0.0, pisc=1.0, gesto=0.0)
         self.add(motor)
 
         def cue_em(ta):
@@ -177,24 +188,46 @@ class ReelFlamengo(Scene):
             m.t += dt
             t = m.t
             ta = t - PRE_ROLL
-            alvo = 0.05 * np.sin(t * TAU / 2.6)
-            g.shift(UP * (alvo - estado["resp"]))
-            estado["resp"] = alvo
-            centro, esc = p["cab"].get_center(), p["cab"].width / 1.72
-            p["boca"].become(_boca(centro, esc, cue_em(ta) if ta >= 0 else 0.0, humor))
-            fase = t % 3.7
-            f = max(.08, abs(fase - .12) / .12) if fase < .24 else 1.0
-            for k in ("oe", "od"):
-                p[k].stretch(f / estado["pisc"], 1, about_point=p[k].get_center())
-            estado["pisc"] = f
+            indice = next((i for i,seg in enumerate(segs) if seg["ini"] <= ta < seg["fim"]),
+                          max(0, estado["indice"]))
+            bat = batidas[indice]
+            ativo = bat.get("personagem", "rubro")
+            for nome, ator in elenco.items():
+                e = bases[nome]
+                grupo = ator["grupo"]
+                alvo = .035 * np.sin(t * TAU / 2.8)
+                grupo.shift(UP * (alvo-e["resp"]))
+                e["resp"] = alvo
+                # Aproximação suave do apresentador, preservando a área das legendas.
+                if not dupla:
+                    escala = 1.10 if bat.get("plano") == "close" else 1.0
+                    desejado = e["width"] * escala
+                    grupo.scale(1 + (desejado/grupo.width-1)*min(1,dt*5), about_point=grupo.get_bottom())
+                humor_atual = bat.get("humor", humor) if nome == ativo else "debochado"
+                if indice != estado["indice"]:
+                    expressao(ator, humor_atual)
+                centro, esc = ator["cab"].get_center(), ator["cab"].width / 1.72
+                ator["boca"].become(_boca(centro, esc, cue_em(ta) if nome == ativo else 0, humor_atual))
+                fase = (t + (.8 if nome == "primo" else 0)) % 3.7
+                f = max(.08, abs(fase-.12)/.12) if fase < .24 else 1.0
+                for k in ("oe","od"):
+                    ator[k].stretch(f/e["pisc"],1,about_point=ator[k].get_center())
+                e["pisc"] = f
+                # Mão acompanha a fala; braço segue a mão, sem acumular deslocamento.
+                movimento = (.12 + .09*np.sin(ta*4)) if nome == ativo else 0
+                ator["maoD"].shift(UP*(movimento-e["gesto"]))
+                ator["bracoD"].put_start_and_end_on(ator["bracoD"].get_start(),ator["maoD"].get_center())
+                e["gesto"] = movimento
+            estado["indice"] = indice
 
         motor.add_updater(dirigir)
 
         # ---- linha do tempo por eventos: troca de camada só ENTRE waits ----
         relogio = 0.0
-        self.wait(PRE_ROLL)
+        if PRE_ROLL:
+            self.wait(PRE_ROLL)
         relogio = PRE_ROLL
-        self.remove(titulo)
+        titulo.scale(.60).move_to([0,5.35,0])
         camada = VGroup()
         for i, s in enumerate(segs):
             inicio = PRE_ROLL + s["ini"]
@@ -202,9 +235,10 @@ class ReelFlamengo(Scene):
                 self.wait(inicio - relogio)
                 relogio = inicio
             self.remove(camada)
+            if i > 0: self.remove(titulo)
             camada = VGroup(_legenda(batidas[i]["legenda"]))
             cartao = _cartao(batidas[i])
-            if cartao is not None:
+            if cartao is not None and i > 0:
                 camada.add(cartao)
             self.add(camada)
         self.wait(total - relogio)

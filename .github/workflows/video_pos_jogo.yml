@@ -8,9 +8,13 @@ name: Video pos-jogo
 
 on:
   schedule:
-    - cron: "20 */3 * * *"
+    - cron: "7,27,47 * * * *"
   workflow_dispatch:
     inputs:
+      ensaio:
+        description: "Gerar sem publicar"
+        type: boolean
+        default: true
       forcar:
         description: "Gerar mesmo se o jogo ja tiver video"
         type: boolean
@@ -34,7 +38,17 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Sondagem de partida recente
+        id: janela
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "ativo=true" >> "$GITHUB_OUTPUT"
+          else
+            python -m src.flamengo.janela
+          fi
+
       - name: Coletar e analisar
+        if: steps.janela.outputs.ativo == 'true' 
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
@@ -42,6 +56,7 @@ jobs:
           python src/flamengo/coletor/tabela.py data/analise.json
 
       - name: Tem jogo novo?
+        if: steps.janela.outputs.ativo == 'true'
         id: novo
         env:
           FORCAR: ${{ inputs.forcar }}
@@ -91,11 +106,12 @@ jobs:
           path: |
             saida/*.mp4
             saida/*.txt
+            saida/*.json
             data/analise.json
           retention-days: 30
 
       - name: Publicar no Instagram
-        if: steps.novo.outputs.novo == 'true' && vars.PUBLICAR == 'true'
+        if: steps.novo.outputs.novo == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
         env:
           GH_TOKEN: ${{ github.token }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
@@ -115,8 +131,8 @@ jobs:
             gh release delete "$T" --cleanup-tag --yes || true
           done
 
-      - name: Marcar jogo como feito
-        if: steps.novo.outputs.novo == 'true'
+      - name: Marcar jogo como publicado
+        if: steps.novo.outputs.novo == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
         run: |
           python - <<'PY'
           import json
@@ -128,6 +144,17 @@ jobs:
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ultimo_video.json
+          git add data/ultimo_video.json data/publicacoes.json
           git commit -m "Video pos-jogo gerado: ${{ steps.novo.outputs.id }}" || echo "nada a commitar"
-          git push
+          git pull --rebase -q && git push
+
+      - name: Preservar recibo inclusive em falha
+        if: always()
+        run: |
+          if [ -f data/publicacoes.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/publicacoes.json
+            git diff --cached --quiet || git commit -m "Atualiza recibos de publicação"
+            git pull --rebase -q && git push
+          fi

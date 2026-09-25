@@ -27,7 +27,7 @@ from pathlib import Path
 
 UA = "Mozilla/5.0 (X11; Linux x86_64) mengao-da-sala/0.2"
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer"
-LIGAS = {"bra.1": "Brasileirão", "conmebol.libertadores": "Libertadores"}
+LIGAS = {"bra.1": "Brasileirão", "conmebol.libertadores": "Libertadores", "bra.copa_do_brazil": "Copa do Brasil"}
 CARTOLA = "https://api.cartola.globo.com"
 FLA_CARTOLA = 262
 POSICOES = {1: "GOL", 2: "LAT", 3: "ZAG", 4: "MEI", 5: "ATA", 6: "TEC"}
@@ -112,6 +112,8 @@ def detalhes(jogo: dict) -> dict:
         "vitoria" if g1 > g2 else "derrota" if g1 < g2 else "empate")
     return {**jogo, "adversario": eles.get("time"), "em_casa": nos.get("casa"),
             "gols_nossos": g1, "gols_deles": g2, "resultado": resultado,
+            "estadio": ((resumo.get("gameInfo") or {}).get("venue") or {}).get("fullName"),
+            "status": "FINISHED" if (comp.get("status") or {}).get("type", {}).get("completed") else "UNKNOWN",
             "substituicoes": subs, "gols": gols, "cartoes": cartoes}
 
 
@@ -312,7 +314,7 @@ def main() -> int:
     jogo = detalhes(jogo)
     saida["jogo"] = jogo
     if jogo["liga"] == "bra.1":
-        saida["cartola"] = notas_cartola(jogo["data"])
+        saida["cartola"] = None  # reativar somente com vínculo verificável partida/rodada
     saida["noticias"] = noticias()
     bruta = analisar({"jogo": jogo, "notas_cartola": saida.get("cartola"),
                       "noticias": saida["noticias"]})
