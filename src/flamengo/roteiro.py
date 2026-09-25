@@ -231,12 +231,21 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         batidas.append(batida(fala, legenda=legenda, tipo="nota",
                               nome=alvo["nome"], nota=alvo["pontos"]))
 
-    # a mexida do técnico — preferência: tirar o melhor do Cartola (gera debate)
+    # a mexida do técnico — prioridade: 1) a que a Groq apontou E a ESPN confirma
+    # (é a que a imprensa está discutindo); 2) tirar quem acabou de marcar;
+    # 3) tirar o melhor do Cartola; 4) a última troca
     subs = [s for s in jogo.get("substituicoes", []) if s.get("saiu") and not s.get("lesao")]
     if subs:
+        def sobrenome(n):
+            return (n or "").lower().split()[-1] if n else "#"
+        groq_mex = ((analise.get("analise") or {}).get("mexida_do_tecnico") or {})
+        marcadores = " ".join(g.get("texto", "") for g in jogo.get("gols", [])
+                              if g.get("nosso")).lower()
         topo = [j["nome"].lower() for j in cartola[:2]]
-        polemica = next((s for s in subs if any(t in s["saiu"].lower() for t in topo)), None)
-        s = polemica or subs[-1]
+        s = (next((x for x in subs if sobrenome(x["saiu"]) == sobrenome(groq_mex.get("saiu"))), None)
+             or next((x for x in subs if sobrenome(x["saiu"]) in marcadores), None)
+             or next((x for x in subs if any(t in x["saiu"].lower() for t in topo)), None)
+             or subs[-1])
         saiu, entrou = _curto(s["saiu"], apelidos), _curto(s["entrou"], apelidos)
         minuto = (s.get("minuto") or "").replace("'", "").split("+")[0]
         fala = (f"E aos {por_extenso(int(minuto)) if minuto.isdigit() else minuto} minutos, "
@@ -244,9 +253,14 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         batidas.append(batida(fala, legenda=fala.replace(por_extenso(int(minuto)), minuto)
                               if minuto.isdigit() else fala, tipo="mexida",
                               minuto=minuto, saiu=saiu, entrou=entrou))
-        if polemica:
-            batidas.append(batida(f"Logo o {saiu}, que tava voando no jogo.", tipo="mexida",
-                                  minuto=minuto, saiu=saiu, entrou=entrou))
+        if sobrenome(s["saiu"]) in marcadores:
+            gancho = f"Logo depois do {saiu} fazer o gol!"
+        elif any(t in s["saiu"].lower() for t in topo):
+            gancho = f"Logo o {saiu}, que tava voando no jogo."
+        else:
+            gancho = None
+        if gancho:
+            batidas.append(batida(gancho, tipo="mexida", minuto=minuto, saiu=saiu, entrou=entrou))
         batidas.append(batida("Mexeu certo ou errou feio?", tipo="pergunta"))
 
     batidas.append(batida(_escolha(CTA[res], semente + "cta"), tipo="cta"))
