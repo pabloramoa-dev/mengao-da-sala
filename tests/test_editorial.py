@@ -68,6 +68,15 @@ class EditorialTests(unittest.TestCase):
         self.assertTrue(deve_verificar(now,[{'id':'1','utc':(now-timedelta(hours=2)).isoformat()}],None))
         self.assertFalse(deve_verificar(now,[{'id':'1','utc':(now-timedelta(hours=2)).isoformat()}],'1'))
 
+    def test_legendas_preservam_tempo_e_texto(self):
+        b=roteiro.batida('Um texto longo que precisa de vários blocos pequenos para não cobrir o rosto do personagem.')
+        bs,ss=quadros.segmentar_legendas([b],[{'ini':0,'fim':10}])
+        self.assertEqual(' '.join(x['legenda'] for x in bs),b['legenda'])
+        self.assertTrue(all(len(x['legenda']) <= 38 for x in bs))
+        self.assertEqual(ss[0]['ini'],0)
+        self.assertEqual(ss[-1]['fim'],10)
+        self.assertTrue(all(a['fim']==b['ini'] for a,b in zip(ss,ss[1:])))
+
     def test_quadros_tem_direcao_e_dupla(self):
         p=quadros.dirigir(quadros.primo('teste'))
         self.assertEqual({b['personagem'] for b in p['batidas']},{'rubro','primo'})

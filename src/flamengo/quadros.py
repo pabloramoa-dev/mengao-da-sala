@@ -129,3 +129,20 @@ def dirigir(pauta):
     for b in p['batidas']:
         if b['tipo'] == 'pergunta': b['dados'].setdefault('cartao', 'SUA VEZ, NAÇÃO')
     return p
+
+
+def segmentar_legendas(batidas, segmentos):
+    """Blocos curtos por proporção de caracteres; nunca cobre o rosto com parágrafos."""
+    import textwrap
+    novas, tempos = [], []
+    for batida_, seg in zip(batidas, segmentos):
+        partes = textwrap.wrap(batida_["legenda"], width=38, break_long_words=False) or [""]
+        pesos = [max(1,len(p)) for p in partes]
+        acumulado = 0
+        for texto, peso in zip(partes, pesos):
+            inicio = seg["ini"] + (seg["fim"]-seg["ini"])*acumulado/sum(pesos)
+            acumulado += peso
+            fim = seg["ini"] + (seg["fim"]-seg["ini"])*acumulado/sum(pesos)
+            novas.append(dict(batida_, legenda=texto))
+            tempos.append(dict(seg, ini=inicio, fim=fim))
+    return novas, tempos

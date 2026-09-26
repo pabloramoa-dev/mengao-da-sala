@@ -15,6 +15,7 @@ import os
 import re
 from pathlib import Path
 
+from src.flamengo.quadros import segmentar_legendas
 import numpy as np
 from manim import *
 
@@ -73,7 +74,7 @@ def _legenda(txt):
     t = Text(_quebrar(txt), font="DejaVu Sans", font_size=34, weight=BOLD, color=WHITE, line_spacing=0.8)
     if t.width > 7.0:
         t.scale(7.0 / t.width)
-    return _banda(t).move_to([0, 2.0, 0])
+    return _banda(t).move_to([0, 2.7, 0])
 
 
 def _cartao(batida):
@@ -139,7 +140,7 @@ def _boca(centro, esc, abertura, humor):
 class ReelFlamengo(Scene):
     def construct(self):
         conteudo, cues = _carregar()
-        batidas, segs = conteudo["batidas"], conteudo["segs"]
+        batidas, segs = segmentar_legendas(conteudo["batidas"], conteudo["segs"])
         humor = conteudo["humor"]
         total = PRE_ROLL + segs[-1]["fim"] + TAIL
 
