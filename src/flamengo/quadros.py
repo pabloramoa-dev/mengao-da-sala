@@ -73,7 +73,7 @@ def primo(data, usados=()):
     chave, dialogo = livres[_index(data, len(livres))]
     return {'formato':'primo_rival','humor':'debochado','capa':'O PRIMO CHEGOU',
             'episodio':'primo:' + chave,
-            'batidas':[dict(batida(f, tipo='reacao'), personagem=p) for p,f in dialogo]}
+            'batidas':[dict(batida(f, tipo='reacao'), personagem=p) for p,f in dialogo] + [batida('Quem é esse primo na sua família? Conta aqui!',tipo='pergunta')]}
 
 
 def nacao_escala():

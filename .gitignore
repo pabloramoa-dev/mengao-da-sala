@@ -2,3 +2,8 @@ saida/trab_*/
 media/
 __pycache__/
 .venv/
+
+# Relatórios privados: versionar somente o envelope criptografado
+data/metricas.json
+docs/RESULTADOS_30_DIAS.md
+*Chave_Relatorios.pem

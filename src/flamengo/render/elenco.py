@@ -70,7 +70,7 @@ def torcedor(nome="rubro"):
                  corner_radius=.36).move_to([0, 2.32, 0])
     aba = shape(RoundedRectangle, NEGRO, width=.62, height=.26,
                 corner_radius=.12).move_to([-1.02, 2.16, 0])
-    marca = Text("PR" if nome == "primo" else INICIAIS, font_size=20, weight=BOLD, color=WHITE).move_to([.16, 2.34, 0])
+    marca = Text("PR" if nome == "primo" else INICIAIS, font="DejaVu Sans", font_size=20, weight=BOLD, color=WHITE).move_to([.16, 2.34, 0])
     bone = VGroup(copa, aba, marca)
     if nome == "primo": copa.set_fill("#355C7D")
     franja = VGroup(*[shape(Circle, cabelo, radius=r).move_to([x, y, 0])

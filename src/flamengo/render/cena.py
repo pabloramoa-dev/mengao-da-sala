@@ -39,7 +39,7 @@ def _carregar():
 
 
 def _texto(txt, tam, cor=WHITE, larg_max=7.0, peso=BOLD):
-    t = Text(txt, font_size=tam, weight=peso, color=cor)
+    t = Text(txt, font="DejaVu Sans", font_size=tam, weight=peso, color=cor)
     if t.width > larg_max:
         t.scale(larg_max / t.width)
     return t
@@ -70,10 +70,10 @@ def _quebrar(txt, max_chars=26):
 
 
 def _legenda(txt):
-    t = Text(_quebrar(txt), font_size=34, weight=BOLD, color=WHITE, line_spacing=0.8)
+    t = Text(_quebrar(txt), font="DejaVu Sans", font_size=34, weight=BOLD, color=WHITE, line_spacing=0.8)
     if t.width > 7.0:
         t.scale(7.0 / t.width)
-    return _banda(t).move_to([0, 1.5, 0])
+    return _banda(t).move_to([0, 2.0, 0])
 
 
 def _cartao(batida):
@@ -148,13 +148,13 @@ class ReelFlamengo(Scene):
 
         p = expressao(torcedor(), humor)
         g = p["grupo"]
-        g.scale(5.4 / g.height).move_to([0, -2.6, 0])
+        g.scale(5.4 / g.height).move_to([0, -1.6, 0])
         self.add(g)
         dupla = any(b.get("personagem") == "primo" for b in batidas)
         primo = expressao(torcedor("primo"), "debochado") if dupla else None
         if dupla:
-            g.scale(.72).move_to([-1.8, -2.7, 0])
-            primo["grupo"].scale(4.0 / primo["grupo"].height).move_to([1.8,-2.7,0])
+            g.scale(5.3/g.height).move_to([-1.8, -1.6, 0])
+            primo["grupo"].scale(5.3 / primo["grupo"].height).move_to([1.8,-1.6,0])
             self.add(primo["grupo"])
             primo["grupo"].add_updater(lambda m,dt: None)
         elenco = {"rubro":p}
@@ -227,7 +227,7 @@ class ReelFlamengo(Scene):
         if PRE_ROLL:
             self.wait(PRE_ROLL)
         relogio = PRE_ROLL
-        titulo.scale(.60).move_to([0,5.35,0])
+        titulo.scale(.72).move_to([0,5.35,0])
         camada = VGroup()
         for i, s in enumerate(segs):
             inicio = PRE_ROLL + s["ini"]

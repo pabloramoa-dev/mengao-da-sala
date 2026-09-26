@@ -38,6 +38,9 @@ jobs:
           mkdir -p saida
           python -c "import json; from src.flamengo.quadros import primo,dirigir; json.dump(dirigir(primo('teste')),open('saida/pauta.json','w'))"
           python -m src.flamengo.gerar --formato diario --pauta saida/pauta.json --out saida/primo_rival_teste.mp4
+          python -c "import json; from src.flamengo.quadros import sofa,dirigir; json.dump(dirigir(sofa('teste')),open('saida/solo.json','w'))"
+          python -m src.flamengo.gerar --formato diario --pauta saida/solo.json --out saida/sofa_teste.mp4
+          ffmpeg -y -ss 2 -i saida/sofa_teste.mp4 -frames:v 1 saida/frame_solo.png
           python -m src.flamengo.stories --pauta saida/pauta.json
           ffmpeg -y -ss 2 -i saida/primo_rival_teste.mp4 -frames:v 1 saida/frame_teste.png
       - uses: actions/upload-artifact@v4
@@ -68,10 +71,10 @@ jobs:
           python -m src.flamengo.publicar --so-verificar
           python -m src.flamengo.comunidade
           python -m src.flamengo.relatorio
+          python -m src.flamengo.proteger_metricas
       - uses: actions/upload-artifact@v4
         with:
           name: diagnostico-integracao
           path: |
-            data/metricas.json
+            data/metricas_privadas.cms
             data/comunidade.json
-            docs/RESULTADOS_30_DIAS.md

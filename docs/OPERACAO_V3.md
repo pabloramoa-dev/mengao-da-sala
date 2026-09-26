@@ -20,7 +20,7 @@ Pontuação do Cartola está suspensa até o coletor validar a rodada específic
 
 ## Experimento de 30 dias
 
-Faixas editoriais de teste: humor 12–20s, opinião 20–35s, história 35–50s. A duração real fica no JSON do vídeo; são faixas de comparação, sem cortar falas nem acelerar voz artificialmente. Comparar pelo menos cinco episódios por formato, com atenção a jogo, assunto, horário e duração. Relatório atualizado em `docs/RESULTADOS_30_DIAS.md`; resultados descritivos, não causalidade.
+Faixas editoriais de teste: humor 12–20s, opinião 20–35s, história 35–50s. A duração real fica no JSON do vídeo; são faixas de comparação, sem cortar falas nem acelerar voz artificialmente. Comparar pelo menos cinco episódios por formato, com atenção a jogo, assunto, horário e duração. Relatório gerado no runner como `docs/RESULTADOS_30_DIAS.md` e persistido, junto às métricas, somente no envelope criptografado `data/metricas_privadas.cms`; resultados descritivos, não causalidade.
 
 ## Perfil
 
@@ -35,3 +35,12 @@ Capas de destaques são geradas por `python -m src.flamengo.stories`.
 O workflow `Validar evolucao editorial` testa, renderiza uma amostra sem publicar e verifica destino/permissões em leitura. O workflow de coleta usa as permissões já concedidas; não pede novas permissões automaticamente.
 Fontes técnicas: documentação Meta de publicação, comentários e insights (Instagram Login); se uma métrica não for aceita na versão/configuração da conta, ela permanece indisponível.
 Histórias novas: acervo do Museu Flamengo, https://www.museuflamengo.com.br/manto-sagrado-historia, consultado em 25/09/2026. Textos próprios e fontes preservadas na legenda.
+
+## Abrir relatórios privados
+
+A chave `Mengao_Chave_Relatorios.pem` foi entregue separadamente ao proprietário; não colocar no GitHub. O certificado público em `config/metricas_publica.pem` só permite criptografar.
+
+```bash
+openssl cms -decrypt -binary -inform DER -in data/metricas_privadas.cms -inkey /caminho/Mengao_Chave_Relatorios.pem -out /tmp/mengao-relatorios.tar.gz
+tar -xzf /tmp/mengao-relatorios.tar.gz -C /diretorio/privado
+```
