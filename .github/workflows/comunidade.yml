@@ -1,10 +1,13 @@
 name: Comunidade e metricas
 on:
+  push:
+    paths: ['.github/workflows/comunidade.yml']
   schedule:
     - cron: '17 10 * * *'
   workflow_dispatch:
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: video-pos-jogo
   cancel-in-progress: false
@@ -17,6 +20,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Remover diagnóstico inicial substituído pelo formato protegido
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Artefato de teste criado nesta implementação; não toca em vídeos.
+          if gh api repos/${{ github.repository }}/actions/artifacts/10889251016 >/dev/null 2>&1; then
+            gh api --method DELETE repos/${{ github.repository }}/actions/artifacts/10889251016
+          fi
       - name: Coletar votos e insights
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
