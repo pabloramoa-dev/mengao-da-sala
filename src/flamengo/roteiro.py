@@ -90,7 +90,7 @@ def pos_jogo(snap: dict) -> dict | None:
 
     placar_fala = f"{por_extenso(jogo['gols_nossos'])} a {por_extenso(jogo['gols_deles'])}"
     placar_tela = f"{jogo['gols_nossos']} x {jogo['gols_deles']}"
-    onde = "no Maracanã" if jogo["mandante"] else "fora de casa"
+    onde = local_do_jogo(jogo)
 
     if jogo["resultado"] == "vitoria":
         humor = "euforico"
@@ -160,10 +160,10 @@ GIRIAS = {
 CTA = {
     "vitoria": ["Pra você, quem foi o melhor em campo? Comenta aí!",
                 "Qual foi o craque do jogo? Deixa o nome nos comentários!"],
-    "empate": ["Quem deixou a desejar hoje? Comenta o nome.",
+    "empate": ["O que você mudaria no segundo tempo?",
                "Faltou o quê pra vencer? Comenta aí."],
-    "derrota": ["Quem foi o pior em campo? Comenta o nome.",
-                "De quem é a culpa hoje? Comenta aí."],
+    "derrota": ["Qual setor precisa melhorar no próximo jogo?",
+                "Qual mudança você faria para o próximo jogo?"],
 }
 
 
@@ -192,7 +192,7 @@ def _curto(nome: str | None, apelidos: list[str]) -> str:
 
 def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
     jogo = analise.get("jogo") or {}
-    if jogo.get("resultado") is None:
+    if jogo.get("resultado") is None or jogo.get("status") != "FINISHED":
         return None                                   # trava: sem placar confirmado
     res = jogo["resultado"]
     semente = str(jogo.get("id", "")) + jogo.get("data", "")
@@ -202,7 +202,7 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
     nos, eles = jogo["gols_nossos"], jogo["gols_deles"]
     placar_fala = f"{por_extenso(nos)} a {por_extenso(eles)}"
     placar_tela = f"{nos} x {eles}"
-    onde = "no Maracanã" if jogo.get("em_casa") else "fora de casa"
+    onde = local_do_jogo(jogo)
     lider = bool(tabela and tabela.get("posicao") == 1)
 
     chave = "vitoria_lider" if (res == "vitoria" and lider) else res
@@ -218,18 +218,22 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         abre = f"{grito} {placar_fala} pro {adv}, {onde}."
         humor = "indignado"
 
-    batidas = [batida(abre, legenda=abre.replace(placar_fala, placar_tela.replace(" x ", " a ")),
+    gancho = {"vitoria":"O sofá sobreviveu. Agora vamos falar dessa vitória!",
+              "empate":"Um ponto na tabela. E uma pergunta na sala: o que faltou?",
+              "derrota":"O jogo acabou. O que você mudaria para o próximo?"}[res]
+    batidas = [batida(gancho, tipo="abre"), batida(abre, legenda=abre.replace(placar_fala, placar_tela.replace(" x ", " a ")),
                       tipo="placar", placar=placar_tela)]
 
     # melhor (vitória) ou pior (empate/derrota) — número do Cartola, sempre
     if cartola:
         alvo = cartola[0] if res == "vitoria" else cartola[-1]
-        rotulo = "o melhor" if res == "vitoria" else "o pior"
-        fala = (f"Pro Cartola, {rotulo} em campo foi o {alvo['nome']}, "
+        rotulo = "a maior pontuação" if res == "vitoria" else "a menor pontuação"
+        fala = (f"No Cartola, {rotulo} foi de {alvo['nome']}, "
                 f"com {decimal_fala(alvo['pontos'])} pontos.")
         legenda = fala.replace(decimal_fala(alvo["pontos"]), f"{alvo['pontos']:.1f}".replace(".", ","))
         batidas.append(batida(fala, legenda=legenda, tipo="nota",
-                              nome=alvo["nome"], nota=alvo["pontos"]))
+                              nome=alvo["nome"], nota=alvo["pontos"],
+                              rotulo="MAIOR PONTUAÇÃO" if res == "vitoria" else "MENOR PONTUAÇÃO"))
 
     # a mexida do técnico — prioridade: 1) a que a Groq apontou E a ESPN confirma
     # (é a que a imprensa está discutindo); 2) tirar quem acabou de marcar;
@@ -253,18 +257,46 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         batidas.append(batida(fala, legenda=fala.replace(por_extenso(int(minuto)), minuto)
                               if minuto.isdigit() else fala, tipo="mexida",
                               minuto=minuto, saiu=saiu, entrou=entrou))
-        if sobrenome(s["saiu"]) in marcadores:
+        if gol_proximo_da_troca(jogo.get("gols", []), s):
             gancho = f"Logo depois do {saiu} fazer o gol!"
         elif any(t in s["saiu"].lower() for t in topo):
-            gancho = f"Logo o {saiu}, que tava voando no jogo."
+            gancho = f"Você manteria o {saiu} em campo?"
         else:
             gancho = None
         if gancho:
             batidas.append(batida(gancho, tipo="mexida", minuto=minuto, saiu=saiu, entrou=entrou))
-        batidas.append(batida("Mexeu certo ou errou feio?", tipo="pergunta"))
+        batidas.append(batida("Você faria essa troca ou manteria o time?", tipo="pergunta", cartao="TROCAR OU MANTER?"))
 
     batidas.append(batida(_escolha(CTA[res], semente + "cta"), tipo="cta"))
     topo = {"vitoria_lider": "SEGUE O LÍDER", "vitoria": "VITÓRIA DO MENGÃO",
             "empate": "SÓ UM PONTO", "derrota": "NÃO DEU"}[chave]
     capa = f"{topo}\n{placar_tela} {adv}".upper()
-    return {"formato": "pos_jogo_v2", "humor": humor, "capa": capa, "batidas": batidas}
+    return {"formato": "pos_jogo_v2", "humor": humor, "capa": capa, "batidas": batidas, "jogo_id": jogo.get("id")}
+
+
+def local_do_jogo(jogo):
+    estadio = jogo.get("estadio") or ""
+    if estadio:
+        return f"no estádio {estadio}"
+    return "em casa" if jogo.get("em_casa", jogo.get("mandante")) else "fora de casa"
+
+
+def minuto_absoluto(valor):
+    import re
+    partes = re.fullmatch(r"(\d+)(?:\+(\d+))?['’]?", str(valor or "").strip())
+    return sum(int(x or 0) for x in partes.groups()) if partes else None
+
+
+def gol_proximo_da_troca(gols, troca):
+    import re
+    minuto = minuto_absoluto(troca.get("minuto"))
+    nome = (troca.get("saiu") or "").casefold()
+    if minuto is None or not nome:
+        return False
+    for gol in gols:
+        mg = minuto_absoluto(gol.get("minuto"))
+        # Exigir nome completo, não um sobrenome que possa pertencer a outro atleta.
+        citado = re.search(r"(?<!\w)" + re.escape(nome) + r"(?!\w)", gol.get("texto", "").casefold())
+        if gol.get("nosso") and citado and mg is not None and 0 <= minuto - mg <= 5:
+            return True
+    return False

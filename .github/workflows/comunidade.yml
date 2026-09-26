@@ -1,0 +1,46 @@
+name: Comunidade e metricas
+on:
+  push:
+    paths: ['.github/workflows/comunidade.yml']
+  schedule:
+    - cron: '17 10 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: video-pos-jogo
+  cancel-in-progress: false
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Remover diagnóstico inicial substituído pelo formato protegido
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Artefato de teste criado nesta implementação; não toca em vídeos.
+          if gh api repos/${{ github.repository }}/actions/artifacts/10889251016 >/dev/null 2>&1; then
+            gh api --method DELETE repos/${{ github.repository }}/actions/artifacts/10889251016
+          fi
+      - name: Coletar votos e insights
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+        run: |
+          python -m src.flamengo.comunidade
+          python -m src.flamengo.relatorio
+          python -m src.flamengo.proteger_metricas
+      - name: Guardar agregados sem dados pessoais
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/comunidade.json data/metricas_privadas.cms
+          git diff --cached --quiet || git commit -m 'Atualiza votos agregados e métricas'
+          git pull --rebase -q && git push

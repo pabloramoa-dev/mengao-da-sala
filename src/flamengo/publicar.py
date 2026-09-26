@@ -20,6 +20,8 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
+from src.flamengo import estado
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -60,20 +62,23 @@ def verificar_destino() -> dict:
     return dados
 
 
-def ja_publicado(legenda: str, limite: int = 25) -> bool:
+def encontrar_publicado(legenda: str, limite: int = 100) -> str | None:
     user, token, base, _ = _cfg()
     dados = _req("GET", f"{base}/{user}/media",
                  {"fields": "id,caption,timestamp", "limit": str(limite), "access_token": token})
     alvo = " ".join(legenda.split()).casefold()
-    return any(" ".join((m.get("caption") or "").split()).casefold() == alvo
-               for m in dados.get("data", []))
+    return next((m["id"] for m in dados.get("data", [])
+                 if " ".join((m.get("caption") or "").split()).casefold() == alvo), None)
 
 
-def publicar_reel(video_url: str, legenda: str, espera_max: int = 420) -> str:
+def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None, story=False) -> str:
     user, token, base, _ = _cfg()
-    cont = _req("POST", f"{base}/{user}/media", {
-        "media_type": "REELS", "video_url": video_url, "caption": legenda,
-        "share_to_feed": "true", "access_token": token})["id"]
+    meta = meta or {}
+    params = {"media_type":"STORIES", "image_url":video_url, "access_token":token} if story else {
+        "media_type":"REELS", "video_url":video_url, "caption":legenda,
+        "share_to_feed":"true", "access_token":token}
+    cont = _req("POST", f"{base}/{user}/media", params)["id"]
+    estado.registrar(legenda, meta, "processando", container_id=cont)
     print(f"[ig] container {cont} criado, aguardando processamento")
     fim = time.time() + espera_max
     while time.time() < fim:
@@ -86,6 +91,7 @@ def publicar_reel(video_url: str, legenda: str, espera_max: int = 420) -> str:
         time.sleep(10)
     else:
         raise TimeoutError("Instagram não terminou de processar o vídeo")
+    estado.registrar(legenda, meta, "publicacao_pendente", container_id=cont)
     media = _req("POST", f"{base}/{user}/media_publish",
                  {"creation_id": cont, "access_token": token})["id"]
     return media
@@ -94,6 +100,7 @@ def publicar_reel(video_url: str, legenda: str, espera_max: int = 420) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--video-url")
+    ap.add_argument("--story", action="store_true", help="video-url aponta para PNG de Story")
     ap.add_argument("--legenda", help="arquivo .txt com a legenda")
     ap.add_argument("--so-verificar", action="store_true")
     a = ap.parse_args()
@@ -105,13 +112,25 @@ def main() -> int:
 
     legenda = open(a.legenda, encoding="utf-8").read().strip()
     print(f"[ig] legenda {hashlib.sha256(legenda.encode()).hexdigest()[:12]} ({len(legenda)} caracteres)")
-    if ja_publicado(legenda):
-        print("[ig] já existe post com esta legenda — nada a fazer")
-        return 0
-    media = publicar_reel(a.video_url, legenda)
+    meta_path = Path(a.legenda).with_suffix(".json")
+    meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+    anterior = next((x for x in estado.ler()['itens'] if x['chave'] == estado.chave(legenda, meta)), {})
+    media = anterior.get("media_id") if anterior.get("status") == "publicado" else (None if a.story else encontrar_publicado(legenda))
+    if not media:
+        if anterior.get("status") == "publicacao_pendente":
+            raise RuntimeError("Publicação anterior inconclusiva: reconciliar container antes de reenviar")
+        estado.registrar(legenda, meta, "gerado")
+        try:
+            media = publicar_reel(a.video_url, legenda, meta=meta, story=a.story)
+        except Exception:
+            atual = next(x for x in estado.ler()['itens'] if x['chave'] == estado.chave(legenda,meta))
+            if atual.get('status') != 'publicacao_pendente':
+                estado.registrar(legenda, meta, "falhou")
+            raise
+    estado.registrar(legenda, meta, "publicado", media_id=media)
     print(f"[ig] PUBLICADO: media_id {media}")
     with open(os.environ.get("GITHUB_STEP_SUMMARY", os.devnull), "a") as f:
-        f.write(f"- Reel publicado no @mengaodasala: media_id `{media}`\n")
+        f.write(f"- Conteúdo publicado no @mengaodasala: media_id `{media}`\n")
     return 0
 
 

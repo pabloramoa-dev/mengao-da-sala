@@ -56,6 +56,8 @@ def torcedor(nome="rubro"):
     pernas = VGroup(*[shape(RoundedRectangle, NEGRO, width=.48, height=1.15,
                             corner_radius=.12).move_to([x, -1.5, 0]) for x in [-.4, .4]])
     corpo = _camisa_listrada()
+    if nome == "primo":
+        corpo.set_fill("#355C7D")
     pescoco = shape(RoundedRectangle, pele, width=.47, height=.58,
                     corner_radius=.16).move_to([0, .55, 0])
     cabeca = shape(RoundedRectangle, pele, width=1.72, height=1.9,
@@ -68,8 +70,9 @@ def torcedor(nome="rubro"):
                  corner_radius=.36).move_to([0, 2.32, 0])
     aba = shape(RoundedRectangle, NEGRO, width=.62, height=.26,
                 corner_radius=.12).move_to([-1.02, 2.16, 0])
-    marca = Text(INICIAIS, font_size=20, weight=BOLD, color=WHITE).move_to([.16, 2.34, 0])
+    marca = Text("PR" if nome == "primo" else INICIAIS, font="DejaVu Sans", font_size=20, weight=BOLD, color=WHITE).move_to([.16, 2.34, 0])
     bone = VGroup(copa, aba, marca)
+    if nome == "primo": copa.set_fill("#355C7D")
     franja = VGroup(*[shape(Circle, cabelo, radius=r).move_to([x, y, 0])
                       for x, y, r in [(-.52, 1.98, .2), (-.16, 2.04, .22), (.22, 2.02, .2)]])
 
@@ -137,7 +140,10 @@ def cenario(tipo="sala"):
     tv = VGroup(shape(RoundedRectangle, NEGRO, width=2.3, height=1.4, corner_radius=.12),
                 shape(RoundedRectangle, "#3A3A3A", width=2.0, height=1.1,
                       corner_radius=.08)).scale(0.8).move_to([-2.7, -0.4, 0])
-    return VGroup(fundo, faixa, chao, tv)
+    sofa = shape(RoundedRectangle, "#655C64", width=6.7, height=1.5, corner_radius=.25).move_to([0,-4.8,0])
+    almofada = shape(RoundedRectangle, RUBRO, width=.8, height=.7, corner_radius=.15).move_to([-2.6,-4.35,0])
+    controle = shape(RoundedRectangle, NEGRO, width=.25, height=.65, corner_radius=.06).rotate(.25).move_to([2.65,-4.5,0])
+    return VGroup(fundo, faixa, chao, tv, sofa, almofada, controle)
 
 
 class FolhaDeElenco(Scene):

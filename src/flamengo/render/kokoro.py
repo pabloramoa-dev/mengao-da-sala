@@ -71,6 +71,7 @@ def resample_44100(s, sr):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("roteiro", help="txt: uma batida de narração por linha")
+    ap.add_argument("--elenco-json", help="Lista de personagens por batida")
     ap.add_argument("--voz", default="pm_alex", help="pm_alex | pm_santa | pf_dora")
     ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--gap", type=float, default=0.35, help="silêncio entre batidas (s)")
@@ -88,12 +89,15 @@ def main():
     k = Kokoro(onnx, vozes)
 
     linhas = [l.strip() for l in open(a.roteiro, encoding="utf-8") if l.strip()]
+    elenco = json.load(open(a.elenco_json)) if a.elenco_json else []
     gap = np.zeros(int(a.gap * SR), dtype=np.float32)
     buf = []
     segs = []
     t = 0.0
     for i, txt in enumerate(linhas):
-        s, sr = k.create(txt, voice=a.voz, speed=a.speed, lang="pt-br")
+        personagem = elenco[i] if i < len(elenco) else "rubro"
+        voz_atual = "pm_santa" if personagem == "primo" else a.voz
+        s, sr = k.create(txt, voice=voz_atual, speed=a.speed, lang="pt-br")
         s = resample_44100(np.asarray(s, dtype=np.float32), sr)
         ini = t
         buf.append(s); buf.append(gap)

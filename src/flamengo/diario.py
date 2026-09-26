@@ -28,6 +28,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from src.flamengo.roteiro import batida, ordinal, por_extenso
+from src.flamengo import quadros
 
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer"
 STANDINGS = "https://site.api.espn.com/apis/v2/sports/soccer/bra.1/standings"
@@ -38,7 +39,7 @@ LIGAS = {"bra.1": "Brasileirão", "conmebol.libertadores": "Libertadores",
 RIVAIS = {"3445": "Fluminense", "3454": "Vasco", "6086": "Botafogo", "2029": "Palmeiras"}
 BRT = timezone(timedelta(hours=-3))
 ESTADO = Path("data/diario.json")
-ORDEM = ["conta_do_titulo", "voce_sabia", "contagem", "zoeira_rival"]
+ORDEM = ["o_sofa_nao_aguenta", "conta_do_titulo", "primo_rival", "voce_sabia", "a_nacao_escala", "zoeira_rival", "contagem", "eu_avisei", "a_nacao_respondeu"]
 HASHTAGS = "#Flamengo #Mengão #NaçãoRubroNegra #Brasileirão #CRF"
 NOMES = {"Red Bull Bragantino": "Bragantino", "Estudiantes de La Plata": "Estudiantes",
          "Vasco da Gama": "Vasco", "Athletico Paranaense": "Athletico",
@@ -48,11 +49,11 @@ NOMES = {"Red Bull Bragantino": "Bragantino", "Estudiantes de La Plata": "Estudi
 # Regra do editorial: nada de letra de hino, nada de tragédia, nada inventado.
 FATOS = [
     {"id": "fundacao", "capa": "VOCÊ SABIA?\n1895",
-     "cartao": "17/11/1895",
-     "falas": ["O Flamengo nasceu no dia dezessete de novembro de mil oitocentos e noventa e cinco.",
+     "cartao": "NOVEMBRO DE 1895",
+     "falas": ["O Flamengo nasceu em novembro de mil oitocentos e noventa e cinco.",
                "E nasceu clube de regata, no remo. O futebol só chegou dezesseis anos depois.",
                "Ou seja: antes de ser o Mais Querido do Brasil, o Mengão era do mar."],
-     "legendas": ["O Flamengo nasceu em 17 de novembro de 1895.",
+     "legendas": ["O Flamengo nasceu em novembro de 1895.",
                   "E nasceu clube de regata, no remo. O futebol só chegou 16 anos depois.",
                   None]},
     {"id": "mundial81", "capa": "VOCÊ SABIA?\nTÓQUIO 1981",
@@ -107,6 +108,19 @@ FATOS = [
                   "Final em Lima, contra o Palmeiras. 1 a 0, gol do Danilo.", None]},
 ]
 
+
+# Novas histórias verificadas no acervo do Museu Flamengo em 25/09/2026.
+FONTE_MANTO = "https://www.museuflamengo.com.br/manto-sagrado-historia"
+for id_, capa_, frases_ in [
+    ("cores1896", "NEM SEMPRE RUBRO-NEGRO", ["O Mengão já teve outras cores!", "O azul e ouro deram lugar ao vermelho e preto em novembro de mil oitocentos e noventa e seis.", "Qual camisa você guardaria para contar essa história?"]),
+    ("papagaio", "UMA CAMISA QUADRICULADA", ["Imagina entrar em campo de quadriculado!", "O primeiro uniforme do futebol ganhou o apelido Papagaio de Vintém.", "Você usaria uma versão dessa camisa hoje?"]),
+    ("coral", "AS FAIXAS BRANCAS", ["Tinha branco entre as listras!", "A camisa Cobra Coral recebeu esse apelido pelos frisos brancos entre vermelho e preto.", "Na sua coleção caberia esse modelo?"]),
+    ("manto1937", "BRANCO PARA ENXERGAR", ["Essa escolha de camisa tinha uma razão prática.", "O uniforme alternativo de mil novecentos e trinta e sete ajudava a distinguir o time em jogos noturnos.", "Hoje, você prefere a camisa clara ou a rubro-negra?"]),
+    ("estreia1912", "A PRIMEIRA PARTIDA", ["Toda história tem um primeiro apito.", "O Flamengo estreou no futebol em três de maio de mil novecentos e doze, contra o Mangueira.", "Qual foi o primeiro jogo que você lembra de assistir?"]),
+    ("carioca1914", "ANTES DAS GRANDES TAÇAS", ["Antes de tantas conquistas, houve esse começo.", "A equipe principal venceu os Cariocas de mil novecentos e quatorze e mil novecentos e quinze.", "Quem te ensinou a acompanhar o Flamengo?"]),
+]:
+    FATOS.append({"id":id_, "capa":capa_, "cartao":"MEMÓRIA DA NAÇÃO",
+                  "falas":frases_, "legendas":[None]*len(frases_), "fonte":FONTE_MANTO})
 
 # ------------------------------------------------------------------ coleta
 def pegar(url: str):
@@ -203,7 +217,7 @@ def _contra(j: dict) -> str:
 def hoje_tem_mengao(prox: dict, t: dict | None) -> dict:
     onde = "no Maracanã" if prox["em_casa"] and "Maracan" in (prox.get("estadio") or "") else \
            ("em casa" if prox["em_casa"] else "fora de casa")
-    b = [batida("Hoje tem Mengão!", tipo="abre"),
+    b = [batida("Já separou o lugar no sofá? Hoje tem Mengão!", tipo="abre"),
          batida(f"É contra o {prox['adversario']}, {onde}, pelo {prox['competicao']}.",
                 tipo="jogo", cartao=_contra(prox).upper()),
          batida(f"A bola rola {_hora_fala(prox)}.",
@@ -215,20 +229,20 @@ def hoje_tem_mengao(prox: dict, t: dict | None) -> dict:
     b.append(batida("Crava aí nos comentários: qual vai ser o placar?", tipo="pergunta",
                     cartao="CRAVA O PLACAR"))
     return {"formato": "hoje_tem_mengao", "humor": "euforico",
-            "capa": f"HOJE TEM MENGÃO\n{_contra(prox)}".upper(), "batidas": b}
+            "capa": f"HOJE TEM MENGÃO\n{_contra(prox)}".upper(), "jogo_id": prox["id"], "batidas": b}
 
 
 def conta_do_titulo(t: dict, prox: dict | None) -> dict:
     lider = t["posicao"] == 1
     if lider:
-        b = [batida(f"O Mengão é o líder do Brasileirão, com {por_extenso(t['pontos'])} pontos.",
+        b = [batida("A vantagem está na tabela. A tranquilidade ainda não chegou ao sofá!", tipo="abre"), batida(f"O Mengão é o líder do Brasileirão, com {por_extenso(t['pontos'])} pontos.",
                     legenda=f"O Mengão é o líder do Brasileirão, com {t['pontos']} pontos.",
                     tipo="tabela", posicao=1, pontos=t["pontos"]),
              batida(f"O vice é o {t['rival_nome']}, {por_extenso(abs(t['diferenca']))} pontos atrás.",
                     legenda=f"O vice é o {t['rival_nome']}, {abs(t['diferenca'])} pontos atrás.",
                     tipo="rival", cartao=f"+{t['diferenca']} NA FRENTE")]
     else:
-        b = [batida(f"O Flamengo está em {ordinal(t['posicao'])} lugar, com {por_extenso(t['pontos'])} pontos.",
+        b = [batida("A sala quer saber: qual é o tamanho da distância?", tipo="abre"), batida(f"O Flamengo está em {ordinal(t['posicao'])} lugar, com {por_extenso(t['pontos'])} pontos.",
                     legenda=f"O Flamengo está em {t['posicao']}º lugar, com {t['pontos']} pontos.",
                     tipo="tabela", posicao=t["posicao"], pontos=t["pontos"]),
              batida(f"O líder é o {t['rival_nome']}, com {por_extenso(t['rival_pontos'])}.",
@@ -282,14 +296,15 @@ def zoeira_rival(nome: str, j: dict) -> dict:
 
 
 def voce_sabia(f: dict) -> dict:
-    b = []
+    b = [batida("Essa história merece um lugar na nossa sala.", tipo="abre")]
     for i, (fala, leg) in enumerate(zip(f["falas"], f["legendas"])):
         extra = {"cartao": f["cartao"]} if i == 0 else {}
         b.append(batida(fala, legenda=leg or fala, tipo="fato", **extra))
+    b.append(batida("É por isso que uma camisa pode guardar tanta memória. Cada geração chega com um jogo, uma pessoa e um momento que não esquece. Aqui na sala, essas lembranças também entram em campo.", tipo="reacao"))
     b.append(batida("Sabia dessa? Comenta aí e manda pra um flamenguista.", tipo="pergunta",
                     cartao="SABIA DESSA?"))
     return {"formato": "voce_sabia", "humor": "euforico", "capa": f["capa"], "batidas": b,
-            "fato": f["id"]}
+            "fato": f["id"], "fonte": f.get("fonte")}
 
 
 # ----------------------------------------------------------------- escolha
@@ -300,6 +315,7 @@ def legenda_post(pauta: dict) -> str:
     perg = next((b["legenda"] for b in pauta["batidas"] if b["tipo"] == "pergunta"), None)
     if perg:
         linhas += ["", perg + " 👇"]
+    if pauta.get("fonte"): linhas += ["", "Fonte histórica: " + pauta["fonte"]]
     linhas += ["", "Segue o @mengaodasala 🔴⚫", "", HASHTAGS]
     return "\n".join(linhas) + "\n"
 
@@ -310,13 +326,25 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
     ultimo = feitos[-1] if feitos else None
     prox = futuros[0] if futuros else None
 
-    if ultimo and not so and (agora - _utc(ultimo["utc"])) < timedelta(hours=30):
-        return None, f"jogo encerrado há menos de 30h ({ultimo['adversario']}) — pós-jogo cobre"
+    # Um Reel diário distinto pode complementar o pós-jogo, sem repetir placar.
+    retorno = quadros.resposta(estado)
+    if retorno and so in (None, "a_nacao_respondeu"):
+        return retorno, "resposta a votação real"
 
     if prox and _utc(prox["utc"]).astimezone(BRT).date() == hoje and so in (None, "hoje_tem_mengao"):
         return hoje_tem_mengao(prox, tabela()), "dia de jogo"
 
-    candidatos: dict[str, dict] = {}
+    usados = estado.get("episodios", [])
+    candidatos = {"o_sofa_nao_aguenta": quadros.sofa(hoje, usados),
+                  "primo_rival": quadros.primo(hoje, usados),
+                  "a_nacao_escala": quadros.nacao_escala()}
+    if retorno: candidatos["a_nacao_respondeu"] = retorno
+    registro = Path("data/publicacoes.json")
+    publicados = json.loads(registro.read_text()).get("itens", []) if registro.exists() else []
+    if ultimo and ultimo.get("gols_nossos") is not None and ultimo.get("gols_deles") is not None and (agora - _utc(ultimo["utc"])) < timedelta(hours=36):
+        ultimo["resultado"] = ("vitoria" if ultimo["gols_nossos"] > ultimo["gols_deles"] else "derrota" if ultimo["gols_nossos"] < ultimo["gols_deles"] else "empate")
+        volta = quadros.eu_avisei(ultimo, publicados)
+        if volta and volta["episodio"] not in usados: candidatos["eu_avisei"] = volta
     t = tabela()
     if t:
         candidatos["conta_do_titulo"] = conta_do_titulo(t, prox)
@@ -329,7 +357,7 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
             f_, _ = agenda(rid, ligas=("bra.1", "conmebol.libertadores", "bra.copa_do_brazil",
                                        "conmebol.sudamericana"))
             j = f_[-1] if f_ else None
-            if j and j["gols_nossos"] is not None and j["gols_nossos"] < j["gols_deles"] \
+            if j and j["gols_nossos"] is not None and j["gols_deles"] is not None and j["gols_nossos"] < j["gols_deles"] \
                     and (agora - _utc(j["utc"])) < timedelta(days=4) \
                     and estado.get("zoeira_jogo") != j["id"]:
                 candidatos["zoeira_rival"] = zoeira_rival(nome, j)
@@ -371,6 +399,7 @@ def main() -> int:
     print(f"[diario] {motivo}")
     if pauta is None:
         return 3
+    pauta = quadros.dirigir(pauta)
     pauta["legenda_post"] = legenda_post(pauta)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(pauta, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -387,6 +416,10 @@ def registrar(pauta_path: str) -> None:
     estado = json.loads(ESTADO.read_text(encoding="utf-8")) if ESTADO.exists() else {}
     estado["data"] = datetime.now(timezone.utc).astimezone(BRT).date().isoformat()
     estado["formato"] = pauta["formato"]
+    if pauta.get("episodio"):
+        estado["episodios"] = (estado.get("episodios", []) + [pauta["episodio"]])[-30:]
+    if pauta.get("responde_media_id"):
+        estado["respondidas"] = (estado.get("respondidas", []) + [pauta["responde_media_id"]])[-100:]
     if pauta.get("fato"):
         estado["fatos_usados"] = (estado.get("fatos_usados", []) + [pauta["fato"]])[-(len(FATOS) - 1):]
     if pauta.get("jogo_rival"):

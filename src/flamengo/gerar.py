@@ -18,7 +18,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from src.flamengo import roteiro
+from src.flamengo import roteiro, quadros
 from src.flamengo.render import voz
 from src.flamengo.render.cena import PRE_ROLL
 
@@ -42,6 +42,7 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
         print("[trava] sem partida encerrada e confirmada — nenhum vídeo hoje")
         return None
 
+    pauta = quadros.dirigir(pauta)
     destino = destino.resolve()
     trab = destino.parent / f"trab_{destino.stem}"
     audio = voz.narrar(pauta["batidas"], trab, RAIZ)
@@ -69,7 +70,7 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
     destino.with_suffix(".txt").write_text(pauta.get("legenda_post") or legenda_post(pauta, snapshot),
                                            encoding="utf-8")
     (destino.with_suffix(".json")).write_text(json.dumps({
-        "formato": pauta["formato"], "humor": pauta["humor"], "capa": pauta["capa"],
+        **pauta, "duracao_segundos": audio["segs"][-1]["fim"] + PRE_ROLL + 1.2,
         "voz": voz.PRESET_BIRA, "filtro": voz.FILTRO_BIRA,
         "falas": [b["fala"] for b in pauta["batidas"]], "publicado": False,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
