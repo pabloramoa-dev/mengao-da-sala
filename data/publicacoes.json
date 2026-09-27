@@ -9,6 +9,16 @@
       "enquete": null,
       "duracao_segundos": 14.203999999999999,
       "versao_editorial": 3
+    },
+    {
+      "chave": "a2f733b5f1c263c4281db72b",
+      "formato": "primo_rival",
+      "status": "falhou",
+      "atualizado_em": "2026-09-27T18:17:44.096442+00:00",
+      "jogo_id": null,
+      "enquete": null,
+      "duracao_segundos": 13.350999999999999,
+      "versao_editorial": 3
     }
   ]
 }
