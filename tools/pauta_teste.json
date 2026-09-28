@@ -1,0 +1,44 @@
+{
+ "batidas": [
+  {
+   "personagem": "primo",
+   "humor": "debochado",
+   "fala": "Você prometeu pra tua mãe que hoje ia ver o jogo calmo."
+  },
+  {
+   "personagem": "rubro",
+   "humor": "tenso",
+   "fala": "E eu tô calmíssimo. Olha a minha respiração: ahhh."
+  },
+  {
+   "personagem": "primo",
+   "humor": "rindo",
+   "fala": "Primo, a bola nem rolou e você já roeu a unha do pé."
+  },
+  {
+   "personagem": "rubro",
+   "humor": "indignado",
+   "fala": "É técnica de concentração! O Mengão sente a energia da sala."
+  },
+  {
+   "personagem": "primo",
+   "humor": "debochado",
+   "fala": "Então manda uma energia pra zaga, que ela tá precisando."
+  },
+  {
+   "personagem": "rubro",
+   "humor": "indignado",
+   "fala": "Sai da minha sala! Com calma. Mas sai!"
+  },
+  {
+   "personagem": "rubro",
+   "humor": "euforico",
+   "fala": "Você vê o jogo sentado ou vira treinador em pé na sala? Conta aí!"
+  },
+  {
+   "personagem": "rubro",
+   "humor": "euforico",
+   "fala": "Segue o Mengão da Sala que amanhã o primo volta. Infelizmente."
+  }
+ ]
+}
