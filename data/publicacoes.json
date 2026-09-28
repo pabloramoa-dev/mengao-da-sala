@@ -3,22 +3,38 @@
     {
       "chave": "71430322005ed12dc8956e8a",
       "formato": "primo_rival",
-      "status": "falhou",
-      "atualizado_em": "2026-09-26T17:45:39.160183+00:00",
+      "status": "publicado",
+      "atualizado_em": "2026-09-28T12:52:50.365106+00:00",
       "jogo_id": null,
       "enquete": null,
       "duracao_segundos": 14.203999999999999,
-      "versao_editorial": 3
+      "versao_editorial": 3,
+      "container_id": "18120135841786157",
+      "media_id": "17942294190361501"
     },
     {
       "chave": "a2f733b5f1c263c4281db72b",
       "formato": "primo_rival",
-      "status": "falhou",
-      "atualizado_em": "2026-09-27T18:17:44.096442+00:00",
+      "status": "publicado",
+      "atualizado_em": "2026-09-28T12:53:29.376018+00:00",
       "jogo_id": null,
       "enquete": null,
       "duracao_segundos": 13.350999999999999,
-      "versao_editorial": 3
+      "versao_editorial": 3,
+      "container_id": "18120136081786157",
+      "media_id": "18106483391521997"
+    },
+    {
+      "chave": "c2ffdb7d40a652743d39cfee",
+      "formato": "story",
+      "status": "publicado",
+      "atualizado_em": "2026-09-28T12:53:46.046179+00:00",
+      "jogo_id": null,
+      "enquete": null,
+      "duracao_segundos": null,
+      "versao_editorial": 3,
+      "container_id": "18120136420786157",
+      "media_id": "18393973636162868"
     }
   ]
 }
