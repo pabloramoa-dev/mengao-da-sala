@@ -44,6 +44,8 @@ jobs:
 
       - name: Pauta do dia
         id: pauta
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}   # esquete do primo com dado real do dia
         run: |
           set +e
           ARGS=""
@@ -68,6 +70,12 @@ jobs:
           sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng
           python -m pip install -q -U pip setuptools wheel
           python -m pip install -q -r requirements.txt
+          # fonte da colagem (etiquetas, legenda, carimbo) — a mesma do @previsaorj
+          mkdir -p ~/.local/share/fonts/poppins
+          for f in Poppins-Bold.ttf Poppins-Regular.ttf; do
+            curl -fsSL --retry 3 -o ~/.local/share/fonts/poppins/$f https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/$f
+          done
+          fc-cache -f >/dev/null
 
       - name: Cache do modelo de voz
         if: steps.pauta.outputs.tem == 'true'
