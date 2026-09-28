@@ -47,3 +47,23 @@ def test_ferramenta_de_cache_usa_as_mesmas_vozes_do_motor():
         for h in voz_dupla.EMOCAO:
             assert vc.parametros(q, h) == voz_dupla.parametros(q, h)
     assert vc.voz_chave("a", "+1%", "+0Hz", "oi") == voz_dupla.voz_chave("a", "+1%", "+0Hz", "oi")
+
+
+CTX = {"tabela": {"posicao": 1, "pontos": 64, "rival_nome": "Palmeiras", "diferenca": 5},
+       "proximo_jogo": {"adversario": "Flamengo x Santos"}}
+
+
+def test_checagem_recusa_clube_nome_e_numero_fora_dos_dados():
+    for fala in ["Vai perder pro Corinthians, primo.",
+                 "O Pedro vai perder pênalti de novo.",
+                 "Três pontos de vantagem não segura ninguém."]:
+        with pytest.raises(ValueError):
+            dialogos.checar_fatos([{"quem": "primo", "fala": fala}], CTX)
+
+
+def test_checagem_aceita_o_que_esta_nos_dados_e_o_banco():
+    ok = [{"quem": "primo", "fala": "O Palmeiras tá cinco pontos atrás. Por enquanto."},
+          {"quem": "rubro", "fala": "E o Santos vem aí. Eu já separei o sofá."}]
+    dialogos.checar_fatos(ok, CTX)
+    for esq in dialogos.BANCO:
+        dialogos.checar_fatos(esq["falas"], {})
