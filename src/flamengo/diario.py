@@ -320,6 +320,21 @@ def legenda_post(pauta: dict) -> str:
     return "\n".join(linhas) + "\n"
 
 
+def _contexto_esquete(prox: dict | None) -> dict:
+    """Dado REAL do dia para a Groq escrever a esquete do primo (nada inventado)."""
+    ctx = {}
+    try:
+        t = tabela()
+        if t:
+            ctx["tabela"] = {k: t[k] for k in ("posicao", "pontos", "jogos", "rival_nome", "diferenca",
+                                               "jogos_restantes")}
+    except Exception:
+        pass
+    if prox:
+        ctx["proximo_jogo"] = {"adversario": _contra(prox), "quando": _utc(prox["utc"]).astimezone(BRT).strftime("%d/%m %Hh%M")}
+    return ctx
+
+
 def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict | None, str]:
     feitos, futuros = agenda(FLA)
     hoje = agora.astimezone(BRT).date()
@@ -335,6 +350,13 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
         return hoje_tem_mengao(prox, tabela()), "dia de jogo"
 
     usados = estado.get("episodios", [])
+    eps_usados = list(usados)
+
+    def com_ia(f):
+        # a esquete do primo só chama a Groq quando ela é a escolhida do dia
+        if f == "primo_rival":
+            return quadros.primo(hoje, eps_usados, _contexto_esquete(prox), ia=True)
+        return candidatos[f]
     candidatos = {"o_sofa_nao_aguenta": quadros.sofa(hoje, usados),
                   "primo_rival": quadros.primo(hoje, usados),
                   "a_nacao_escala": quadros.nacao_escala()}
@@ -371,14 +393,14 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
     if so:
         if so not in candidatos:
             raise SystemExit(f"formato {so} indisponível hoje (sem dado real): {list(candidatos)}")
-        return candidatos[so], "forçado"
+        return com_ia(so), "forçado"
 
     anterior = estado.get("formato")
     i0 = (ORDEM.index(anterior) + 1) if anterior in ORDEM else 0
     for k in range(len(ORDEM)):
         f = ORDEM[(i0 + k) % len(ORDEM)]
         if f in candidatos and f != anterior:
-            return candidatos[f], f"rodízio (ontem: {anterior})"
+            return com_ia(f), f"rodízio (ontem: {anterior})"
     return None, "nenhum formato disponível"
 
 

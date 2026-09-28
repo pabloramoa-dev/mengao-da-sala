@@ -45,6 +45,8 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
     pauta = quadros.dirigir(pauta)
     destino = destino.resolve()
     trab = destino.parent / f"trab_{destino.stem}"
+    if pauta.get("motor") == "dupla" and os.environ.get("FLAMENGO_MOTOR") != "v1":
+        return gerar_dupla(pauta, destino, trab, snapshot)
     audio = voz.narrar(pauta["batidas"], trab, RAIZ)
 
     conteudo = dict(pauta, segs=audio["segs"])
@@ -72,6 +74,37 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
     (destino.with_suffix(".json")).write_text(json.dumps({
         **pauta, "duracao_segundos": audio["segs"][-1]["fim"] + PRE_ROLL + 1.2,
         "voz": voz.PRESET_BIRA, "filtro": voz.FILTRO_BIRA,
+        "falas": [b["fala"] for b in pauta["batidas"]], "publicado": False,
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+    return destino
+
+
+def gerar_dupla(pauta: dict, destino: Path, trab: Path, snapshot: dict) -> Path:
+    """Esquete Juninho x Primo Secador: vozes distintas, rig com gestos e
+    reações, câmera plano/contraplano e acabamento de colagem (grão de papel)."""
+    from src.flamengo.render import voz_dupla, papel
+    audio = voz_dupla.narrar(pauta["batidas"], trab, RAIZ)
+    conteudo = dict(pauta, segs=audio["segs"])
+    (trab / "conteudo.json").write_text(json.dumps(conteudo, ensure_ascii=False), encoding="utf-8")
+    env = dict(os.environ, FLAMENGO_TRAB=str(trab), PYTHONPATH=str(RAIZ))
+    qualidade = os.environ.get("FLAMENGO_RES", "1080,1920")
+    subprocess.run([sys.executable, "-m", "manim", "-r", qualidade, "--fps", "30",
+                    "--disable_caching", "--media_dir", str(trab / "media"),
+                    str(Path(__file__).parent / "render" / "cena_dupla.py"), "EsqueteDupla"],
+                   check=True, cwd=RAIZ, env=env)
+    mudo = next((trab / "media" / "videos").rglob("EsqueteDupla.mp4"))
+    mudo = papel.aplicar_textura(mudo, trab / "mudo_papel.mp4")
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(mudo), "-i", str(audio["master"]),
+                    "-filter_complex", "[1:a]apad[a]", "-map", "0:v", "-map", "[a]",
+                    "-c:v", "libx264", "-profile:v", "main", "-level", "4.0",
+                    "-crf", "21", "-pix_fmt", "yuv420p", "-r", "30",
+                    "-c:a", "aac", "-b:a", "160k", "-ar", "48000",
+                    "-movflags", "+faststart", "-shortest", str(destino)], check=True)
+    destino.with_suffix(".txt").write_text(pauta.get("legenda_post") or legenda_post(pauta, snapshot),
+                                           encoding="utf-8")
+    destino.with_suffix(".json").write_text(json.dumps({
+        **pauta, "duracao_segundos": audio["segs"][-1]["fim"] + 1.4, "motor": "dupla",
+        "vozes": {k: {kk: str(vv) for kk, vv in v.items()} for k, v in voz_dupla.VOZES.items()},
         "falas": [b["fala"] for b in pauta["batidas"]], "publicado": False,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     return destino

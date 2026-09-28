@@ -68,12 +68,28 @@ def sofa(data, usados=()):
             'batidas':[batida(f, tipo='pergunta' if i == len(falas)-1 else 'reacao') for i,f in enumerate(falas)]}
 
 
-def primo(data, usados=()):
-    livres = [x for x in PRIMOS if 'primo:' + x[0] not in usados] or PRIMOS
-    chave, dialogo = livres[_index(data, len(livres))]
-    return {'formato':'primo_rival','humor':'debochado','capa':'O PRIMO CHEGOU',
-            'episodio':'primo:' + chave,
-            'batidas':[dict(batida(f, tipo='reacao'), personagem=p) for p,f in dialogo] + [batida('Quem é esse primo na sua família? Conta aqui!',tipo='pergunta')]}
+def primo(data, usados=(), contexto=None, ia=False):
+    """Esquete Juninho x Primo Secador (v2): Groq com dado real do dia ou banco.
+
+    Cada batida leva a direção de cena (humor, gesto, reação de quem ouve,
+    plano de câmera, carimbo da virada) para o render da dupla."""
+    from src.flamengo import dialogos
+    esq = (ia and dialogos.esquete_groq(contexto)) or dialogos.escolher_banco(data, usados)
+    batidas = []
+    for f in esq['falas']:
+        b = batida(f['fala'], legenda=f.get('legenda'), tipo='pergunta' if f is esq['falas'][-1] else 'reacao')
+        b.update(personagem=f['quem'], humor=f['humor'], gesto=f.get('gesto', 'explicar'),
+                 plano=f.get('plano', 'dupla'))
+        for k in ('reacao', 'carimbo', 'efeito'):
+            if f.get(k):
+                b[k] = f[k]
+        batidas.append(b)
+    # regra do canal: todo vídeo termina com CTA (seguir ou mandar pro amigo)
+    fim = batida(dialogos.cta(data), tipo='cta')
+    fim.update(personagem='rubro', humor='euforico', gesto='apontar', reacao='revirar', plano='dupla')
+    batidas.append(fim)
+    return {'formato': 'primo_rival', 'humor': 'debochado', 'capa': esq['capa'],
+            'episodio': 'primo:' + esq['chave'], 'motor': 'dupla', 'batidas': batidas}
 
 
 def nacao_escala():
@@ -118,7 +134,7 @@ def eu_avisei(jogo, registros):
 def dirigir(pauta):
     p = deepcopy(pauta)
     curto = p['formato'] in {'primo_rival','o_sofa_nao_aguenta','eu_avisei'}
-    p['duracao_alvo'] = [12,20] if curto else [35,50] if p['formato'] == 'voce_sabia' else [20,35]
+    p['duracao_alvo'] = [25,42] if p['formato'] == 'primo_rival' else [12,20] if curto else [35,50] if p['formato'] == 'voce_sabia' else [20,35]
     p['versao_editorial'] = 3
     for i,b in enumerate(p['batidas']):
         b.setdefault('personagem','rubro')
@@ -127,7 +143,7 @@ def dirigir(pauta):
         b.setdefault('gesto','perguntar' if b['tipo'] == 'pergunta' else 'explicar')
     # A pergunta exibida precisa ser a mesma que está sendo falada.
     for b in p['batidas']:
-        if b['tipo'] == 'pergunta': b['dados'].setdefault('cartao', 'SUA VEZ, NAÇÃO')
+        if b['tipo'] == 'pergunta' and p.get('motor') != 'dupla': b['dados'].setdefault('cartao', 'SUA VEZ, NAÇÃO')
     return p
 
 
