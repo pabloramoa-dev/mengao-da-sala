@@ -44,3 +44,20 @@ A chave `Mengao_Chave_Relatorios.pem` foi entregue separadamente ao proprietári
 openssl cms -decrypt -binary -inform DER -in data/metricas_privadas.cms -inkey /caminho/Mengao_Chave_Relatorios.pem -out /tmp/mengao-relatorios.tar.gz
 tar -xzf /tmp/mengao-relatorios.tar.gz -C /diretorio/privado
 ```
+
+
+## Correção de publicação — 28/09/2026
+
+O publicador distingue o módulo `estado` de `status_container`. Os testes agora
+cobrem Reel, Story, processamento, timeout, destino incorreto e duplicatas.
+
+O diário tem tentativas às 11h07, 13h07, 15h07, 17h07 e 19h07 (Brasília).
+São tentativas, não cinco publicações: `data/diario.json` encerra o dia após o
+Reel confirmado. O agendador do GitHub pode atrasar; não há garantia de minuto exato.
+O rodízio é registrado antes do Story, para uma falha de Story não duplicar o Reel.
+Falhas de Story ficam visíveis no resultado do job. Os artefatos incluem seus metadados.
+
+`Recuperar publicacoes pendentes` usa os MP4s existentes. Só roda manualmente ou
+quando o manifesto `config/recuperacao.json` muda em main. Confere a conta, aplica
+a mesma deduplicação e preserva recibos mesmo em falha. A recuperação inicial
+publica os Reels de 26 e 27/09 e um Story do mais recente. Não executa em outros perfis.

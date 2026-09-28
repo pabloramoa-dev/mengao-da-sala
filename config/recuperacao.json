@@ -1,0 +1,7 @@
+{
+  "motivo": "Recuperar os dois Reels que falharam por UnboundLocalError em setembro de 2026",
+  "itens": [
+    {"run_id": 36260011026, "tag": "202609261743", "story": false},
+    {"run_id": 36339985443, "tag": "202609271816", "story": true}
+  ]
+}

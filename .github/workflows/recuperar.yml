@@ -1,0 +1,46 @@
+name: Recuperar publicacoes pendentes
+on:
+  push:
+    branches: [main]
+    paths: ['config/recuperacao.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: video-pos-jogo
+  cancel-in-progress: false
+jobs:
+  recuperar:
+    if: vars.PUBLICAR == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Testar publicador antes de publicar
+        run: python -m unittest discover -s tests -v
+      - name: Recuperar videos com verificacao de duplicatas
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+        run: python -m src.flamengo.recuperar
+      - name: Preservar recibos mesmo em falha
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/diario.json
+          if [ -f data/publicacoes.json ]; then git add data/publicacoes.json; fi
+          git diff --cached --quiet || git commit -m 'Registra recuperação dos Reels pendentes'
+          git pull --rebase -q && git push
+      - name: Resumo
+        if: always()
+        env:
+          RESULTADO: ${{ job.status }}
+        run: |
+          echo "- Recuperação: $RESULTADO. Consulte os recibos de cada publicação acima." >> "$GITHUB_STEP_SUMMARY"

@@ -7,7 +7,7 @@ name: Video diario
 
 on:
   schedule:
-    - cron: "7 14 * * *"        # 11h07 de Brasilia
+    - cron: "7 14,16,18,20,22 * * *" # 11h07 BRT + retentativas; o registro impede repetir
   workflow_dispatch:
     inputs:
       formato:
@@ -52,7 +52,11 @@ jobs:
           python -m src.flamengo.diario --out data/pauta_diario.json $ARGS
           cod=$?
           set -e
-          if [ $cod -eq 3 ]; then echo "tem=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ $cod -eq 3 ]; then
+            echo "tem=false" >> "$GITHUB_OUTPUT"
+            echo "- Sem novo Reel: publicação do dia já registrada ou pauta indisponível." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           [ $cod -ne 0 ] && exit $cod
           echo "tem=true" >> "$GITHUB_OUTPUT"
           echo "tag=$(date -u +%Y%m%d%H%M)" >> "$GITHUB_OUTPUT"
@@ -94,11 +98,12 @@ jobs:
             saida/*.mp4
             saida/*.txt
             saida/*.json
-            saida/stories/*.png
+            saida/stories/*
             data/pauta_diario.json
           retention-days: 30
 
       - name: Publicar no Instagram
+        id: publicar
         if: steps.pauta.outputs.tem == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -118,17 +123,6 @@ jobs:
             gh release delete "$R" --cleanup-tag --yes || true
           done
 
-      - name: Publicar Story com convite para a resenha
-        if: steps.pauta.outputs.tem == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
-        continue-on-error: true
-        env:
-          IG_USER_ID: ${{ secrets.IG_USER_ID }}
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-          EXPECTED_IG_USERNAME: mengaodasala
-        run: |
-          URL="https://github.com/${{ github.repository }}/releases/download/diario-${{ steps.pauta.outputs.tag }}/story_do_dia.png"
-          python -m src.flamengo.publicar --story --video-url "$URL" --legenda saida/stories/story_do_dia.txt
-
       - name: Registrar formato do dia
         if: steps.pauta.outputs.tem == 'true' && (vars.PUBLICAR == 'true' && inputs.ensaio != true)
         run: |
@@ -139,6 +133,16 @@ jobs:
           git commit -m "Post diario: $(python -c "import json;print(json.load(open('data/pauta_diario.json'))['formato'])")" || echo "nada a commitar"
           git pull --rebase -q && git push
 
+      - name: Publicar Story com convite para a resenha
+        if: steps.pauta.outputs.tem == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+        run: |
+          URL="https://github.com/${{ github.repository }}/releases/download/diario-${{ steps.pauta.outputs.tag }}/story_do_dia.png"
+          python -m src.flamengo.publicar --story --video-url "$URL" --legenda saida/stories/story_do_dia.txt
+
       - name: Preservar recibo inclusive em falha
         if: always()
         run: |
@@ -148,4 +152,16 @@ jobs:
             git add data/publicacoes.json
             git diff --cached --quiet || git commit -m "Atualiza recibos de publicação"
             git pull --rebase -q && git push
+          fi
+
+      - name: Resumo da execução
+        if: always()
+        env:
+          RESULTADO: ${{ job.status }}
+          PUBLICACAO: ${{ steps.publicar.outcome }}
+          TEM_PAUTA: ${{ steps.pauta.outputs.tem }}
+        run: |
+          echo "- Resultado: $RESULTADO; pauta: $TEM_PAUTA; publicação: $PUBLICACAO." >> "$GITHUB_STEP_SUMMARY"
+          if [ "$RESULTADO" = "failure" ]; then
+            echo "::error::Falha no diário. Consulte a etapa vermelha; vídeo gerado não significa publicado."
           fi

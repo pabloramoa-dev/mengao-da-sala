@@ -82,12 +82,12 @@ def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None
     print(f"[ig] container {cont} criado, aguardando processamento")
     fim = time.time() + espera_max
     while time.time() < fim:
-        estado = _req("GET", f"{base}/{cont}", {"fields": "status_code",
+        status_container = _req("GET", f"{base}/{cont}", {"fields": "status_code",
                                                 "access_token": token}).get("status_code")
-        if estado == "FINISHED":
+        if status_container == "FINISHED":
             break
-        if estado in {"ERROR", "EXPIRED"}:
-            raise RuntimeError(f"container {estado}")
+        if status_container in {"ERROR", "EXPIRED"}:
+            raise RuntimeError(f"container {status_container}")
         time.sleep(10)
     else:
         raise TimeoutError("Instagram não terminou de processar o vídeo")
@@ -110,7 +110,7 @@ def main() -> int:
     if a.so_verificar:
         return 0
 
-    legenda = open(a.legenda, encoding="utf-8").read().strip()
+    legenda = Path(a.legenda).read_text(encoding="utf-8").strip()
     print(f"[ig] legenda {hashlib.sha256(legenda.encode()).hexdigest()[:12]} ({len(legenda)} caracteres)")
     meta_path = Path(a.legenda).with_suffix(".json")
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
