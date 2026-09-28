@@ -1,0 +1,28 @@
+name: Vozes da pauta de teste
+
+# Só roda na mão. Gera com o Edge TTS a voz de cada fala de tools/pauta_teste.json
+# e publica os MP3 numa release "vozes-pauta-N" (nada vai pro Instagram).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  vozes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -q edge-tts
+      - run: python tools/vozes_cache.py tools/pauta_teste.json saida_cache
+      - name: Publicar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "vozes-pauta-${{ github.run_number }}" saida_cache/*.mp3 \
+            --title "Vozes da pauta ${{ github.run_number }}" --notes "Falas da pauta de teste (Edge TTS)" --prerelease
