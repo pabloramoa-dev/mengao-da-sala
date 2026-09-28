@@ -1,0 +1,44 @@
+name: Teste de vozes
+
+# Só roda na mão. Gera o mesmo diálogo em vários motores de voz e publica os
+# MP3 numa release "teste-vozes-N" (nada vai pro Instagram).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  vozes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg espeak-ng
+          python -m pip install -q -U pip
+          python -m pip install -q kokoro-onnx soundfile numpy edge-tts piper-tts
+      - name: Kokoro, Edge e Piper
+        run: python tools/teste_vozes.py kokoro edge piper
+      - name: Chatterbox (CPU, demora)
+        continue-on-error: true
+        run: |
+          python -m pip install -q chatterbox-tts
+          python tools/teste_vozes.py chatterbox
+      - name: Publicar os MP3
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la saida_vozes
+          gh release create "teste-vozes-${{ github.run_number }}" saida_vozes/*.mp3 \
+            --title "Teste de vozes ${{ github.run_number }}" --notes "Mesmo dialogo em cada motor de voz" --prerelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: teste-vozes
+          path: saida_vozes/*.mp3
