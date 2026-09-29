@@ -1,8 +1,11 @@
 {
-  "data": "2026-09-28",
-  "formato": "primo_rival",
+  "data": "2026-09-29",
+  "formato": "voce_sabia",
   "episodios": [
     "primo:analista",
     "primo:calma"
+  ],
+  "fatos_usados": [
+    "lima2019"
   ]
 }
