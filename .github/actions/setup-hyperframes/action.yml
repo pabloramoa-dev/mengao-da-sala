@@ -1,0 +1,21 @@
+name: Preparar HyperFrames
+description: Instala o compositor e o navegador nas versões validadas.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: npm
+        cache-dependency-path: video/package-lock.json
+    - name: Instalar compositor fixado
+      shell: bash
+      run: npm ci --prefix video
+    - uses: actions/cache@v4
+      with:
+        path: ~/.cache/hyperframes/chrome
+        key: hyperframes-browser-${{ runner.os }}-${{ runner.arch }}-0.8.96
+    - name: Preparar navegador de render
+      shell: bash
+      working-directory: video
+      run: npx --no-install hyperframes browser ensure

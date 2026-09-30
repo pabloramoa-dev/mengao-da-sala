@@ -30,7 +30,7 @@ concurrency:
 jobs:
   video:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -78,9 +78,21 @@ jobs:
         if: steps.novo.outputs.novo == 'true'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng
+          sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng fonts-dejavu-core
           python -m pip install -q -U pip setuptools wheel
           python -m pip install -q -r requirements.txt
+
+      - name: Preparar HyperFrames
+        if: steps.novo.outputs.novo == 'true'
+        uses: ./.github/actions/setup-hyperframes
+
+      - name: Cache das vozes da dupla
+        if: steps.novo.outputs.novo == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/flamengo_vozes
+          key: flamengo-edge-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: flamengo-edge-${{ runner.os }}-
 
       - name: Cache do modelo de voz
         if: steps.novo.outputs.novo == 'true'
@@ -89,7 +101,7 @@ jobs:
           path: ~/.cache/flamengo_kokoro
           key: kokoro-v1
 
-      - name: Gerar video (voz do Bira)
+      - name: Gerar vídeo com HyperFrames e vozes da dupla
         if: steps.novo.outputs.novo == 'true'
         run: |
           mkdir -p saida

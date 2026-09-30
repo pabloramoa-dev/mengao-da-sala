@@ -1,7 +1,7 @@
 name: Validar evolucao editorial
 on:
   push:
-    paths: ['src/**', 'tests/**', 'config/**', '.github/workflows/**']
+    paths: ['src/**', 'tests/**', 'config/**', 'video/**', '.github/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -14,12 +14,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python -m unittest discover -s tests -v
+      - run: python -m pip install -q pytest numpy pillow
+      - run: python -m pytest -q
       - run: python -m compileall -q src
   render:
     needs: testes
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,8 +28,9 @@ jobs:
           python-version: '3.11'
       - run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng
+          sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng fonts-dejavu-core
           python -m pip install -q -r requirements.txt
+      - uses: ./.github/actions/setup-hyperframes
       - uses: actions/cache@v4
         with:
           path: ~/.cache/flamengo_kokoro
@@ -41,11 +43,14 @@ jobs:
           python -c "import json; from src.flamengo.quadros import sofa,dirigir; json.dump(dirigir(sofa('teste')),open('saida/solo.json','w'))"
           python -m src.flamengo.gerar --formato diario --pauta saida/solo.json --out saida/sofa_teste.mp4
           ffmpeg -y -ss 2 -i saida/sofa_teste.mp4 -frames:v 1 saida/frame_solo.png
+          python tools/teste_hyperframes.py --analise saida/analise_teste.json
+          python -m src.flamengo.gerar --formato pos_jogo_v2 --analise saida/analise_teste.json --out saida/pos_jogo_teste.mp4
+          python tools/teste_hyperframes.py --conferir saida/primo_rival_teste.json saida/sofa_teste.json saida/pos_jogo_teste.json
           python -m src.flamengo.stories --pauta saida/pauta.json
           ffmpeg -y -ss 2 -i saida/primo_rival_teste.mp4 -frames:v 1 saida/frame_teste.png
       - uses: actions/upload-artifact@v4
         with:
-          name: amostra-editorial-v3
+          name: amostra-hyperframes-producao
           path: |
             saida/*.mp4
             saida/*.json
