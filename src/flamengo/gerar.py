@@ -20,7 +20,6 @@ from pathlib import Path
 
 from src.flamengo import roteiro, quadros
 from src.flamengo.render import voz
-from src.flamengo.render.cena import PRE_ROLL
 
 RAIZ = Path(__file__).resolve().parents[2]
 
@@ -45,8 +44,11 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
     pauta = quadros.dirigir(pauta)
     destino = destino.resolve()
     trab = destino.parent / f"trab_{destino.stem}"
+    if os.environ.get("FLAMENGO_MOTOR", "hyperframes") == "hyperframes":
+        return gerar_hyperframes(pauta, destino, trab, snapshot)
     if pauta.get("motor") == "dupla" and os.environ.get("FLAMENGO_MOTOR") != "v1":
         return gerar_dupla(pauta, destino, trab, snapshot)
+    from src.flamengo.render.cena import PRE_ROLL
     audio = voz.narrar(pauta["batidas"], trab, RAIZ)
 
     conteudo = dict(pauta, segs=audio["segs"])
@@ -75,6 +77,22 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
         **pauta, "duracao_segundos": audio["segs"][-1]["fim"] + PRE_ROLL + 1.2,
         "voz": voz.PRESET_BIRA, "filtro": voz.FILTRO_BIRA,
         "falas": [b["fala"] for b in pauta["batidas"]], "publicado": False,
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+    return destino
+
+
+def gerar_hyperframes(pauta: dict, destino: Path, trab: Path, snapshot: dict) -> Path:
+    """Motor padrão de todos os Reels: dupla original e compositor aprovado."""
+    from src.flamengo.render import voz_dupla, hyperframes
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    audio = voz_dupla.narrar(pauta["batidas"], trab, RAIZ)
+    conteudo = dict(pauta, segs=audio["segs"])
+    (trab / "conteudo.json").write_text(json.dumps(conteudo, ensure_ascii=False), encoding="utf-8")
+    meta = hyperframes.renderizar(conteudo, audio, destino, trab, RAIZ)
+    destino.with_suffix(".txt").write_text(pauta.get("legenda_post") or legenda_post(pauta, snapshot), encoding="utf-8")
+    destino.with_suffix(".json").write_text(json.dumps({
+        **pauta, **meta, "motor_voz": audio["motor_voz"], "camada_personagens": "dupla-manim",
+        "vozes": voz_dupla.VOZES, "falas": [b["fala"] for b in pauta["batidas"]], "publicado": False,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     return destino
 
