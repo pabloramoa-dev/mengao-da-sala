@@ -65,15 +65,24 @@ def quantidade(n, singular, plural, feminino=False):
 
 def pre_jogo(j, feitos, rivais, agora, tabela=None):
     data = diario._utc(j['utc']).astimezone(BRT)
+    meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
+    dia = roteiro.por_extenso(data.day) + ' de ' + meses[data.month-1]
+    h = data.hour % 12 or 12
+    horario = 'à meia-noite' if data.hour == 0 else 'ao meio-dia' if data.hour == 12 else 'à uma' if h == 1 else 'às ' + roteiro.por_extenso(h)
+    horario += ' e meia' if data.minute == 30 else (' e ' + roteiro.por_extenso(data.minute) if data.minute else '')
+    if data.hour not in {0,12}: horario += ' da noite' if data.hour >= 18 else ' da tarde' if data.hour >= 12 else ' da manhã'
+    artigo = 'pelo' if j['competicao'].startswith(('Brasileirão','Campeonato','Mundial','Torneio','Derby')) else 'pela'
     b = [roteiro.batida('Primo, antes do palpite: vamos olhar o que esse jogo pede!', tipo='abre'),
-         roteiro.batida(f"Flamengo enfrenta {j['adversario']} pela {j['competicao']}, dia {data:%d/%m}, {diario._hora_fala(j)}.",
+         roteiro.batida(f"Flamengo enfrenta {j['adversario']} {artigo} {j['competicao']}, dia {dia}, {horario}.",
                         cartao=f"{j['adversario']} · {data:%d/%m %H:%M} BRT")]
     fase = (j.get('fase') or '').lower().replace('-', '').replace(' ', '')
     rotulo = next((nome for termo,nome in [('quarterfinal','quartas de final'),('semifinal','semifinal'),('roundof16','oitavas de final')] if termo in fase), None)
     if rotulo:
         b.append(roteiro.batida('A fase informada é '+rotulo+'. Cada detalhe pesa mais no mata-mata.', cartao=rotulo.upper()))
     if j.get('estadio'):
-        b.append(roteiro.batida('O jogo será no estádio '+j['estadio']+'.', cartao=j['estadio']))
+        estadio = j['estadio']
+        local = ('na ' if estadio.lower().startswith('arena') else 'no ') + ('' if estadio.lower().startswith(('estádio','estadio','arena')) else 'estádio ') + estadio
+        b.append(roteiro.batida('O jogo será '+local+'.', cartao=estadio))
     for nome, jogos in [('Flamengo', feitos), (j['adversario'], rivais)]:
         f = forma(jogos, agora)
         if f['jogos']:
