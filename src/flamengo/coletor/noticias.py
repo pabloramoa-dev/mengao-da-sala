@@ -24,7 +24,8 @@ UA = "Mozilla/5.0 (compatible; MengaoDaSalaBot/1.0; +https://github.com/pabloram
 RUMOR = ("negocia", "interesse", "sonda", "estaria", "pode ", "avalia", "alvo", "especula", "proposta", "quer ")
 TEMAS = {
     "mercado": ("contrat", "negocia", "proposta", "reforço", "reforco", "venda", "renova", "empréstimo", "emprestimo"),
-    "dm": ("lesão", "lesao", "cirurgia", "desfalque", "departamento médico", "dm ", "machuc", "volta aos treinos"),
+    "dm": ("lesão", "lesao", "cirurgia", "desfalque", "departamento médico", "médico", "medico", "recupera",
+           "dm ", "machuc", "volta aos treinos"),
     "jogo": (" x ", "escalação", "escalacao", "vence", "empata", "perde", "gol", "rodada", "classifica"),
     "tecnico": ("técnico", "tecnico", "treinador", "jardim", "comissão"),
     "bastidor": ("diretoria", "presidente", "bap", "boto", "sócio", "socio", "receita", "patrocín", "stf", "bets"),
@@ -128,7 +129,9 @@ def fundir_mesmo_assunto(pautas: list[dict]) -> list[dict]:
     finais = []
     for p in sorted(pautas, key=lambda x: x["nota"], reverse=True):
         nomes = _nomes(p["titulo"])
-        alvo = next((f for f in finais if f["tema"] == p["tema"] and nomes & f["_nomes"]), None)
+        # tema "geral" é amplo: só funde com dois nomes em comum (um "Santos" sozinho não basta)
+        minimo = 2 if p["tema"] == "geral" else 1
+        alvo = next((f for f in finais if f["tema"] == p["tema"] and len(nomes & f["_nomes"]) >= minimo), None)
         if alvo:
             alvo["relacionadas"].append(dict(titulo=p["titulo"], rumor=p["rumor"]))
             alvo["veiculos"] = sorted(set(alvo["veiculos"]) | set(p["veiculos"]))

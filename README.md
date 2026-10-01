@@ -1,4 +1,37 @@
-# Mengão da Sala — HyperFrames
+# Mengão da Sala — v3 (personagens animados + Plantão da Sala)
+
+## O que mudou na v3
+
+- **Motor padrão `v3`** (`src/flamengo/render/hyperframes_v3.py`): Juninho e Primo
+  em rig SVG por camadas (`render/personagens_v3.py`), animados direto no
+  HyperFrames/GSAP, sem camada Manim. Oito expressões para cada um (neutra,
+  eufórico, indignado, debochado, rindo, chocado, sofrendo, tenso), piscar a
+  cada 2–5 s, respiração, quem escuta reage, boca em 5 formatos pelo áudio,
+  câmera aproximando nas falas fortes e tremida de tela no gol. Sala à noite
+  com a TV em primeiro plano mostrando placar, tabela ou manchete.
+- **Recuperação**: `FLAMENGO_MOTOR=dupla` volta ao motor aprovado em 30/09
+  (Manim + HyperFrames). `manim-dupla` e `v1` continuam para casos extremos.
+- **Plantão da Sala** (`src/flamengo/plantao.py`): lê `data/noticias_hoje.json`
+  (`src/flamengo/coletor/noticias.py`), pega as 3 pautas de maior nota das
+  últimas 24 h e monta um Reel de 15–25 s. A Groq reescreve com palavras
+  próprias a partir do título; fala parecida demais com o título, número ou
+  nome fora do título é recusado; rumor é falado como rumor; os veículos vão
+  na legenda.
+- **Rodízio novo** (`diario.py`): em dia sem jogo o padrão é o Plantão. Humor
+  (sofá, primo, você sabia) entra no máximo 2 vezes por semana (quarta e
+  sábado). Sem notícias válidas ou sem Groq, cai no rodízio antigo sem falhar.
+  Pré-jogo, pós-jogo e tabela seguem na cobertura, como antes.
+- **CTA final em todo vídeo**: seguir o @mengaodasala para não perder nenhuma
+  notícia do Mengão, ou mandar para um flamenguista amigo.
+- `video_diario.yml` coleta as notícias antes da pauta; `validar.yml` renderiza
+  sem publicar o Plantão (notícias fictícias), o primo rival e o pós-jogo fictício.
+
+Travas mantidas: deduplicação por recibo, pós-jogo só com partida FINISHED,
+nada de fato ou fala inventada de pessoa real, `PUBLICAR` intocado.
+
+---
+
+# Motor anterior — HyperFrames (30/09/2026)
 
 Motor padrão dos Reels do `@mengaodasala`: Juninho e Primo Secador com os rigs
 originais do Manim, vozes distintas e composição HyperFrames/GSAP. Integração

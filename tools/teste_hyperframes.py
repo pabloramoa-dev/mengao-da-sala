@@ -1,5 +1,6 @@
 """Fixture explicitamente fictícia e conferência dos artefatos de CI (sem publicar)."""
 import argparse
+import os
 import json
 from pathlib import Path
 
@@ -23,7 +24,10 @@ def main():
     for caminho in a.conferir or []:
         m = json.loads(caminho.read_text())
         assert m["motor"] == "hyperframes", caminho
-        assert m["versao_visual"] == "hyperframes-v1", caminho
+        esperado = "hyperframes-v3" if os.environ.get("FLAMENGO_MOTOR", "v3") == "v3" else "hyperframes-v1"
+        assert m["versao_visual"] == esperado, (caminho, m["versao_visual"])
+        if esperado == "hyperframes-v3":
+            assert m.get("camada_personagens") == "rig-svg-v3", caminho
         assert m["resolucao"] == [1080, 1920] and m["fps"] == 30, caminho
         assert caminho.with_suffix(".mp4").stat().st_size > 1000, caminho
         assert caminho.with_suffix(".txt").stat().st_size > 0, caminho

@@ -6,6 +6,8 @@ import hashlib
 import json
 from src.flamengo.roteiro import batida
 
+CTA_FINAL = 'Segue o Mengão da Sala pra não perder nenhuma notícia do Mengão, ou manda pra um flamenguista amigo!'
+
 ENQUETE = {'id': 'estilo', 'pergunta': 'Para o próximo jogo: atacar desde o início ou controlar primeiro?',
            'opcoes': {'A': 'atacar desde o início', 'B': 'controlar primeiro'}}
 HUMOR = [
@@ -124,12 +126,18 @@ def dirigir(pauta):
     p['duracao_alvo'] = [25,42] if p['formato'] == 'primo_rival' else [12,20] if curto else [35,50] if p['formato'] == 'voce_sabia' else [20,35]
     if p['formato'] in {'pre_jogo', 'pos_jogo_v2'}: p['duracao_alvo'] = [35, 65]
     if p['formato'] == 'tabela_semanal': p['duracao_alvo'] = [45, 75]
+    if p['formato'] == 'plantao_da_sala': p['duracao_alvo'] = [15, 25]
     p['versao_editorial'] = 4
     for i,b in enumerate(p['batidas']):
         b.setdefault('personagem','rubro')
         b.setdefault('humor','tenso' if b['tipo'] == 'pergunta' else p['humor'] if i%2 == 0 else 'debochado')
         b.setdefault('plano','close' if i == 0 or b['tipo'] == 'pergunta' else 'aberto')
         b.setdefault('gesto','perguntar' if b['tipo'] == 'pergunta' else 'explicar')
+    # Regra do canal: todo vídeo termina com o CTA (seguir ou mandar para um amigo).
+    if p['batidas'] and p['batidas'][-1].get('tipo') != 'cta':
+        fim = batida(CTA_FINAL, tipo='cta')
+        fim.update(personagem='rubro', humor='euforico', gesto='apontar', reacao='revirar', plano='dupla')
+        p['batidas'].append(fim)
     # A pergunta exibida precisa ser a mesma que está sendo falada.
     for b in p['batidas']:
         if b['tipo'] == 'pergunta' and p.get('motor') != 'dupla': b['dados'].setdefault('cartao', 'SUA VEZ, NAÇÃO')

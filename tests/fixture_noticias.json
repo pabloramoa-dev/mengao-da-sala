@@ -1,0 +1,20 @@
+{
+  "_nota": "DADOS FICTÍCIOS para testar o Plantão da Sala; não publicar",
+  "coletado_em": "2026-10-01T10:40:00+00:00",
+  "janela_horas": 24,
+  "pautas": [
+    {"titulo": "Flamengo encerra preparação para o jogo de sábado com treino fechado", "tema": "jogo", "rumor": false,
+     "veiculos": ["Veículo Exemplo A", "Veículo Exemplo B"], "links": ["https://exemplo.invalid/a"], "nota": 40},
+    {"titulo": "Flamengo pode receber proposta por meia da base, dizem bastidores", "tema": "mercado", "rumor": true,
+     "veiculos": ["Veículo Exemplo C"], "links": ["https://exemplo.invalid/c"], "nota": 30},
+    {"titulo": "Departamento médico do Flamengo libera zagueiro para voltar aos treinos", "tema": "dm", "rumor": false,
+     "veiculos": ["Veículo Exemplo A", "Veículo Exemplo D"], "links": ["https://exemplo.invalid/d"], "nota": 25},
+    {"titulo": "Torcida esgota ingressos para o próximo jogo no Maracanã", "tema": "torcida", "rumor": false,
+     "veiculos": ["Veículo Exemplo E"], "links": ["https://exemplo.invalid/e"], "nota": 10}
+  ],
+  "textos_ficticios": [
+    {"id": 0, "fala": "O Mengão fechou os portões e caprichou no último treino antes de sábado!", "tv": "TREINO FECHADO NO NINHO", "zoeira": "Treino fechado pra ninguém ver o vexame, né?"},
+    {"id": 1, "fala": "Corre o rumor de que uma proposta pode chegar por um meia da base.", "tv": "RUMOR: PROPOSTA NA BASE", "zoeira": ""},
+    {"id": 2, "fala": "Boa notícia do departamento médico: o zagueiro está liberado pra voltar a treinar.", "tv": "ZAGUEIRO LIBERADO", "humor": "euforico", "zoeira": "Liberado? Então já pode começar a sofrer comigo."}
+  ]
+}
