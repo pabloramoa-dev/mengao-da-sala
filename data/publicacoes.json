@@ -132,6 +132,20 @@
       "versao_editorial": 4,
       "container_id": "18121118530786157",
       "media_id": "18010801448987787"
+    },
+    {
+      "chave": "c344902b04d034cdb0a68c1d",
+      "formato": "story",
+      "status": "publicado",
+      "atualizado_em": "2026-10-01T19:49:47.901721+00:00",
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": null,
+      "duracao_segundos": null,
+      "versao_editorial": 3,
+      "container_id": "18121119157786157",
+      "media_id": "17889495600616221"
     }
   ]
 }
