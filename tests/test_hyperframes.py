@@ -69,15 +69,28 @@ class HyperFramesTests(unittest.TestCase):
     def test_motor_padrao_cobre_solo_e_dupla_sem_exigir_nova_fala(self):
         for b in [[roteiro.batida('Um torcedor no sofá.', tipo='reacao')], self.conteudo()['batidas']]:
             pauta = dict(formato='o_sofa_nao_aguenta', humor='euforico', capa='SALA', batidas=b)
-            with tempfile.TemporaryDirectory() as d, patch.dict('os.environ', {}, clear=True), patch.object(gerar, 'gerar_hyperframes', return_value=Path(d)/'video.mp4') as render:
+            with tempfile.TemporaryDirectory() as d, patch.dict('os.environ', {}, clear=True), patch.object(gerar, 'gerar_v3', return_value=Path(d)/'video.mp4') as render:
                 gerar.gerar({'pauta': pauta}, 'diario', Path(d)/'video.mp4')
                 dirigido = render.call_args.args[0]
-                self.assertEqual([x['fala'] for x in dirigido['batidas']], [x['fala'] for x in b])
+                # as falas da pauta ficam intactas; a direção só acrescenta o CTA final do canal
+                self.assertEqual([x['fala'] for x in dirigido['batidas']][:len(b)], [x['fala'] for x in b])
+                self.assertEqual(dirigido['batidas'][-1]['tipo'], 'cta')
+
+    def test_motor_anterior_continua_acessivel_para_recuperacao(self):
+        pauta = dict(formato='o_sofa_nao_aguenta', humor='euforico', capa='SALA',
+                     batidas=[roteiro.batida('Um torcedor no sofá.', tipo='reacao')])
+        with tempfile.TemporaryDirectory() as d, patch.dict('os.environ', {'FLAMENGO_MOTOR': 'dupla'}, clear=True), \
+                patch.object(gerar, 'gerar_hyperframes', return_value=Path(d)/'video.mp4') as antigo, \
+                patch.object(gerar, 'gerar_v3') as novo:
+            gerar.gerar({'pauta': pauta}, 'diario', Path(d)/'video.mp4')
+            antigo.assert_called_once()
+            novo.assert_not_called()
 
     def test_placar_nao_confirmado_continua_bloqueado_antes_do_render(self):
         analise = {'jogo': {'status': 'IN_PROGRESS', 'resultado': None}}
-        with patch.object(gerar, 'gerar_hyperframes') as render:
+        with patch.object(gerar, 'gerar_hyperframes') as render, patch.object(gerar, 'gerar_v3') as render_v3:
             self.assertIsNone(gerar.gerar({'analise': analise}, 'pos_jogo_v2', Path('x.mp4')))
+            render_v3.assert_not_called()
             render.assert_not_called()
 
     def test_video_sem_audio_ou_com_duracao_errada_nao_passa_para_publicacao(self):
