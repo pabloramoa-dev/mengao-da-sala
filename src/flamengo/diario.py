@@ -11,6 +11,10 @@ Formatos (regra-mãe do editorial: nunca o mesmo dois dias seguidos):
     contagem        - quantos dias até o Mengão voltar a campo (Data FIFA etc.)
     zoeira_rival    - rival (Flu, Vasco, Bota, Palmeiras) perdeu nos últimos 4 dias
     voce_sabia      - fato de história do banco FATOS (conferido), sem repetir
+    plantao_da_sala - (v3) as 3 notícias do dia, reescritas; padrão em dia sem jogo
+
+Rodízio v3: em dia sem jogo sai o Plantão da Sala; humor no máximo 2x/semana.
+Sem data/noticias_hoje.json (ou sem texto válido), cai no rodízio antigo.
 
 Saída com código 3 = "hoje não tem post diário" (dia seguinte a jogo, pós-jogo
 já cobre; ou post do dia já feito). O workflow entende como pular.
@@ -29,7 +33,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from src.flamengo.roteiro import batida, ordinal, por_extenso
-from src.flamengo import quadros
+from src.flamengo import quadros, plantao
 
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer"
 STANDINGS = "https://site.api.espn.com/apis/v2/sports/soccer/bra.1/standings"
@@ -43,6 +47,11 @@ LIGAS = {"bra.1": "Brasileirão", "conmebol.libertadores": "Libertadores",
 RIVAIS = {"3445": "Fluminense", "3454": "Vasco", "6086": "Botafogo", "2029": "Palmeiras"}
 BRT = timezone(timedelta(hours=-3))
 ESTADO = Path("data/diario.json")
+# Rodízio v3: o Plantão da Sala é o padrão em dia sem jogo; humor (sofá, primo,
+# você sabia) entra no máximo 2 vezes por semana, nos dias de DIAS_HUMOR.
+HUMOR_FMT = {"o_sofa_nao_aguenta", "primo_rival", "voce_sabia"}
+HUMOR_MAX_SEMANA = 2
+DIAS_HUMOR = {2, 5}          # quarta e sábado (0 = segunda)
 ORDEM = ["o_sofa_nao_aguenta", "conta_do_titulo", "primo_rival", "voce_sabia", "a_nacao_escala", "zoeira_rival", "contagem", "eu_avisei", "a_nacao_respondeu"]
 HASHTAGS = "#Flamengo #Mengão #NaçãoRubroNegra #Brasileirão #CRF"
 NOMES = {"Red Bull Bragantino": "Bragantino", "Estudiantes de La Plata": "Estudiantes",
@@ -322,9 +331,11 @@ def voce_sabia(f: dict) -> dict:
 
 # ----------------------------------------------------------------- escolha
 def legenda_post(pauta: dict) -> str:
+    if pauta.get("formato") == "plantao_da_sala":
+        return plantao.legenda(pauta, HASHTAGS)
     capa = pauta["capa"].replace("\n", " · ")
     linhas = [f"{capa} 🔴⚫", ""]
-    linhas += [b["legenda"] for b in pauta["batidas"] if b["tipo"] not in ("pergunta", "abre")]
+    linhas += [b["legenda"] for b in pauta["batidas"] if b["tipo"] not in ("pergunta", "abre", "cta")]
     perg = next((b["legenda"] for b in pauta["batidas"] if b["tipo"] == "pergunta"), None)
     if perg:
         linhas += ["", perg + " 👇"]
@@ -352,6 +363,26 @@ def _contexto_esquete(prox: dict | None) -> dict:
     return ctx
 
 
+def humor_na_semana(estado: dict, hoje) -> int:
+    """Quantos posts de humor nos 6 dias anteriores (janela móvel de 7 dias com hoje)."""
+    n = 0
+    for h in estado.get("historico", []):
+        try:
+            d = datetime.fromisoformat(h["data"]).date()
+        except Exception:
+            continue
+        if 0 < (hoje - d).days <= 6 and h.get("formato") in HUMOR_FMT:
+            n += 1
+    return n
+
+
+def vez_do_dia(estado: dict, hoje) -> str:
+    """'humor' só nos dias de humor e abaixo do limite semanal; senão 'plantao'."""
+    if hoje.weekday() in DIAS_HUMOR and humor_na_semana(estado, hoje) < HUMOR_MAX_SEMANA:
+        return "humor"
+    return "plantao"
+
+
 def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict | None, str]:
     feitos, futuros = agenda(FLA)
     hoje = agora.astimezone(BRT).date()
@@ -365,6 +396,19 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
 
     if prox and _utc(prox["utc"]).astimezone(BRT).date() == hoje and so == "hoje_tem_mengao":
         return hoje_tem_mengao(prox, tabela()), "dia de jogo"
+
+    dia_de_jogo = bool(prox and _utc(prox["utc"]).astimezone(BRT).date() == hoje)
+    if so == "plantao_da_sala":
+        p = plantao.gerar(hoje)
+        if p is None:
+            raise SystemExit("plantao_da_sala indisponível hoje (sem notícias válidas ou sem Groq)")
+        return p, "forçado"
+    vez = None if (so or dia_de_jogo) else vez_do_dia(estado, hoje)
+    if vez == "plantao":
+        p = plantao.gerar(hoje)
+        if p is not None:
+            return p, "plantão da sala (padrão em dia sem jogo)"
+        print("[diario] plantão indisponível: segue o rodízio antigo")
 
     usados = estado.get("episodios", [])
     eps_usados = list(usados)
@@ -414,8 +458,13 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
 
     anterior = estado.get("formato")
     i0 = (ORDEM.index(anterior) + 1) if anterior in ORDEM else 0
-    for k in range(len(ORDEM)):
-        f = ORDEM[(i0 + k) % len(ORDEM)]
+    sequencia = [ORDEM[(i0 + k) % len(ORDEM)] for k in range(len(ORDEM))]
+    if vez == "humor":
+        sequencia = [f for f in sequencia if f in HUMOR_FMT] + [f for f in sequencia if f not in HUMOR_FMT]
+    elif humor_na_semana(estado, hoje) >= HUMOR_MAX_SEMANA:
+        # limite semanal de humor: só entra se não houver nenhuma alternativa
+        sequencia = [f for f in sequencia if f not in HUMOR_FMT] + [f for f in sequencia if f in HUMOR_FMT]
+    for f in sequencia:
         if f in candidatos and f != anterior:
             return com_ia(f), f"rodízio (ontem: {anterior})"
     return None, "nenhum formato disponível"
@@ -424,7 +473,7 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
-    ap.add_argument("--formato", choices=["hoje_tem_mengao", *ORDEM])
+    ap.add_argument("--formato", choices=["hoje_tem_mengao", "plantao_da_sala", *ORDEM])
     ap.add_argument("--forcar", action="store_true", help="ignora 'post de hoje já feito'")
     a = ap.parse_args()
 
@@ -455,6 +504,7 @@ def registrar(pauta_path: str) -> None:
     estado = json.loads(ESTADO.read_text(encoding="utf-8")) if ESTADO.exists() else {}
     estado["data"] = datetime.now(timezone.utc).astimezone(BRT).date().isoformat()
     estado["formato"] = pauta["formato"]
+    estado["historico"] = (estado.get("historico", []) + [{"data": estado["data"], "formato": pauta["formato"]}])[-21:]
     if pauta.get("episodio"):
         estado["episodios"] = (estado.get("episodios", []) + [pauta["episodio"]])[-30:]
     if pauta.get("responde_media_id"):
