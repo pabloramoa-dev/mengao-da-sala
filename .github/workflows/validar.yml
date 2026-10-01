@@ -35,9 +35,12 @@ jobs:
         with:
           path: ~/.cache/flamengo_kokoro
           key: kokoro-v1
-      - name: Gerar amostra sem publicar
+      - name: Gerar amostras v3 sem publicar (plantao, primo rival e pos-jogo ficticio)
         run: |
           mkdir -p saida
+          python -m tools.teste_v3 --plantao saida/plantao_pauta.json
+          python -m src.flamengo.gerar --formato diario --pauta saida/plantao_pauta.json --out saida/plantao_da_sala_teste.mp4
+          ffmpeg -y -ss 6 -i saida/plantao_da_sala_teste.mp4 -frames:v 1 saida/frame_plantao.png
           python -c "import json; from src.flamengo.quadros import primo,dirigir; json.dump(dirigir(primo('teste')),open('saida/pauta.json','w'))"
           python -m src.flamengo.gerar --formato diario --pauta saida/pauta.json --out saida/primo_rival_teste.mp4
           python -c "import json; from src.flamengo.quadros import sofa,dirigir; json.dump(dirigir(sofa('teste')),open('saida/solo.json','w'))"
@@ -45,7 +48,8 @@ jobs:
           ffmpeg -y -ss 2 -i saida/sofa_teste.mp4 -frames:v 1 saida/frame_solo.png
           python tools/teste_hyperframes.py --analise saida/analise_teste.json
           python -m src.flamengo.gerar --formato pos_jogo_v2 --analise saida/analise_teste.json --out saida/pos_jogo_teste.mp4
-          python tools/teste_hyperframes.py --conferir saida/primo_rival_teste.json saida/sofa_teste.json saida/pos_jogo_teste.json
+          python tools/teste_hyperframes.py --conferir saida/plantao_da_sala_teste.json saida/primo_rival_teste.json saida/sofa_teste.json saida/pos_jogo_teste.json
+          ffmpeg -y -ss 2 -i saida/pos_jogo_teste.mp4 -frames:v 1 saida/frame_pos_jogo.png
           python -m tools.teste_cobertura
           python -m src.flamengo.gerar --formato diario --pauta saida/pre_pauta_teste.json --out saida/pre_jogo_teste.mp4
           python -m src.flamengo.gerar --formato diario --pauta saida/tabela_pauta_teste.json --out saida/tabela_semanal_teste.mp4

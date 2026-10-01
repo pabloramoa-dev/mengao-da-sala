@@ -1,6 +1,8 @@
 name: Video diario
 
-# Post do dia do @mengaodasala (dias em que o pos-jogo nao fala): conta do
+# Post do dia do @mengaodasala. v3: em dia sem jogo o padrao e o Plantao da Sala
+# (3 noticias das ultimas 24h, reescritas pela Groq); humor no maximo 2x/semana.
+# Sem noticias validas, volta ao rodizio antigo: conta do
 # titulo, contagem pro proximo jogo, zoeira com rival que perdeu, "Voce sabia?"
 # e "Hoje tem Mengao" em dia de jogo. Nunca o mesmo formato dois dias seguidos.
 # PUBLICA SOMENTE se a variavel do repositorio PUBLICAR=true. Sem ela: modo ensaio.
@@ -14,7 +16,7 @@ on:
         description: "Forcar um formato (vazio = rodizio automatico)"
         type: choice
         default: ""
-        options: ["", "conta_do_titulo", "contagem", "zoeira_rival", "voce_sabia", "hoje_tem_mengao", "o_sofa_nao_aguenta", "primo_rival", "a_nacao_escala", "a_nacao_respondeu", "eu_avisei"]
+        options: ["", "plantao_da_sala", "conta_do_titulo", "contagem", "zoeira_rival", "voce_sabia", "hoje_tem_mengao", "o_sofa_nao_aguenta", "primo_rival", "a_nacao_escala", "a_nacao_respondeu", "eu_avisei"]
       forcar:
         description: "Gerar mesmo se o post de hoje ja foi feito"
         type: boolean
@@ -41,6 +43,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Coletar noticias das ultimas 24h (Plantao da Sala)
+        continue-on-error: true      # sem noticias, o diario cai no rodizio antigo
+        run: python -m src.flamengo.coletor.noticias data/noticias_hoje.json
 
       - name: Pauta do dia
         id: pauta
