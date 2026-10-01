@@ -90,6 +90,34 @@
       "versao_editorial": 3,
       "container_id": "18120810772786157",
       "media_id": "18264268930307545"
+    },
+    {
+      "chave": "tabela:2026-W40",
+      "formato": "tabela_semanal",
+      "status": "publicado",
+      "atualizado_em": "2026-10-01T14:55:05.822910+00:00",
+      "jogo_id": null,
+      "enquete": null,
+      "semana": "2026-W40",
+      "coletado_em": "2026-10-01T14:48:08.923974+00:00",
+      "duracao_segundos": 48.388999999999996,
+      "versao_editorial": 4,
+      "container_id": "18121042516786157",
+      "media_id": "18129386932825441"
+    },
+    {
+      "chave": "d021bc28cd43c9738f8c97bf",
+      "formato": "story",
+      "status": "publicado",
+      "atualizado_em": "2026-10-01T14:55:15.329214+00:00",
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": null,
+      "duracao_segundos": null,
+      "versao_editorial": 3,
+      "container_id": "18121042876786157",
+      "media_id": "17882635206523154"
     }
   ]
 }
