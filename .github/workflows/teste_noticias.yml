@@ -1,0 +1,18 @@
+name: Teste de fontes de noticias
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "40 10 * * *"   # 7h40 BRT: deixa a pauta pronta antes do Reel das 11h07
+jobs:
+  noticias:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: Coletar noticias das ultimas 24h
+        run: python -m src.flamengo.coletor.noticias data/noticias_hoje.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: noticias-do-dia
+          path: data/noticias_hoje.json
