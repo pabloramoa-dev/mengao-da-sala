@@ -46,6 +46,11 @@ jobs:
           python tools/teste_hyperframes.py --analise saida/analise_teste.json
           python -m src.flamengo.gerar --formato pos_jogo_v2 --analise saida/analise_teste.json --out saida/pos_jogo_teste.mp4
           python tools/teste_hyperframes.py --conferir saida/primo_rival_teste.json saida/sofa_teste.json saida/pos_jogo_teste.json
+          python -m tools.teste_cobertura
+          python -m src.flamengo.gerar --formato diario --pauta saida/pre_pauta_teste.json --out saida/pre_jogo_teste.mp4
+          python -m src.flamengo.gerar --formato diario --pauta saida/tabela_pauta_teste.json --out saida/tabela_semanal_teste.mp4
+          python tools/teste_hyperframes.py --conferir saida/pre_jogo_teste.json saida/tabela_semanal_teste.json
+          ffmpeg -y -ss 14 -i saida/tabela_semanal_teste.mp4 -frames:v 1 -update 1 saida/frame_tabela.png
           python -m src.flamengo.stories --pauta saida/pauta.json
           ffmpeg -y -ss 2 -i saida/primo_rival_teste.mp4 -frames:v 1 saida/frame_teste.png
       - uses: actions/upload-artifact@v4

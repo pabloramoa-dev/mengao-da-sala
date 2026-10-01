@@ -203,7 +203,7 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
     placar_fala = f"{por_extenso(nos)} a {por_extenso(eles)}"
     placar_tela = f"{nos} x {eles}"
     onde = local_do_jogo(jogo)
-    lider = bool(tabela and tabela.get("posicao") == 1)
+    lider = bool(tabela and tabela.get("posicao") == 1 and jogo.get("liga", "bra.1") == "bra.1")
 
     chave = "vitoria_lider" if (res == "vitoria" and lider) else res
     grito = _escolha(GIRIAS[chave], semente)
@@ -218,12 +218,34 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         abre = f"{grito} {placar_fala} pro {adv}, {onde}."
         humor = "indignado"
 
+    if jogo.get("penaltis"):
+        abre = f"O jogo ficou {placar_fala.lower()} com o {adv}, {onde}. A decisão foi nos pênaltis."
     gancho = {"vitoria":"O sofá sobreviveu. Agora vamos falar dessa vitória!",
-              "empate":"Um ponto na tabela. E uma pergunta na sala: o que faltou?",
+              "empate":("Um ponto na tabela. E uma pergunta na sala: o que faltou?" if jogo.get("liga", "bra.1") == "bra.1" else "O jogo terminou empatado. O que faltou para o Mengão?"),
               "derrota":"O jogo acabou. O que você mudaria para o próximo?"}[res]
     batidas = [batida(gancho, tipo="abre"), batida(abre, legenda=abre.replace(placar_fala, placar_tela.replace(" x ", " a ")),
                       tipo="placar", placar=placar_tela)]
 
+    if jogo.get("penaltis"):
+        pn, pe = jogo["penaltis"]["nos"], jogo["penaltis"]["eles"]
+        batidas.append(batida(f"A disputa de pênaltis terminou {por_extenso(pn)} a {por_extenso(pe)}.",
+                              tipo="placar", placar=f"PÊNALTIS {pn} x {pe}"))
+    if jogo.get("competicao"):
+        batidas.append(batida("Esse foi o resultado pela " + jogo["competicao"] + "."))
+    estatisticas = jogo.get("estatisticas") or {}
+    stats = estatisticas.get(str(jogo.get("fla_id", "819"))) or {}
+    if str(stats.get("totalShots", "")).isdigit() and str(stats.get("shotsOnTarget", "")).isdigit():
+        total, alvo = int(stats["totalShots"]), int(stats["shotsOnTarget"])
+        batidas.append(batida(f"O Flamengo finalizou {por_extenso(total)} vezes: {por_extenso(alvo)} no alvo.",
+                              cartao=f"CHUTES {total} · NO ALVO {alvo}"))
+    if stats.get("possessionPct") is not None:
+        try:
+            posse = float(stats["possessionPct"])
+        except (ValueError, TypeError):
+            posse = None
+        if posse is not None and 0 <= posse <= 100:
+            batidas.append(batida(f"A posse do Mengão foi de {decimal_fala(posse)} por cento. Ter a bola não é tudo: precisa criar chances.",
+                                  cartao=f"POSSE {posse:g}%"))
     # melhor (vitória) ou pior (empate/derrota) — número do Cartola, sempre
     if cartola:
         alvo = cartola[0] if res == "vitoria" else cartola[-1]

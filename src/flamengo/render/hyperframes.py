@@ -140,7 +140,18 @@ def escrever_composicao(conteudo: dict, projeto: Path, font_path: Path) -> dict:
         z = dur if i == len(conteudo["batidas"]) - 1 else s["fim"]
         p = painel(conteudo, b, i)
         titulo, tamanho = titulo_formatado(p["titulo"], font_path)
-        if p["efeito"] == "medidor":
+        if b.get("tipo") == "classificacao":
+            linhas = (b.get("dados") or {}).get("linhas") or []
+            if not (1 <= len(linhas) <= 5):
+                raise ValueError("Painel de tabela exige de uma a cinco equipes")
+            rows = []
+            for row in linhas:
+                cls = "flamengo" if str(row["id"]) == "819" else ""
+                nome = _curto(row["time"], 27)
+                rows.append(f'<tr class="{cls}"><td>{int(row["rank"])}</td><td>{_escape(nome)}</td><td>{int(row["points"])}</td><td>{int(row["gamesPlayed"])}</td><td>{int(row["pointDifferential"]):+d}</td></tr>')
+            table = '<table class="standings"><thead><tr><th>POS</th><th>TIME</th><th>PTS</th><th>J</th><th>SG</th></tr></thead><tbody>' + ''.join(rows) + '</tbody></table>'
+            clips.append(f'<section id="panel{i}" class="clip panel" data-start="{a}" data-duration="{z-a}" data-track-index="2"><div id="card{i}" class="card standings-card"><div class="eyebrow">BRASILEIRÃO · CLASSIFICAÇÃO</div>{table}<p>Coleta: {_escape(conteudo.get("coletado_em", "")[:16])} UTC · PTS pontos · J jogos · SG saldo</p></div></section>')
+        elif p["efeito"] == "medidor":
             extra = f'<div class="meter"><div class="fill" id="fill{i}"></div></div><div class="meter-label">MEDIDOR DE SECAGEM · HUMOR</div>'
             anim.append(f'tl.fromTo("#fill{i}",{{scaleX:0}},{{scaleX:1,duration:1.2,ease:"power2.out"}},{a + .35});')
         elif p["efeito"] == "campo":
@@ -148,7 +159,8 @@ def escrever_composicao(conteudo: dict, projeto: Path, font_path: Path) -> dict:
             anim.append(f'tl.fromTo("#ball{i}",{{x:0,rotation:0}},{{x:600,rotation:720,duration:{min(2.5,z-a)},ease:"power2.inOut"}},{a});')
         else:
             extra = '<div class="versus"><span>JUNINHO</span><b>×</b><span>PRIMO SECADOR</span></div>'
-        clips.append(f'<section id="panel{i}" class="clip panel" data-start="{a}" data-duration="{z-a}" data-track-index="2"><div id="card{i}" class="card"><div class="eyebrow">{_escape(p["tag"])}</div><h1 style="--title-size:{tamanho}px">{_escape(titulo)}</h1><p>{_escape(p["subtitulo"])}</p>{extra}</div></section>')
+        if b.get("tipo") != "classificacao":
+            clips.append(f'<section id="panel{i}" class="clip panel" data-start="{a}" data-duration="{z-a}" data-track-index="2"><div id="card{i}" class="card"><div class="eyebrow">{_escape(p["tag"])}</div><h1 style="--title-size:{tamanho}px">{_escape(titulo)}</h1><p>{_escape(p["subtitulo"])}</p>{extra}</div></section>')
         # Capa legível no primeiro quadro; demais cartões entram suavemente.
         if i:
             anim.append(f'tl.fromTo("#card{i}",{{y:40,scale:.96,opacity:0}},{{y:0,scale:1,opacity:1,duration:.25,ease:"power3.out"}},{a});')

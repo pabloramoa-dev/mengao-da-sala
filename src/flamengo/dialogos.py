@@ -121,16 +121,79 @@ def _outro_campeonato(rival, competicao, periodo, nf, nr, fontes):
     esq.update(chave="titulos_" + rival.lower().replace(" ", "_") + "_" + competicao.lower().replace(" ", "_"),
                fato={"competicao": competicao, "periodo": periodo, "flamengo": nf, "rival": nr}, fontes=fontes)
     falas = esq["falas"]
-    falas[0]["fala"] = f"Primo, {periodo}, quem tinha mais títulos da {competicao}: Flamengo ou {rival}?"
+    falas[0]["fala"] = f"Primo, {periodo}, quem tinha mais títulos {'do' if competicao == 'Campeonato Carioca' else 'da'} {competicao}: Flamengo ou {rival}?"
     falas[2].update(fala=f"Errou! Flamengo: {numeros[nf]}. {rival}: {numeros[nr]}. Teu palpite não ganhou taça!", carimbo=f"FLA {nf} X {nr}")
     return esq
 
 
 BANCO += [_outro_campeonato(rival, "Copa do Brasil", "até 2024", 5, nr,
                            [FONTE_COPA, FONTE_COPA_RANK]) for rival, nr in COPA_2024.items()]
-BANCO += [_outro_campeonato(rival, "liga carioca", "até março de 2026", 40, nr,
+BANCO += [_outro_campeonato(rival, "Campeonato Carioca", "até março de 2026", 40, nr,
                            [FONTE_CARIOCA, FONTE_CARIOCA_RANK])
           for rival, nr in {"Vasco": 24, "Fluminense": 33, "Botafogo": 21}.items()]
+
+
+# Novos recortes oficiais. Brasileirão em pontos corridos evita somar 1987
+# sem explicar a controvérsia. Mundial distingue Intercontinental/FIFA.
+FONTE_BR = "https://www.cbf.com.br/futebol-brasileiro/noticias/campeonato-brasileiro/serie-b/flamengo-e-campeao-do-brasileirao-betano-2025"
+FONTE_MUNDIAL = "https://inside.fifa.com/en/news/liverpool-on-top-as-doha-welcomes-the-world"
+FONTE_SUPER = "https://www.cbf.com.br/futebol-brasileiro/noticias/competicoes-campeonato-brasileiro-serie-a/a/supercopa-rei-superbet-2026-sera-a-3-final-entre-flamengo-e-corinthians"
+FONTE_RECOPA = "https://www.sportingnews.com/br/futebol/noticias/campeoes-recopa-sul-americana-titulos-flamengo/3808d274433b6d6f14c55156"
+FONTE_MERCOSUL = "https://arquivodabola.com.br/campeonato/copa-mercosul.html"
+
+BR_CORRIDOS = {"Vasco": 0, "Fluminense": 2, "Botafogo": 1, "São Paulo": 3,
+               "Santos": 0, "Grêmio": 0, "Internacional": 0, "Cruzeiro": 3, "Atlético-MG": 1}
+SUPER_2025 = {r: int(r in {"Corinthians", "Grêmio", "Palmeiras", "São Paulo", "Atlético-MG"})
+              for r in LIBERTADORES if r != "Flamengo"}
+
+
+def _comparacao(rival, competicao, periodo, nf, nr, fontes, pergunta, resposta):
+    e = _outro_campeonato(rival, competicao, periodo, nf, nr, fontes)
+    e["falas"][0]["fala"] = pergunta
+    e["falas"][2]["fala"] = resposta
+    return e
+
+
+for rival, nr in BR_CORRIDOS.items():
+    BANCO.append(_comparacao(rival, "Brasileirão em pontos corridos", "2003 a 2025", 4, nr, [FONTE_BR, "https://www.cnnbrasil.com.br/esportes/brasileirao/brasileirao-por-pontos-corridos-veja-lista-de-todos-os-campeoes/"],
+        f"De 2003 a 2025, quem ganhou mais Brasileirões: Flamengo ou {rival}?",
+        f"Errou! Em pontos corridos: Flamengo, quatro. {rival}, {EXTENSO[nr]}. Olha o recorte, primo!"))
+for rival in ("Vasco", "Fluminense", "Botafogo", "Cruzeiro", "Atlético-MG"):
+    BANCO.append(_comparacao(rival, "Mundiais Intercontinental e FIFA", "até 2025", 1, 0, [FONTE_MUNDIAL],
+        f"Até 2025, entre Flamengo e {rival}, quem ganhou Mundial Intercontinental ou da FIFA?",
+        f"Errou! Flamengo, um: em oitenta e um. {rival}, nenhum nesses torneios. Taça não é palpite!"))
+for rival, nr in SUPER_2025.items():
+    BANCO.append(_comparacao(rival, "Supercopa do Brasil", "até 2025", 3, nr, [FONTE_SUPER],
+        f"Até 2025, quem ganhou mais Supercopas do Brasil: Flamengo ou {rival}?",
+        f"Errou! Flamengo, três. {rival}, {EXTENSO[nr]}. Você tá contando a vontade de ganhar!"))
+for rival in ("Vasco", "Botafogo"):
+    BANCO.append(_comparacao(rival, "Recopa Sul-Americana", "até 2025", 1, 0, [FONTE_RECOPA],
+        f"Até 2025, quem ganhou mais Recopas: Flamengo ou {rival}?",
+        f"Flamengo, um título. {rival}, nenhum. Errou com uma confiança que até me assustou!"))
+for rival in ("Fluminense", "Botafogo", "Corinthians", "São Paulo", "Santos", "Grêmio", "Internacional", "Cruzeiro", "Atlético-MG"):
+    BANCO.append(_comparacao(rival, "Copa Mercosul", "1998 a 2001", 1, 0, [FONTE_MERCOSUL],
+        f"Na Mercosul, de 1998 a 2001, quem ganhou mais: Flamengo ou {rival}?",
+        f"Errou! Flamengo, um. {rival}, nenhum. A competição acabou e teu palpite continua perdido!"))
+
+# Edições e fases individuais não são somadas a totais de Mundial/Libertadores.
+# Permitem abordar os demais troféus sem alegar uma superioridade inexistente.
+EDICOES = [
+    ("Copa Ouro", 1996, "São Paulo", "https://flaestatistica.com.br/titulos/1990"),
+    ("Copa dos Campeões", 2001, "São Paulo", "https://www.flamengo.com.br/noticias/novidades/beto-ex-jogador-do-flamengo-e-o-entrevistado-da-radio-fla"),
+    ("Torneio Rio-São Paulo", 1961, "Vasco", "https://www.rsssfbrasil.com/miscellaneous/matdecrjsp.htm"),
+    ("Taça Guanabara", 2025, "Fluminense", "https://www.flamengo.com.br/noticias/futebol/em-ano-inesquecivel--flamengo-levanta-sete-tacas"),
+    ("Taça Rio", 2019, "Vasco", "https://www.flamengo.com.br/flatv/Futebol/free?page=31"),
+    ("Derby das Américas", 2025, "Palmeiras", "https://www.flamengo.com.br/noticias/futebol/em-ano-inesquecivel--flamengo-levanta-sete-tacas"),
+    ("Copa Challenger", 2025, "Botafogo", "https://www.flamengo.com.br/noticias/futebol/em-ano-inesquecivel--flamengo-levanta-sete-tacas"),
+]
+for competicao, ano, rival, fonte in EDICOES:
+    e = _comparacao(rival, competicao, f"edição de {ano}", 1, 0, [fonte],
+        f"Quem ganhou a {competicao} de {ano}: Flamengo ou {rival}?",
+        f"Errou! Essa taça é do Flamengo! O {rival} não ganhou essa edição. Vai estudar, primo!")
+    e["fato"]["criterio"] = "vencedor desta edição; não total histórico"
+    if competicao in {"Derby das Américas", "Copa Challenger"}:
+        e["fato"]["nota"] = "troféu de fase da Intercontinental; não é título mundial completo"
+    BANCO.append(e)
 
 
 def escolher_banco(data, usados=()):

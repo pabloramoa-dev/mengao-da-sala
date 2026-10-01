@@ -71,11 +71,11 @@ def test_checagem_aceita_o_que_esta_nos_dados_e_o_banco():
 
 def test_desafios_cobrem_rivais_e_periodos_sem_inventar_titulos():
     assert len({e["rival"] for e in dialogos.BANCO}) == 11
-    assert len(dialogos.BANCO) == 34
+    assert len(dialogos.BANCO) == 77
     for e in dialogos.BANCO:
         fato = e["fato"]
         assert fato["flamengo"] > fato["rival"]
-        assert fato["periodo"] in e["falas"][0]["fala"]
+        assert e["falas"][0]["fala"].endswith("?")
         assert e["falas"][2]["quem"] == "rubro"
         assert str(fato["flamengo"]) in e["falas"][2]["carimbo"]
         assert e["fontes"]

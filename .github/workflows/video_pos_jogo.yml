@@ -3,12 +3,11 @@ name: Video pos-jogo
 # Gera o Reel e a legenda depois de cada jogo e guarda como artefato.
 # PUBLICA no @mengaodasala SOMENTE se a variavel do repositorio PUBLICAR=true
 # (Settings > Secrets and variables > Actions > Variables). Sem ela: modo ensaio.
-# A cada 3 horas: coleta (ESPN + Cartola + noticias + Groq checada), tabela,
+# Execução manual legada. A rotina automática é cobertura.yml.
+# Antes: coleta (ESPN + Cartola + noticias + Groq checada), tabela,
 # e so renderiza se o ultimo jogo encerrado ainda nao tiver video.
 
 on:
-  schedule:
-    - cron: "7,27,47 * * * *"
   workflow_dispatch:
     inputs:
       ensaio:

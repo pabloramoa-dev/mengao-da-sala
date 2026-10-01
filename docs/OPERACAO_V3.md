@@ -94,3 +94,88 @@ O marcador antigo sozinho não comprova publicação; os recibos é que confirma
 A sondagem passa a aceitar partidas não registradas até 24 horas após o início,
 para tolerar atraso do cron/coleta. Agenda inteiramente indisponível agora
 falha explicitamente e não aparece como ausência confirmada de jogo.
+
+## Cobertura completa e títulos — 01/10/2026
+
+O banco passa a 77 resenhas em 15 categorias de competição/troféu. Acrescenta
+Brasileirão (era dos pontos corridos, 2003–2025), Mundial Intercontinental e
+FIFA, Supercopa, Recopa, Mercosul, Copa Ouro, Copa dos Campeões, Rio–São Paulo,
+Taça Guanabara, Taça Rio, Derby das Américas e Copa Challenger.
+O recorte é dito na fala e guardado na legenda. Derby/Challenger são troféus
+de fase: não são somados como títulos mundiais completos. Taças estaduais
+não são comparadas com campeonatos de outros estados. Torneios que o Flamengo
+não ganhou, como Sul-Americana, não geram comparação de vantagem falsa.
+O Brasileirão usa um recorte sem a controvérsia de 1987; o Flamengo tem quatro
+conquistas de pontos corridos até 2025. Palmeiras e Corinthians empatam nesse
+recorte e recebem outras perguntas. Santos tem zero desde 2003.
+
+### Rotina automática independente do humor
+
+- `cobertura.yml`: sondagem aos minutos 11, 31 e 51 de cada hora, com a fila
+  compartilhada de publicação para evitar disputa pelo registro no git.
+- Pré-jogo: um Reel por jogo, nas 24 horas anteriores ao início confirmado.
+  Adversário, competição, data/hora em Brasília, estádio quando informado,
+  últimos cinco resultados disponíveis de cada equipe e posição no Brasileiro.
+  Termina com uma decisão futebolística para a torcida debater.
+- Pós-jogo: um Reel por ID, depois de status encerrado e placar confirmado.
+  Competição, resultado, pênaltis quando houver, finalizações/no alvo e posse
+  quando disponíveis, substituições verificadas e pergunta de análise.
+  Um empate de copa não é narrado como ganho de ponto. Vitória nos pênaltis
+  distingue placar do jogo e resultado da disputa. Não declara classificação
+  de mata-mata só pelo placar de uma partida, sem agregado confirmado.
+- Tabela: toda segunda às 19h BRT; se houver atraso/falha, tenta recuperar ao
+  longo da semana. Reel com as 20 equipes, em quatro painéis de cinco: posição,
+  pontos, jogos e saldo. A legenda inclui também vitórias, empates e derrotas.
+  Mostra líder/vice, distância do Flamengo e alerta sobre jogos a menos.
+- Humor diário continua às 11h07 BRT e não consome pré, pós ou tabela.
+  O pós-jogo legado fica manual; sua agenda foi substituída pela cobertura.
+- A primeira semana pode ser publicada após a ativação para fornecer a tabela
+  atual; nas seguintes, segue a janela de segunda-feira às 19h.
+
+### Onde pesquisar e o que sustenta cada conteúdo
+
+1. ESPN, agenda agregada (`all/teams/819/schedule` + `fixture=true`): descobre
+   todos os torneios que a fonte registra para o profissional masculino,
+   sem depender da antiga lista de três competições. O teste real encontrou
+   Brasileirão, Libertadores, Copa do Brasil, Carioca, Supercopa e Recopa em 2026.
+   Summary/boxscore dá status, gols, pênaltis, substituições e estatísticas.
+2. ESPN standings: classificação completa com ano da temporada. `gamesPlayed`
+   era lido incorretamente como `jogos`; ambos agora são tratados como aliases.
+   Ausência de estatística obrigatória bloqueia a tabela, não vira zero.
+3. CBF: tabela detalhada, regulamento e súmulas para conferir jogos nacionais:
+   https://www.cbf.com.br/futebol-brasileiro
+4. FERJ: calendário, súmulas e regulamento do Carioca:
+   https://www.fferj.com.br/
+5. CONMEBOL: calendário e decisões de Libertadores/Recopa/Sul-Americana:
+   https://www.conmebol.com/
+6. FIFA: Mundial/Intercontinental e reconhecimento histórico dos campeões:
+   https://www.fifa.com/ e https://inside.fifa.com/
+7. Flamengo oficial: notícias, convocados, mudanças de estádio/horário e
+   anúncio de escalação: https://www.flamengo.com.br/noticias/futebol
+   O sistema atual não lê automaticamente escalações/desfalques desse site;
+   não inventa essas informações quando não disponíveis na fonte estruturada.
+
+A automação usa ESPN; os sites oficiais são fontes para conferência editorial,
+não um fallback automático implementado. Cobrir todos os campeonatos não
+significa garantir partidas omitidas pela fonte ou transmissão em tempo real.
+A agenda é consultada novamente em cada execução; jogos adiados/cancelados e
+horário ainda não confirmado não geram pré. Alteração depois de um pré já
+publicado demanda atualização editorial, não um segundo pré automático.
+
+### Controle e recuperação
+
+Recibos separam `pre:<jogo_id>`, `pos:<jogo_id>` e `tabela:<ano-Wsemana>`.
+Confirmados e publicação inconclusiva bloqueiam reenvio; texto novo não muda
+identidade do conteúdo. Ensaios não registram publicado. Falhas mantêm recibos.
+Partidas encerradas desde a ativação podem ser recuperadas por até sete dias;
+não dispara publicações antigas de janeiro/setembro ao ativar.
+`PUBLICAR` e o token existentes continuam controlando o destino @mengaodasala.
+
+Uma pendência é processada por execução: prioridade para pós, depois pré e
+por fim tabela. São no máximo duas publicações por partida, mais o humor do dia
+quando houver e uma tabela semanal. Cron do GitHub pode atrasar; não promete
+publicação no minuto exato do início ou do apito final.
+
+CI verifica seleção, janelas, deduplicação por jogo/semana, pênaltis, tabela
+incompleta, temporada errada, agenda agregada e HTML com os 20 clubes. Renderiza
+pré/tabela fictícios sem publicá-los, além dos três formatos anteriores.

@@ -62,23 +62,12 @@ def pegar(url: str, json_ok: bool = True, dados: bytes | None = None, cab: dict 
 # ------------------------------------------------------------------- ESPN
 def ultimo_jogo() -> dict | None:
     """Último jogo ENCERRADO entre todas as competições, ordenado por DATA."""
-    candidatos = []
-    for liga, nome_liga in LIGAS.items():
-        _, times = pegar(f"{ESPN}/{liga}/teams")
-        lista = [t["team"] for t in ((times or {}).get("sports", [{}])[0]
-                                     .get("leagues", [{}])[0].get("teams", []))]
-        fla = next((t for t in lista if "flamengo" in t.get("displayName", "").lower()), None)
-        if not fla:
-            continue
-        _, agenda = pegar(f"{ESPN}/{liga}/teams/{fla['id']}/schedule")
-        for e in (agenda or {}).get("events", []):
-            comp = (e.get("competitions") or [{}])[0]
-            if comp.get("status", {}).get("type", {}).get("completed"):
-                candidatos.append({"liga": liga, "competicao": nome_liga, "fla_id": fla["id"],
-                                   "id": e["id"], "data": e.get("date", ""), "nome": e.get("name")})
-    if not candidatos:
+    from src.flamengo.diario import agenda, FLA
+    feitos, _ = agenda(FLA)
+    if not feitos:
         return None
-    return max(candidatos, key=lambda c: c["data"])
+    j = feitos[-1]
+    return {**j, "fla_id": FLA, "data": j["utc"], "nome": "Flamengo x " + j["adversario"]}
 
 
 def detalhes(jogo: dict) -> dict:
@@ -90,7 +79,8 @@ def detalhes(jogo: dict) -> dict:
         lado = "nos" if c.get("id") == jogo["fla_id"] else "eles"
         placar[lado] = {"time": (c.get("team") or {}).get("displayName"),
                         "gols": int(c["score"]) if str(c.get("score", "")).isdigit() else None,
-                        "casa": c.get("homeAway") == "home"}
+                        "casa": c.get("homeAway") == "home",
+                        "penaltis": int(c["shootoutScore"]) if str(c.get("shootoutScore", "")).isdigit() else None}
     subs, gols, cartoes = [], [], []
     for ev in resumo.get("keyEvents", []):
         tipo = ((ev.get("type") or {}).get("text") or "").lower()
@@ -110,9 +100,15 @@ def detalhes(jogo: dict) -> dict:
     g1, g2 = nos.get("gols"), eles.get("gols")
     resultado = None if g1 is None or g2 is None else (
         "vitoria" if g1 > g2 else "derrota" if g1 < g2 else "empate")
-    return {**jogo, "adversario": eles.get("time"), "em_casa": nos.get("casa"),
+    penaltis = None
+    if nos.get("penaltis") is not None and eles.get("penaltis") is not None:
+        penaltis = {"nos": nos["penaltis"], "eles": eles["penaltis"]}
+        if penaltis["nos"] != penaltis["eles"]:
+            resultado = "vitoria" if penaltis["nos"] > penaltis["eles"] else "derrota"
+    return {**jogo, "penaltis": penaltis, "adversario": eles.get("time"), "em_casa": nos.get("casa"),
             "gols_nossos": g1, "gols_deles": g2, "resultado": resultado,
             "estadio": ((resumo.get("gameInfo") or {}).get("venue") or {}).get("fullName"),
+            "estatisticas": {str((c.get("team") or {}).get("id")): {x.get("name"): x.get("displayValue") for x in c.get("statistics", [])} for c in (resumo.get("boxscore") or {}).get("teams", [])},
             "status": "FINISHED" if (comp.get("status") or {}).get("type", {}).get("completed") else "UNKNOWN",
             "substituicoes": subs, "gols": gols, "cartoes": cartoes}
 

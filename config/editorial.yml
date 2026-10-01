@@ -4,6 +4,9 @@
 
 formatos:
   # ---------------------------------------------------------- dia de jogo
+  pre_jogo: {rotina: cobertura.yml, janela: 24h antes, fonte: ESPN agenda agregada, por: jogo_id}
+  pos_jogo_v2: {rotina: cobertura.yml, quando: encerrado confirmado, por: jogo_id}
+  tabela_semanal: {rotina: cobertura.yml, quando: segunda 19h BRT, fonte: ESPN standings, equipes: 20}
   hoje_tem_mengao:   {quando: dia de jogo, manha, humor: euforico, cenario: sala_tv}
   segue_o_lider:     {quando: vitoria, humor: euforico, cta: "Quem foi o melhor em campo?",
                       dado: sofascore.notas[0]}
@@ -15,11 +18,11 @@ formatos:
   # ------------------------------------------------------- dia sem jogo
   a_nacao_falou:     {fonte: comentarios dos nossos posts, humor: debochado}
   imprensa_x_nacao:  {fonte: colunas (trafilatura) + comentarios, humor: indignado}
-  conta_do_titulo:   {fonte: football-data, humor: tenso}
+  conta_do_titulo:   {fonte: ESPN, humor: tenso}
   resenha_mercado:   {fonte: noticias, regra: "rumor sempre dito como rumor"}
 
   # --------------------------------------------------- zoeira e criativos
-  zoeira_de_segunda: {quando: rival perdeu na rodada, fonte: football-data (resultado real),
+  zoeira_de_segunda: {quando: rival perdeu na rodada, fonte: ESPN (resultado real),
                       rivais: [Fluminense, Vasco, Botafogo, Palmeiras], humor: debochado}
   o_secador:         {quando: jogo do vice-lider, humor: tenso, ideia: "torcedor secando na frente da TV"}
   primo_rival:       {ideia: "dupla fixa — o torcedor e o primo de outro time discutindo",

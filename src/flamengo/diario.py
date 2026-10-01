@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -35,7 +36,10 @@ STANDINGS = "https://site.api.espn.com/apis/v2/sports/soccer/bra.1/standings"
 UA = "Mozilla/5.0 (X11; Linux x86_64) mengao-da-sala/0.3"
 FLA = "819"
 LIGAS = {"bra.1": "Brasileirão", "conmebol.libertadores": "Libertadores",
-         "bra.copa_do_brazil": "Copa do Brasil"}
+         "bra.copa_do_brazil": "Copa do Brasil", "bra.camp.carioca": "Campeonato Carioca",
+         "bra.supercopa_do_brazil": "Supercopa do Brasil", "conmebol.recopa": "Recopa Sul-Americana",
+         "fifa.club.world": "Mundial de Clubes", "fifa.intercontinental_cup": "Copa Intercontinental",
+         "conmebol.sudamericana": "Sul-Americana"}
 RIVAIS = {"3445": "Fluminense", "3454": "Vasco", "6086": "Botafogo", "2029": "Palmeiras"}
 BRT = timezone(timedelta(hours=-3))
 ESTADO = Path("data/diario.json")
@@ -140,6 +144,10 @@ def _curto(nome: str | None) -> str:
 
 def _jogo(e: dict, liga: str, time_id: str) -> dict:
     comp = (e.get("competitions") or [{}])[0]
+    if liga == "all":
+        refs = json.dumps(comp, ensure_ascii=False)
+        m = re.search(r"/leagues/([^/]+)/", refs) or re.search(r"/league/([^/?\"]+)", refs)
+        liga = m.group(1) if m else "all"
     nos = next((c for c in comp.get("competitors", []) if str((c.get("team") or {}).get("id")) == time_id), {})
     eles = next((c for c in comp.get("competitors", []) if c is not nos), {})
 
@@ -148,25 +156,30 @@ def _jogo(e: dict, liga: str, time_id: str) -> dict:
         s = s.get("displayValue") if isinstance(s, dict) else s
         return int(s) if str(s or "").isdigit() else None
 
-    return {"id": e.get("id"), "liga": liga, "competicao": LIGAS.get(liga, liga),
+    return {"id": e.get("id"), "liga": liga, "competicao": LIGAS.get(liga, (e.get("season") or {}).get("displayName", liga)),
             "utc": e.get("date", ""), "status": ((comp.get("status") or {}).get("type") or {}),
             "adversario": _curto((eles.get("team") or {}).get("displayName")),
             "em_casa": nos.get("homeAway") == "home",
             "estadio": (comp.get("venue") or {}).get("fullName"),
+            "adversario_id": str((eles.get("team") or {}).get("id") or ""),
+            "fase": (e.get("seasonType") or {}).get("name"),
+            "horario_confirmado": e.get("timeValid", comp.get("timeValid", False)),
+            "fonte": f"https://www.espn.com/soccer/match/_/gameId/{e.get('id')}",
             "gols_nossos": gols(nos), "gols_deles": gols(eles)}
 
 
-def agenda(time_id: str, ligas=LIGAS) -> tuple[list[dict], list[dict]]:
+def agenda(time_id: str, ligas=None) -> tuple[list[dict], list[dict]]:
     """(encerrados, futuros) do time, em todas as competições, por data."""
     feitos, futuros = [], []
-    for liga in ligas:
+    # A agenda all inclui torneios não previstos numa lista fixa.
+    for liga in (ligas if ligas is not None else ("all",)):
         for extra in ("", "?fixture=true"):
             d = pegar(f"{ESPN}/{liga}/teams/{time_id}/schedule{extra}") or {}
             for e in d.get("events", []):
                 j = _jogo(e, liga, time_id)
                 if j["status"].get("completed"):
                     feitos.append(j)
-                elif j["status"].get("state") == "pre":
+                elif j["status"].get("state") == "pre" and j["status"].get("name") not in {"STATUS_POSTPONED", "STATUS_CANCELED", "STATUS_CANCELLED"}:
                     futuros.append(j)
     uniq = lambda l: list({j["id"]: j for j in l}.values())
     return (sorted(uniq(feitos), key=lambda j: j["utc"]),
@@ -180,7 +193,7 @@ def tabela() -> dict | None:
     ent = [e for g in (d.get("children") or [d]) for e in (g.get("standings") or {}).get("entries", [])]
 
     def st(e, n):
-        return next((s.get("value") for s in e.get("stats", []) if s.get("name") == n), None)
+        return next((s.get("value") for s in e.get("stats", []) if s.get("name") in ({"gamesPlayed", "jogos"} if n == "gamesPlayed" else {n})), None)
 
     linhas = sorted(({"id": str(e["team"]["id"]), "time": _curto(e["team"]["displayName"]),
                       "pos": int(st(e, "rank") or 99), "pts": int(st(e, "points") or 0),
@@ -350,7 +363,7 @@ def montar(agora: datetime, estado: dict, so: str | None = None) -> tuple[dict |
     if retorno and so in (None, "a_nacao_respondeu"):
         return retorno, "resposta a votação real"
 
-    if prox and _utc(prox["utc"]).astimezone(BRT).date() == hoje and so in (None, "hoje_tem_mengao"):
+    if prox and _utc(prox["utc"]).astimezone(BRT).date() == hoje and so == "hoje_tem_mengao":
         return hoje_tem_mengao(prox, tabela()), "dia de jogo"
 
     usados = estado.get("episodios", [])
