@@ -1,0 +1,27 @@
+{
+  "_nota": "Fontes gratuitas e sem chave. Cada uma é testada no runner do GitHub pelo workflow teste_noticias.yml; a que falhar é só pulada.",
+  "fontes": [
+    {"id": "gnews_fla", "tipo": "rss", "peso": 3, "nome": "Google Notícias — Flamengo",
+     "url": "https://news.google.com/rss/search?q=Flamengo+when:1d&hl=pt-BR&gl=BR&ceid=BR:pt-419"},
+    {"id": "gnews_mercado", "tipo": "rss", "peso": 2, "nome": "Google Notícias — mercado",
+     "url": "https://news.google.com/rss/search?q=Flamengo+(contrata%C3%A7%C3%A3o+OR+negocia%C3%A7%C3%A3o+OR+proposta)+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419"},
+    {"id": "gnews_dm", "tipo": "rss", "peso": 2, "nome": "Google Notícias — departamento médico",
+     "url": "https://news.google.com/rss/search?q=Flamengo+(les%C3%A3o+OR+desfalque+OR+cirurgia+OR+escala%C3%A7%C3%A3o)+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419"},
+    {"id": "ge_fla", "tipo": "rss", "peso": 3, "nome": "ge — Flamengo",
+     "url": "https://ge.globo.com/rss/ge/futebol/times/flamengo/"},
+    {"id": "espn_bra1", "tipo": "espn", "peso": 2, "nome": "ESPN — Brasileirão",
+     "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/bra.1/news?limit=50"},
+    {"id": "espn_liberta", "tipo": "espn", "peso": 1, "nome": "ESPN — Libertadores",
+     "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/conmebol.libertadores/news?limit=50"},
+    {"id": "placar", "tipo": "rss", "peso": 1, "nome": "Placar", "url": "https://placar.com.br/feed/"},
+    {"id": "bolavip", "tipo": "rss", "peso": 1, "nome": "Bolavip — Brasileirão",
+     "url": "https://br.bolavip.com/rss/feed/category/campeonato-brasileirao"},
+    {"id": "futebolinterior", "tipo": "rss", "peso": 1, "nome": "Futebol Interior", "url": "https://www.futebolinterior.com.br/feed/"},
+    {"id": "trends_br", "tipo": "trends", "peso": 0, "nome": "Google Trends Brasil (assunto do momento)",
+     "url": "https://trends.google.com/trending/rss?geo=BR"},
+    {"id": "reddit_fla", "tipo": "rss", "peso": 0, "nome": "r/flamengo (humor da torcida, só agregado)",
+     "url": "https://www.reddit.com/r/flamengo/top/.rss?t=day"}
+  ],
+  "palavras_obrigatorias": ["flamengo", "mengão", "mengao", "rubro-negro", "rubro-negra", "fla "],
+  "ignorar": ["feminino", "sub-17", "sub-20", "basquete", "vôlei", "volei", "aposta", "palpite", "odds", "onde assistir"]
+}
