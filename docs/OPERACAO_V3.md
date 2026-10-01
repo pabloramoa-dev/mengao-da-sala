@@ -61,3 +61,36 @@ Falhas de Story ficam visíveis no resultado do job. Os artefatos incluem seus m
 quando o manifesto `config/recuperacao.json` muda em main. Confere a conta, aplica
 a mesma deduplicação e preserva recibos mesmo em falha. A recuperação inicial
 publica os Reels de 26 e 27/09 e um Story do mais recente. Não executa em outros perfis.
+
+
+## Desafios de títulos e auditoria — 01/10/2026
+
+O quadro primo_rival agora usa 34 esquetes dirigidas: 22 sobre Libertadores,
+nove sobre Copa do Brasil e três sobre o Carioca. Abrange Vasco, Fluminense,
+Botafogo, Palmeiras, Corinthians, São Paulo, Santos, Grêmio, Internacional,
+Cruzeiro e Atlético-MG, sem pretender definir um ranking dos maiores clubes.
+Juninho pergunta, o rival dá um palpite errado, Juninho corrige e vence a piada.
+Os números corretos vêm do banco conferido, sem geração livre da IA.
+O rival é identificado nas falas; mantém o personagem original do primo.
+
+Cada comparação declara seu recorte: Libertadores até 2025 ou de 2019 a 2025;
+Copa do Brasil até 2024; Carioca até março de 2026. Isso mantém os episódios
+corretos mesmo se outra edição terminar. Fontes entram nos metadados e legenda.
+O Flamengo não lidera todos os campeonatos. Por isso Cruzeiro e Grêmio não são
+comparados com ele no total da Copa do Brasil: um supera, o outro empata.
+A vantagem contra eles vem da Libertadores. Nunca antecipar título de 2026.
+
+Auditoria dos recibos: Reel e Story confirmados em 29/09 (19h25 UTC) e
+30/09 (19h14–19h15 UTC). Os cinco horários do diário são retentativas para
+um único Reel/dia. Depois dele o estado bloqueia as demais tentativas.
+Comunidade coleta votos e métricas; não publica vídeos. A resposta à enquete
+exige coleta completa e três votos válidos. Os quadros são alternativas no
+rodízio, não publicações independentes diárias.
+
+Execução pós-jogo 36824120239: geração/publicação puladas porque não havia
+partida elegível. Na agenda consultada, o último jogo encerrado é 401841241,
+20/09, e coincide com data/ultimo_video.json. O próximo vem em 08/10.
+O marcador antigo sozinho não comprova publicação; os recibos é que confirmam.
+A sondagem passa a aceitar partidas não registradas até 24 horas após o início,
+para tolerar atraso do cron/coleta. Agenda inteiramente indisponível agora
+falha explicitamente e não aparece como ausência confirmada de jogo.

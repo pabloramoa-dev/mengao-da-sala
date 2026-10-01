@@ -7,7 +7,7 @@ from src.flamengo import dialogos, quadros
 def test_banco_inteiro_passa_na_validacao():
     for esq in dialogos.BANCO:
         falas = dialogos.validar(esq["falas"])
-        assert falas[0]["quem"] == "primo"
+        assert falas[0]["quem"] == "rubro" and "?" in falas[0]["fala"]
         assert falas[-1]["quem"] == "rubro" and "?" in falas[-1]["fala"]
         assert any(f.get("carimbo") for f in falas)
 
@@ -66,4 +66,25 @@ def test_checagem_aceita_o_que_esta_nos_dados_e_o_banco():
           {"quem": "rubro", "fala": "E o Santos vem aí. Eu já separei o sofá."}]
     dialogos.checar_fatos(ok, CTX)
     for esq in dialogos.BANCO:
-        dialogos.checar_fatos(esq["falas"], {})
+        assert esq["fato"]["flamengo"] > esq["fato"]["rival"]
+
+
+def test_desafios_cobrem_rivais_e_periodos_sem_inventar_titulos():
+    assert len({e["rival"] for e in dialogos.BANCO}) == 11
+    assert len(dialogos.BANCO) == 34
+    for e in dialogos.BANCO:
+        fato = e["fato"]
+        assert fato["flamengo"] > fato["rival"]
+        assert fato["periodo"] in e["falas"][0]["fala"]
+        assert e["falas"][2]["quem"] == "rubro"
+        assert str(fato["flamengo"]) in e["falas"][2]["carimbo"]
+        assert e["fontes"]
+
+
+def test_memoria_nao_repete_desafio_antes_de_esgotar():
+    usados = []
+    for _ in dialogos.BANCO:
+        e = dialogos.escolher_banco("mesmo-dia", usados)
+        chave = "primo:" + e["chave"]
+        assert chave not in usados
+        usados.append(chave)

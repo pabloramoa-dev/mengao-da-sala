@@ -66,6 +66,7 @@ class EditorialTests(unittest.TestCase):
         now=datetime.now(timezone.utc)
         self.assertFalse(deve_verificar(now,[{'id':'1','utc':(now-timedelta(days=2)).isoformat()}],None))
         self.assertTrue(deve_verificar(now,[{'id':'1','utc':(now-timedelta(hours=2)).isoformat()}],None))
+        self.assertTrue(deve_verificar(now,[{'id':'1','utc':(now-timedelta(hours=12)).isoformat()}],None))
         self.assertFalse(deve_verificar(now,[{'id':'1','utc':(now-timedelta(hours=2)).isoformat()}],'1'))
 
     def test_legendas_preservam_tempo_e_texto(self):

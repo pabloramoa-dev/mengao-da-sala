@@ -40,20 +40,6 @@ HUMOR = [
   'No fim, eu levo duas para o sofá. Vai que precisa de substituição.',
   'Você tem uma camisa preferida para assistir?']),
 ]
-PRIMOS = [
- ('sofa', [('primo','Você chama isso de estádio? É um sofá!'),
-           ('rubro','Respeita. Esse sofá já viveu muita decisão.'),
-           ('primo','E onde fica a torcida visitante?'),
-           ('rubro','Na cadeira. E sem pegar o controle!')]),
- ('calma', [('primo','Você prometeu que ia ficar calmo.'),
-            ('rubro','Estou calmo. Só estou aquecendo na sala.'),
-            ('primo','Para entrar no segundo tempo?'),
-            ('rubro','Para buscar água sem perder o lance!')]),
- ('analista', [('primo','Agora você virou treinador?'),
-               ('rubro','Aqui do sofá eu enxergo tudo.'),
-               ('primo','Inclusive o controle que você perdeu?'),
-               ('rubro','Esse está fazendo marcação individual na almofada.')]),
-]
 
 
 def _index(data, n):
@@ -69,7 +55,7 @@ def sofa(data, usados=()):
 
 
 def primo(data, usados=(), contexto=None, ia=False):
-    """Esquete Juninho x Primo Secador (v2): Groq com dado real do dia ou banco.
+    """Desafio de títulos: Juninho pergunta e vence com dados conferidos.
 
     Cada batida leva a direção de cena (humor, gesto, reação de quem ouve,
     plano de câmera, carimbo da virada) para o render da dupla."""
@@ -89,7 +75,8 @@ def primo(data, usados=(), contexto=None, ia=False):
     fim.update(personagem='rubro', humor='euforico', gesto='apontar', reacao='revirar', plano='dupla')
     batidas.append(fim)
     return {'formato': 'primo_rival', 'humor': 'debochado', 'capa': esq['capa'],
-            'episodio': 'primo:' + esq['chave'], 'motor': 'dupla', 'batidas': batidas}
+            'episodio': 'primo:' + esq['chave'], 'motor': 'dupla', 'batidas': batidas,
+            'rival': esq['rival'], 'comparacao_titulos': esq['fato'], 'fontes': esq['fontes']}
 
 
 def nacao_escala():

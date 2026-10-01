@@ -21,9 +21,8 @@ Cada fala carrega a direção de cena:
     carimbo  texto do carimbo de papel (só na virada)
     efeito   confete | nenhum
 
-Fonte das falas, em ordem: Groq (com dados REAIS do dia no prompt, validada
-aqui) -> banco escrito à mão (abaixo). Sem chave ou resposta inválida, o banco
-segura o dia sem ninguém perceber.
+Fonte das falas: banco conferido com recortes históricos explícitos com data de corte explícita.
+O torcedor rival muda por episódio; Juninho sempre ganha a comparação.
 """
 from __future__ import annotations
 
@@ -52,90 +51,86 @@ def F(quem, fala, humor, gesto="explicar", reacao=None, plano="dupla", carimbo=N
                                   legenda=legenda).items() if v is not None}
 
 
-# =============================================================================
-#  BANCO — esquetes atemporais (não citam placar, tabela nem jogador)
-# =============================================================================
-BANCO = [
-    dict(chave="sofa_estadio", capa="O PRIMO\nCHEGOU", falas=[
-        F("primo", "Você chama isso de estádio? É um sofá com televisão, primo.", "debochado", "ombros", "revirar"),
-        F("rubro", "Respeita! Esse sofá já viu mais título que o teu time inteiro.", "indignado", "apontar", "choque", "close"),
-        F("primo", "E essa almofada rubro-negra aí? É o setor VIP?", "debochado", "apontar", "cruzar"),
-        F("rubro", "É a arquibancada! E ela tem regra: secador senta no chão.", "euforico", "explicar", "revirar"),
-        F("primo", "No chão? Eu sou visita!", "chocado", "peito", "rir"),
-        F("rubro", "Visita que seca vira mobília. Pega ali o controle, mobília.", "rindo", "apontar", "sofrer",
-          "impacto", carimbo="VIROU MÓVEL"),
-        F("rubro", "E na tua casa, quem é o secador do sofá? Marca ele aqui!", "debochado", "contar", "celular", "close"),
-    ]),
-    dict(chave="calma", capa="HOJE EU\nFICO CALMO", falas=[
-        F("primo", "Você prometeu pra tua mãe que hoje ia ver o jogo calmo.", "debochado", "celular", "sim"),
-        F("rubro", "E eu tô calmíssimo. Olha a minha respiração: ahhh.", "tenso", "maos_juntas", "revirar", "close"),
-        F("primo", "Primo, a bola nem rolou e você já roeu a unha do pé.", "rindo", "apontar", "sofrer"),
-        F("rubro", "É técnica de concentração! O Mengão sente a energia da sala.", "indignado", "peito", "rir"),
-        F("primo", "Então manda uma energia pra zaga, que ela tá precisando.", "debochado", "ombros", "choque",
-          "impacto", carimbo="SECOU!"),
-        F("rubro", "Sai da minha sala! Com calma. Mas sai!", "indignado", "apontar", "rir", "close"),
-        F("rubro", "Você vê o jogo sentado ou vira treinador em pé na sala? Conta aí!", "euforico", "explicar", "celular"),
-    ]),
-    dict(chave="treinador", capa="O TÉCNICO\nDO SOFÁ", falas=[
-        F("primo", "Olha ele! Virou treinador de novo. Já pediu três substituições.", "debochado", "contar", "orgulho"),
-        F("rubro", "Daqui do sofá eu enxergo o jogo todo. O técnico só enxerga o gramado!", "euforico", "explicar", "revirar"),
-        F("primo", "E o controle remoto? Você enxerga onde ele tá?", "rindo", "apontar", "choque"),
-        F("rubro", "O controle tá fazendo marcação individual na almofada.", "tenso", "maos_juntas", "rir", "close"),
-        F("primo", "Pois é, a única marcação que funcionou hoje.", "debochado", "cruzar", "sofrer",
-          "impacto", carimbo="TOMOU"),
-        F("rubro", "Primo, você tá a um comentário de assistir no celular. Lá fora.", "indignado", "apontar", "celular"),
-        F("rubro", "E você, Nação, qual substituição faria hoje? Escreve aqui embaixo!", "neutra", "contar", "sim", "close"),
-    ]),
-    dict(chave="camisa", capa="A CAMISA\nDA SORTE", falas=[
-        F("primo", "Por que você tá vestindo duas camisas uma em cima da outra?", "chocado", "apontar", "orgulho"),
-        F("rubro", "Uma é a da sorte. A outra é reserva, caso a primeira canse.", "euforico", "peito", "revirar", "close"),
-        F("primo", "Camisa não cansa, primo. Quem cansa é quem convive contigo.", "debochado", "ombros", "choque"),
-        F("rubro", "Ri agora. Na última vez que eu tirei ela, a gente levou gol.", "tenso", "explicar", "rir"),
-        F("primo", "Então tira as duas que eu quero ver.", "rindo", "celular", "sofrer", "impacto", carimbo="SECADOR"),
-        F("rubro", "Nunca! Essa camisa só sai daqui depois do título.", "euforico", "bracos_cima", "revirar", efeito="confete"),
-        F("rubro", "Qual é a tua mania de dia de jogo? Conta que eu não julgo!", "debochado", "contar", "celular", "close"),
-    ]),
-    dict(chave="vizinho", capa="O VIZINHO\nJÁ SABE", falas=[
-        F("primo", "Teu vizinho bateu aqui perguntando se tá tudo bem.", "debochado", "celular", "choque"),
-        F("rubro", "Tá tudo ótimo! Eu só gritei um pouquinho no lance.", "neutra", "ombros", "revirar"),
-        F("primo", "Um pouquinho? O alarme do carro dele disparou!", "chocado", "bracos_cima", "rir", "close"),
-        F("rubro", "Isso é o alarme torcendo junto. Até o carro é Mengão!", "euforico", "peito", "sofrer"),
-        F("primo", "O carro dele é do meu time, primo.", "debochado", "cruzar", "choque",
-          "impacto", carimbo="ALARME SECADOR"),
-        F("rubro", "Então é por isso que ele apita toda vez que o Mengão ataca.", "rindo", "apontar", "sofrer"),
-        F("rubro", "Na tua rua, quem é o vizinho que sabe o placar pelo teu grito? Comenta!", "euforico", "explicar", "sim", "close"),
-    ]),
-    dict(chave="resenha_zap", capa="O GRUPO\nDA FAMÍLIA", falas=[
-        F("primo", "Já mandei no grupo da família: hoje o Mengão tropeça.", "debochado", "celular", "choque"),
-        F("rubro", "Você manda isso toda semana. Toda semana você apaga depois.", "indignado", "apontar", "sofrer", "close"),
-        F("primo", "Eu não apago. Eu só arquivo a conversa.", "tenso", "maos_juntas", "rir"),
-        F("rubro", "Arquiva e sai do grupo por três dias. A tia até perguntou se você viajou.", "rindo", "contar", "sofrer"),
-        F("primo", "Eu fui fazer um retiro espiritual.", "sofrendo", "peito", "rir",
-          "impacto", carimbo="RETIRO DO SECADOR"),
-        F("rubro", "Retiro não, primo. É o esconderijo de todo domingo.", "euforico", "ombros", "revirar"),
-        F("rubro", "Tem um primo desses no teu grupo? Marca ele aqui, sem dó!", "debochado", "contar", "celular", "close"),
-    ]),
-    dict(chave="pipoca", capa="A PIPOCA\nPÉ-QUENTE", falas=[
-        F("primo", "Posso pegar um pouco da pipoca?", "neutra", "apontar", "nao"),
-        F("rubro", "Não! Essa pipoca é pé-quente. Cada milho estourado é um gol.", "indignado", "explicar", "revirar", "close"),
-        F("primo", "Então me dá umas duas, que eu quero ver você sofrer.", "debochado", "celular", "choque"),
-        F("rubro", "Pipoca de secador estoura pra dentro. Deus me livre.", "chocado", "maos_juntas", "rir"),
-        F("primo", "Primo, você precisa de ajuda.", "rindo", "ombros", "orgulho"),
-        F("rubro", "Ajuda eu tenho. Chama Nação. São quarenta milhões!", "euforico", "bracos_cima", "revirar",
-          "impacto", carimbo="QUARENTA MILHÕES", efeito="confete"),
-        F("rubro", "Qual comida não pode faltar no teu dia de jogo? Conta aí!", "neutra", "contar", "sim", "close"),
-    ]),
-    dict(chave="replay", capa="EU JÁ VI\nESSE LANCE", falas=[
-        F("primo", "Você tá gritando no replay, primo. O lance já acabou.", "debochado", "apontar", "nao"),
-        F("rubro", "O lance acabou. O meu coração ainda não recebeu o aviso!", "tenso", "peito", "revirar", "close"),
-        F("primo", "E se no replay a bola não entrar?", "debochado", "ombros", "choque"),
-        F("rubro", "Aí a gente vê de novo, até entrar!", "euforico", "bracos_cima", "rir", efeito="confete"),
-        F("primo", "Isso não é torcida. É teimosia.", "chocado", "cruzar", "orgulho"),
-        F("rubro", "Teimosia é o teu time chegar no fim do ano achando que tem chance.", "rindo", "apontar", "sofrer",
-          "impacto", carimbo="PEGOU PESADO"),
-        F("rubro", "Você também comemora o gol no replay? Confessa aqui embaixo!", "euforico", "explicar", "celular", "close"),
-    ]),
+# Comparações fechadas até 2025: não antecipam vencedores de 2026.
+# Os números são calculados a partir dos anos; o rival erra na ficção,
+# Juninho apresenta o resultado verdadeiro. Não há geração livre de fatos.
+FONTE_LIB = "https://www.sportingnews.com/br/futebol/noticias/libertadores-todos-os-clubes-campeoes-do-torneio/73503f43b0e8c5160ae63734"
+FONTE_FLA = "https://www.flamengo.com.br/noticias/futebol/flamengo-vence-palmeiras-e-se-torna-o-primeiro-tetracampeao-da-libertadores"
+FONTE_COPA = "https://www.cbf.com.br/futebol-brasileiro/noticias/detalhes/competicoes-copa-brasil-masculino/com-quinto-titulo-flamengo-se-torna-segundo-maior-campeao-da-copa-betano-do-brasil"
+LIBERTADORES = {
+    "Flamengo": [1981, 2019, 2022, 2025],
+    "Vasco": [1998], "Fluminense": [2023], "Botafogo": [2024],
+    "Palmeiras": [1999, 2020, 2021], "Corinthians": [2012],
+    "São Paulo": [1992, 1993, 2005], "Santos": [1962, 1963, 2011],
+    "Grêmio": [1983, 1995, 2017], "Internacional": [2006, 2010],
+    "Cruzeiro": [1976, 1997], "Atlético-MG": [2013],
+}
+EXTENSO = {0: "nenhum", 1: "um", 2: "dois", 3: "três", 4: "quatro", 5: "cinco"}
+FINAIS = [
+    "Você não sabe de nada! Vai pegar uma cerveja pra mim e deixa a conta das taças comigo!",
+    "Primo, tua confiança é de campeão. A resposta é de recuperação!",
+    "Teu palpite veio cheio. A conta das taças veio vazia!",
+    "Pode procurar no celular. Só não vale editar a história!",
+    "Aqui na sala o controle é meu. E nessa conta a vantagem também!",
+    "Você trouxe a camisa. Esqueceu de trazer a resposta certa!",
 ]
+
+
+def _desafio(rival, anos, recente=False):
+    janela = "de 2019 a 2025" if recente else "até 2025"
+    nf = sum(y >= 2019 for y in LIBERTADORES["Flamengo"]) if recente else 4
+    nr = sum(y >= 2019 for y in anos) if recente else len(anos)
+    assert nf > nr
+    i = list(LIBERTADORES).index(rival)
+    correcoes = [
+        f"Errou! {janela.capitalize()}: Flamengo, {EXTENSO[nf]} títulos. {rival}, {EXTENSO[nr]}. Confiança não é taça!",
+        f"Não, primo! {janela.capitalize()}, deu {EXTENSO[nf]} pro Flamengo e {EXTENSO[nr]} pro {rival}. Conta de novo!",
+    ]
+    return dict(chave="titulos_" + rival.lower().replace(" ", "_") + ("_recente" if recente else "_total"),
+        capa=rival.upper() + "\nERROU A CONTA", rival=rival,
+        fato={"competicao": "Libertadores", "periodo": janela, "flamengo": nf, "rival": nr},
+        fontes=[FONTE_FLA, FONTE_LIB], falas=[
+        F("rubro", f"Primo, {janela}, quem ganhou mais Libertadores: Flamengo ou {rival}?", "debochado", "contar", "revirar", "close"),
+        F("primo", f"O {rival}, claro! Essa você escolheu fácil demais!", "euforico", "peito", "rir"),
+        F("rubro", correcoes[int(recente)], "rindo", "contar", "choque", "impacto", carimbo=f"FLA {nf} X {nr}", efeito="confete"),
+        F("primo", "Eu tava contando com as taças que a gente ainda vai ganhar!", "tenso", "celular", "rir"),
+        F("rubro", "Taça imaginária? Então teu museu fica dentro da tua cabeça!", "debochado", "apontar", "sofrer", "close"),
+        F("rubro", FINAIS[(i + int(recente)) % len(FINAIS)], "rindo", "apontar", "revirar", "impacto"),
+        F("rubro", f"Qual amigo do {rival} ia errar essa também? Marca ele aqui!", "debochado", "contar", "celular", "close"),
+    ])
+
+
+BANCO = [_desafio(rival, anos, recente) for rival, anos in LIBERTADORES.items()
+         if rival != "Flamengo" for recente in (False, True)]
+
+
+# Copa do Brasil com recorte fechado em 2024; Grêmio empata e Cruzeiro
+# supera o Flamengo, portanto nenhum dos dois entra nesta comparação.
+COPA_2024 = {"Vasco": 1, "Fluminense": 1, "Botafogo": 0, "Palmeiras": 4,
+             "Corinthians": 3, "São Paulo": 1, "Santos": 1,
+             "Internacional": 1, "Atlético-MG": 2}
+FONTE_COPA_RANK = "https://www.espn.com.br/futebol/copa-do-brasil/artigo/_/id/14411948/quem-sao-maiores-campeoes-copa-do-brasil-ranking-titulos"
+FONTE_CARIOCA = "https://www.flamengo.com.br/noticias/futebol/flamengo-vence-o-fluminense-nos-penaltis-e-conquista-seu-40--titulo-do-campeonato-carioca"
+FONTE_CARIOCA_RANK = "https://ge.globo.com/rj/futebol/campeonato-carioca/noticia/2026/01/10/guia-do-carioca-2026-saiba-tudo-sobre-o-campeonato-que-comeca-neste-sabado.ghtml"
+
+
+def _outro_campeonato(rival, competicao, periodo, nf, nr, fontes):
+    assert nf > nr
+    numeros = {**EXTENSO, 21: "vinte e um", 24: "vinte e quatro", 33: "trinta e três", 40: "quarenta"}
+    esq = _desafio(rival, LIBERTADORES[rival])
+    esq.update(chave="titulos_" + rival.lower().replace(" ", "_") + "_" + competicao.lower().replace(" ", "_"),
+               fato={"competicao": competicao, "periodo": periodo, "flamengo": nf, "rival": nr}, fontes=fontes)
+    falas = esq["falas"]
+    falas[0]["fala"] = f"Primo, {periodo}, quem tinha mais títulos da {competicao}: Flamengo ou {rival}?"
+    falas[2].update(fala=f"Errou! Flamengo: {numeros[nf]}. {rival}: {numeros[nr]}. Teu palpite não ganhou taça!", carimbo=f"FLA {nf} X {nr}")
+    return esq
+
+
+BANCO += [_outro_campeonato(rival, "Copa do Brasil", "até 2024", 5, nr,
+                           [FONTE_COPA, FONTE_COPA_RANK]) for rival, nr in COPA_2024.items()]
+BANCO += [_outro_campeonato(rival, "liga carioca", "até março de 2026", 40, nr,
+                           [FONTE_CARIOCA, FONTE_CARIOCA_RANK])
+          for rival, nr in {"Vasco": 24, "Fluminense": 33, "Botafogo": 21}.items()]
 
 
 def escolher_banco(data, usados=()):
@@ -173,8 +168,8 @@ def validar(falas):
                         f.get("efeito") if f.get("efeito") == "confete" else None))
     if len({f["quem"] for f in limpas}) < 2:
         raise ValueError("esquete precisa dos dois personagens")
-    if limpas[0]["quem"] != "primo":
-        raise ValueError("gancho é do primo (é ele que chega provocando)")
+    if limpas[0]["quem"] != "rubro" or "?" not in limpas[0]["fala"]:
+        raise ValueError("Juninho abre com uma pergunta de títulos")
     if limpas[-1]["quem"] != "rubro" or "?" not in limpas[-1]["fala"]:
         raise ValueError("última fala é do Juninho e é pergunta pra Nação")
     if not any(f.get("carimbo") for f in limpas):
@@ -247,56 +242,16 @@ def checar_fatos(falas, contexto):
 # =============================================================================
 #  GROQ — esquete nova todo dia, com o contexto REAL do dia
 # =============================================================================
-SISTEMA_ESQUETE = """Você escreve esquetes curtas de humor para o Instagram @mengaodasala.
-Personagens (ficção, desenho animado):
-- JUNINHO (quem="rubro"): flamenguista apaixonado, dono da sala, exagerado, bom de resposta,
-  fala gíria carioca leve ("Nação", "Mengão", "segue o líder", "primo").
-- PRIMO SECADOR (quem="primo"): primo que visita só pra secar o Flamengo. Irônico, contido,
-  vive no celular. NUNCA diz qual é o time dele.
-Regras obrigatórias:
-- 6 a 8 falas. A 1ª é do primo e já provoca. Cada resposta sobe o tom. Uma VIRADA engraçada
-  perto do fim (marque "plano":"impacto" e um "carimbo" de até 3 palavras).
-- A última fala é do Juninho e é uma PERGUNTA para a torcida comentar.
-- Cada fala com no máximo 110 caracteres, frases faladas, naturais, sem hashtag e sem emoji.
-- Só use fatos que estão em DADOS. Não invente placar, jogador, lesão, contratação nem polêmica.
-  Não cite NENHUM clube, jogador ou técnico que não esteja escrito em DADOS, e não diga número
-  de pontos, gols, rodadas ou posição que não esteja em DADOS (o texto é checado e recusado).
-  Se DADOS vier vazio, faça humor atemporal de sala (sofá, controle, mania, família, vizinho).
-- Zoeira leve de futebol. Proibido palavrão, ofensa pessoal, preconceito, violência, política.
-- Números por extenso na fala (ex.: "três pontos").
-Responda SÓ JSON: {"capa":"TÍTULO CURTO EM 2 LINHAS COM \\n","falas":[{"quem":"primo|rubro",
-"fala":"...","humor":"...","gesto":"...","reacao":"...","plano":"dupla|close|impacto",
-"carimbo":"... ou null","efeito":"confete ou null"}]}
-humor: neutra euforico indignado tenso debochado rindo chocado sofrendo
-gesto: repouso explicar apontar bracos_cima facepalm ombros cruzar peito celular maos_juntas contar
-reacao (o que o outro faz ouvindo): revirar rir nao sim cruzar celular choque sofrer orgulho"""
+SISTEMA_ESQUETE = "Juninho pergunta; rival erra; Juninho corrige com títulos verificados e vence a resenha."
 
 
 def esquete_groq(contexto: dict | None):
-    chave = os.environ.get("GROQ_API_KEY")
-    if not chave or os.environ.get("FLAMENGO_DIALOGO_IA", "1") == "0":
-        return None
-    try:
-        from src.flamengo.coletor.pos_jogo import GROQ_URL, escolher_modelo, pegar
-        modelo = escolher_modelo(chave)
-        if not modelo:
-            return None
-        corpo = {"model": modelo, "temperature": 0.9, "max_tokens": 1800,
-                 "response_format": {"type": "json_object"},
-                 "messages": [{"role": "system", "content": SISTEMA_ESQUETE},
-                              {"role": "user", "content": "DADOS:\n" + json.dumps(contexto or {}, ensure_ascii=False)[:4000]}]}
-        if modelo.startswith("openai/gpt-oss"):
-            corpo["reasoning_effort"] = "low"
-        cod, resp = pegar(GROQ_URL, dados=json.dumps(corpo).encode("utf-8"),
-                          cab={"Authorization": f"Bearer {chave}", "Content-Type": "application/json"})
-        bruto = json.loads(resp["choices"][0]["message"]["content"])
-        falas = checar_fatos(validar(bruto.get("falas")), contexto)
-        capa = str(bruto.get("capa") or "O PRIMO\nCHEGOU").upper()[:28]
-        print(f"[esquete] Groq ({modelo}): {len(falas)} falas")
-        return dict(chave="ia", capa=capa, falas=falas)
-    except Exception as exc:                     # qualquer falha -> banco
-        print(f"[esquete] Groq recusada, usando o banco: {exc}")
-        return None
+    """Comparações de títulos usam exclusivamente o banco conferido.
+
+    A IA livre não consegue garantir a correção da resposta e a vantagem
+    do Flamengo; o rodízio com memória mantém a diversidade do banco.
+    """
+    return None
 
 
 def cta(data):

@@ -7,11 +7,17 @@ from src.flamengo.diario import agenda, FLA, _utc
 
 
 def deve_verificar(agora, jogos, ultimo):
-    return any(j.get('id') != ultimo and timedelta(0) <= agora-_utc(j['utc']) <= timedelta(hours=8) for j in jogos)
+    return any(j.get('id') != ultimo and timedelta(0) <= agora-_utc(j['utc']) <= timedelta(hours=24) for j in jogos)
 
 
 def main():
     feitos, futuros = agenda(FLA)
+    if not feitos and not futuros:
+        raise RuntimeError('Agenda indisponível: não é possível concluir que não há partida. Tentar novamente.')
+    if feitos:
+        print('Último jogo encerrado na fonte:', feitos[-1]['id'], feitos[-1]['utc'])
+    if futuros:
+        print('Próximo jogo na fonte:', futuros[0]['id'], futuros[0]['utc'])
     p = Path('data/ultimo_video.json')
     ultimo = json.loads(p.read_text()).get('id') if p.exists() else None
     ativo = deve_verificar(datetime.now(timezone.utc), feitos, ultimo)

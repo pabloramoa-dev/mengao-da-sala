@@ -316,6 +316,10 @@ def legenda_post(pauta: dict) -> str:
     if perg:
         linhas += ["", perg + " 👇"]
     if pauta.get("fonte"): linhas += ["", "Fonte histórica: " + pauta["fonte"]]
+    if pauta.get("comparacao_titulos"):
+        f = pauta["comparacao_titulos"]
+        linhas += ["", f"Resenha fictícia; comparação: {f['competicao']}, {f['periodo']}. Rival: {pauta['rival']}."]
+        linhas += ["Fontes: " + url for url in pauta.get("fontes", [])]
     linhas += ["", "Segue o @mengaodasala 🔴⚫", "", HASHTAGS]
     return "\n".join(linhas) + "\n"
 
