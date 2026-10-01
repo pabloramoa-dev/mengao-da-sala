@@ -17,6 +17,9 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+MAX_TITULO = 150          # título maior que isso é post de rede social, não manchete
+NAO_SAO_NOMES = {"flamengo", "mengao", "libertadores", "brasileirao", "campeonato", "brasileiro", "copa",
+                 "brasil", "saiba", "confira", "veja", "rubro", "negro", "nacao", "maracana"}
 UA = "Mozilla/5.0 (compatible; MengaoDaSalaBot/1.0; +https://github.com/pabloramoa-dev/mengao-da-sala)"
 RUMOR = ("negocia", "interesse", "sonda", "estaria", "pode ", "avalia", "alvo", "especula", "proposta", "quer ")
 TEMAS = {
@@ -88,6 +91,8 @@ def ler_espn(raw: bytes, fonte: dict) -> list[dict]:
 
 
 def eh_do_flamengo(it, cfg) -> bool:
+    if not it["titulo"] or len(it["titulo"]) > MAX_TITULO:
+        return False
     t = " " + _norm(it["titulo"] + " " + it["resumo"]) + " "
     if not any(_norm(p) in t for p in cfg["palavras_obrigatorias"]):
         return False
@@ -110,6 +115,29 @@ def agrupar(itens: list[dict], limiar=0.45) -> list[dict]:
         else:
             grupos.append({"tokens": tk, "itens": [it]})
     return grupos
+
+
+def _nomes(titulo: str) -> set[str]:
+    """Nomes próprios do título (Arrascaeta, Fux, Jardim...) para achar a mesma história."""
+    return {_norm(w).strip() for w in re.findall(r"\b[A-ZÁÉÍÓÚÂÊÔÃÕÇ][\wÀ-ÿ]{3,}", titulo)} - NAO_SAO_NOMES
+
+
+def fundir_mesmo_assunto(pautas: list[dict]) -> list[dict]:
+    """Junta pautas do mesmo tema que citam o mesmo nome próprio (ex.: duas do Arrascaeta).
+    A de maior nota fica; a outra vira 'relacionada' e soma veículos."""
+    finais = []
+    for p in sorted(pautas, key=lambda x: x["nota"], reverse=True):
+        nomes = _nomes(p["titulo"])
+        alvo = next((f for f in finais if f["tema"] == p["tema"] and nomes & f["_nomes"]), None)
+        if alvo:
+            alvo["relacionadas"].append(dict(titulo=p["titulo"], rumor=p["rumor"]))
+            alvo["veiculos"] = sorted(set(alvo["veiculos"]) | set(p["veiculos"]))
+            alvo["links"] = (alvo["links"] + p["links"])[:6]
+        else:
+            finais.append(dict(p, relacionadas=[], _nomes=nomes))
+    for f in finais:
+        f.pop("_nomes")
+    return finais
 
 
 def classificar(titulo: str) -> tuple[str, bool]:
@@ -148,6 +176,7 @@ def coletar(cfg_path="config/fontes_noticias.json", horas=24, relatorio=None):
         pautas.append(dict(titulo=principal["titulo"], tema=tema, rumor=rumor, veiculos=veiculos,
                            links=[i["link"] for i in g["itens"]][:4], nota=nota, em_alta=em_alta,
                            quando=max((i["quando"] for i in g["itens"] if i["quando"]), default=agora).isoformat()))
+    pautas = fundir_mesmo_assunto(pautas)
     pautas.sort(key=lambda p: p["nota"], reverse=True)
     saida = dict(coletado_em=agora.isoformat(), janela_horas=horas, pautas=pautas[:15],
                  assunto_do_momento_br=trends[:10], saude_fontes=saude)
@@ -165,6 +194,7 @@ if __name__ == "__main__":
         print(("  OK  " if s["ok"] else "  FALHOU ") + s["id"], s.get("itens", ""), "itens /", s.get("do_fla", ""), "do Fla" if s["ok"] else s.get("erro", ""))
     print("\nTOP PAUTAS DO DIA")
     for p in r["pautas"][:8]:
-        print(f"  [{p['nota']:>3}] {p['tema']:<9}{' (RUMOR)' if p['rumor'] else ''} {p['titulo']}  — {', '.join(p['veiculos'][:3])}")
+        print(f"  [{p['nota']:>3}] {p['tema']:<9}{' (RUMOR)' if p['rumor'] else ''} {p['titulo']}  — {', '.join(p['veiculos'][:3])}"
+              + (f"  (+{len(p['relacionadas'])} relacionada)" if p.get("relacionadas") else ""))
     if not any(s["ok"] for s in r["saude_fontes"] if s["id"] != "trends_br"):
         sys.exit("nenhuma fonte respondeu")
