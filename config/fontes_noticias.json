@@ -1,5 +1,5 @@
 {
-  "_nota": "Fontes gratuitas e sem chave. Cada uma é testada no runner do GitHub pelo workflow teste_noticias.yml; a que falhar é só pulada.",
+  "_nota": "Fontes gratuitas e sem chave. Cada uma é testada no runner do GitHub pelo workflow teste_noticias.yml; a que falhar é só pulada. Removidas em 01/10/2026: futebolinterior (feed vazio) e reddit_fla (403 no runner).",
   "fontes": [
     {"id": "gnews_fla", "tipo": "rss", "peso": 3, "nome": "Google Notícias — Flamengo",
      "url": "https://news.google.com/rss/search?q=Flamengo+when:1d&hl=pt-BR&gl=BR&ceid=BR:pt-419"},
@@ -16,11 +16,12 @@
     {"id": "placar", "tipo": "rss", "peso": 1, "nome": "Placar", "url": "https://placar.com.br/feed/"},
     {"id": "bolavip", "tipo": "rss", "peso": 1, "nome": "Bolavip — Brasileirão",
      "url": "https://br.bolavip.com/rss/feed/category/campeonato-brasileirao"},
-    {"id": "futebolinterior", "tipo": "rss", "peso": 1, "nome": "Futebol Interior", "url": "https://www.futebolinterior.com.br/feed/"},
+    {"id": "gnews_jogos", "tipo": "rss", "peso": 2, "nome": "Google Notícias — jogos e competições",
+     "url": "https://news.google.com/rss/search?q=Flamengo+(Libertadores+OR+Brasileir%C3%A3o+OR+Copa+do+Brasil)+when:1d&hl=pt-BR&gl=BR&ceid=BR:pt-419"},
+    {"id": "gnews_tecnico", "tipo": "rss", "peso": 1, "nome": "Google Notícias — técnico e diretoria",
+     "url": "https://news.google.com/rss/search?q=Flamengo+(t%C3%A9cnico+OR+treinador+OR+diretoria+OR+presidente)+when:1d&hl=pt-BR&gl=BR&ceid=BR:pt-419"},
     {"id": "trends_br", "tipo": "trends", "peso": 0, "nome": "Google Trends Brasil (assunto do momento)",
-     "url": "https://trends.google.com/trending/rss?geo=BR"},
-    {"id": "reddit_fla", "tipo": "rss", "peso": 0, "nome": "r/flamengo (humor da torcida, só agregado)",
-     "url": "https://www.reddit.com/r/flamengo/top/.rss?t=day"}
+     "url": "https://trends.google.com/trending/rss?geo=BR"}
   ],
   "palavras_obrigatorias": ["flamengo", "mengão", "mengao", "rubro-negro", "rubro-negra", "fla "],
   "ignorar": ["feminino", "sub-17", "sub-20", "basquete", "vôlei", "volei", "aposta", "palpite", "odds", "onde assistir"]
