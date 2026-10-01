@@ -139,9 +139,9 @@ recorte e recebem outras perguntas. Santos tem zero desde 2003.
    sem depender da antiga lista de três competições. O teste real encontrou
    Brasileirão, Libertadores, Copa do Brasil, Carioca, Supercopa e Recopa em 2026.
    Summary/boxscore dá status, gols, pênaltis, substituições e estatísticas.
-2. ESPN standings: classificação completa com ano da temporada. `gamesPlayed`
-   era lido incorretamente como `jogos`; ambos agora são tratados como aliases.
-   Ausência de estatística obrigatória bloqueia a tabela, não vira zero.
+2. ESPN standings: classificação completa com ano da temporada. O campo
+   `gamesPlayed` já era lido; agora `jogos` também é aceito como alias.
+   A melhoria é bloquear estatística obrigatória ausente, em vez de preencher zero.
 3. CBF: tabela detalhada, regulamento e súmulas para conferir jogos nacionais:
    https://www.cbf.com.br/futebol-brasileiro
 4. FERJ: calendário, súmulas e regulamento do Carioca:
