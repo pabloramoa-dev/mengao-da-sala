@@ -1,11 +1,18 @@
 {
-  "data": "2026-10-01",
-  "formato": "contagem",
+  "data": "2026-10-02",
+  "formato": "o_sofa_nao_aguenta",
   "episodios": [
     "primo:analista",
-    "primo:calma"
+    "primo:calma",
+    "sofa:controle"
   ],
   "fatos_usados": [
     "lima2019"
+  ],
+  "historico": [
+    {
+      "data": "2026-10-02",
+      "formato": "o_sofa_nao_aguenta"
+    }
   ]
 }

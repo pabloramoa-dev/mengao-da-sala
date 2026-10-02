@@ -146,6 +146,20 @@
       "versao_editorial": 3,
       "container_id": "18121119157786157",
       "media_id": "17889495600616221"
+    },
+    {
+      "chave": "e8e13d510f1fbe85e09e0fb0",
+      "formato": "o_sofa_nao_aguenta",
+      "status": "publicado",
+      "atualizado_em": "2026-10-02T19:16:56.996236+00:00",
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": null,
+      "duracao_segundos": 20.517999999999997,
+      "versao_editorial": 4,
+      "container_id": "18121431520786157",
+      "media_id": "17867519163659685"
     }
   ]
 }
