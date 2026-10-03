@@ -1,10 +1,11 @@
 {
-  "data": "2026-10-02",
-  "formato": "o_sofa_nao_aguenta",
+  "data": "2026-10-03",
+  "formato": "primo_rival",
   "episodios": [
     "primo:analista",
     "primo:calma",
-    "sofa:controle"
+    "sofa:controle",
+    "primo:titulos_internacional_supercopa_do_brasil"
   ],
   "fatos_usados": [
     "lima2019"
@@ -13,6 +14,10 @@
     {
       "data": "2026-10-02",
       "formato": "o_sofa_nao_aguenta"
+    },
+    {
+      "data": "2026-10-03",
+      "formato": "primo_rival"
     }
   ]
 }
