@@ -1,6 +1,6 @@
 {
-  "data": "2026-10-03",
-  "formato": "primo_rival",
+  "data": "2026-10-04",
+  "formato": "a_nacao_escala",
   "episodios": [
     "primo:analista",
     "primo:calma",
@@ -18,6 +18,10 @@
     {
       "data": "2026-10-03",
       "formato": "primo_rival"
+    },
+    {
+      "data": "2026-10-04",
+      "formato": "a_nacao_escala"
     }
   ]
 }

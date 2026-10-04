@@ -61,25 +61,6 @@
       "media_id": "18131975734672149"
     },
     {
-      "chave": "5005d013649c8c651f459429",
-      "formato": "a_nacao_escala",
-      "status": "publicado",
-      "atualizado_em": "2026-09-30T19:14:41.060778+00:00",
-      "jogo_id": null,
-      "enquete": {
-        "id": "estilo",
-        "pergunta": "Para o próximo jogo: atacar desde o início ou controlar primeiro?",
-        "opcoes": {
-          "A": "atacar desde o início",
-          "B": "controlar primeiro"
-        }
-      },
-      "duracao_segundos": 12.780000000000001,
-      "versao_editorial": 3,
-      "container_id": "18120810439786157",
-      "media_id": "18239441116315960"
-    },
-    {
       "chave": "46ee3cfd51a0cf0457b3e651",
       "formato": "story",
       "status": "publicado",
@@ -202,6 +183,27 @@
       "versao_editorial": 3,
       "container_id": "18121726552786157",
       "media_id": "18110052212606876"
+    },
+    {
+      "chave": "5005d013649c8c651f459429",
+      "formato": "a_nacao_escala",
+      "status": "publicado",
+      "atualizado_em": "2026-10-04T18:09:21.513442+00:00",
+      "jogo_id": null,
+      "enquete": {
+        "id": "estilo",
+        "pergunta": "Para o próximo jogo: atacar desde o início ou controlar primeiro?",
+        "opcoes": {
+          "A": "atacar desde o início",
+          "B": "controlar primeiro"
+        }
+      },
+      "duracao_segundos": 17.971999999999998,
+      "versao_editorial": 4,
+      "container_id": "18120810439786157",
+      "media_id": "18239441116315960",
+      "semana": null,
+      "coletado_em": null
     }
   ]
 }
