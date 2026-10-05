@@ -164,7 +164,7 @@ def coletar(cfg_path="config/fontes_noticias.json", horas=24, relatorio=None):
                 saude.append(dict(id=f["id"], ok=True, itens=len(itens), do_fla=None, ms=int((time.time()-t0)*1000)))
                 continue
             fla = [dict(i, fonte=f["id"], peso=f["peso"]) for i in itens
-                   if eh_do_flamengo(i, cfg) and (i["quando"] is None or i["quando"] >= corte)]
+                   if eh_do_flamengo(i, cfg) and (i["quando"] is not None and corte <= i["quando"] <= agora)]
             todos += fla
             saude.append(dict(id=f["id"], ok=True, itens=len(itens), do_fla=len(fla), ms=int((time.time()-t0)*1000)))
         except Exception as e:
@@ -175,9 +175,9 @@ def coletar(cfg_path="config/fontes_noticias.json", horas=24, relatorio=None):
         veiculos = sorted({i["veiculo"] for i in g["itens"]})
         tema, rumor = classificar(principal["titulo"])
         em_alta = any(_norm(tr) in _norm(principal["titulo"]) for tr in trends if len(tr) > 3)
-        nota = sum(i["peso"] for i in g["itens"]) + 2 * len(veiculos) + (5 if em_alta else 0)
+        nota = sum(max(i["peso"] for i in g["itens"] if i["veiculo"] == v) for v in veiculos) + 2 * len(veiculos) + (5 if em_alta else 0)
         pautas.append(dict(titulo=principal["titulo"], tema=tema, rumor=rumor, veiculos=veiculos,
-                           links=[i["link"] for i in g["itens"]][:4], nota=nota, em_alta=em_alta,
+                           links=[i["link"] for i in g["itens"]][:4], artigos=[dict(link=i["link"], veiculo=i["veiculo"], quando=i["quando"].isoformat()) for i in g["itens"]][:4], nota=nota, em_alta=em_alta,
                            quando=max((i["quando"] for i in g["itens"] if i["quando"]), default=agora).isoformat()))
     pautas = fundir_mesmo_assunto(pautas)
     pautas.sort(key=lambda p: p["nota"], reverse=True)

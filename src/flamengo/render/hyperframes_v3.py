@@ -27,11 +27,11 @@ import subprocess
 from pathlib import Path
 
 from src.flamengo.render import hyperframes as hf
-from src.flamengo.render import personagens_v3 as P
+from src.flamengo.render import personagens_v4 as P
 
-VERSION = "hyperframes-v3"
+VERSION = "hyperframes-v4-gil-cida"
 WIDTH, HEIGHT, FPS = hf.WIDTH, hf.HEIGHT, hf.FPS
-NOMES = hf.NOMES
+NOMES = {"rubro": "GIL", "primo": "DONA CIDA"}
 # posição dos personagens na cena (translate, escala) e centro da cabeça para a câmera
 POS = {"rubro": (318, 842, .86), "primo": (790, 800, .84)}
 REACAO = {
@@ -179,18 +179,18 @@ def tela_tv(pauta: dict, b: dict, i: int, font_path: Path) -> str:
     if b.get("carimbo") or d.get("cartao"):
         p = dict(p, titulo=str(b.get("carimbo") or d.get("cartao")).upper())
     if p["tag"] == "RESENHA DO SOFÁ":
-        p = dict(p, tag="AO VIVO DA SALA")
+        p = dict(p, tag="RESENHA DA NAÇÃO")
     if tipo == "noticia":
         p = dict(p, tag="RUMOR · SEM CONFIRMAÇÃO" if d.get("rumor") else "NOTÍCIA DO DIA")
     elif tipo == "abre" and d.get("cartao"):
-        p = dict(p, tag="AO VIVO DA SALA")
+        p = dict(p, tag="RESENHA DA NAÇÃO")
     proprio = b.get("carimbo") or d.get("cartao") or tipo in ("placar", "tabela", "nota", "mexida", "cta")
     if not proprio:
         # sem dado próprio: a TV não repete a legenda; mostra o confronto ou mantém a tela anterior
         if pauta.get("rival"):
             p = dict(p, tag="RESENHA AO VIVO", titulo=f"MENGÃO × {str(pauta['rival']).upper()}")
         elif i == 0:
-            p = dict(p, tag="AO VIVO DA SALA", titulo=str(pauta.get("capa") or "MENGÃO DA SALA").upper())
+            p = dict(p, tag="RESENHA DA NAÇÃO", titulo=str(pauta.get("capa") or "MENGÃO DA SALA").upper())
         else:
             return None
     if tipo == "placar":
@@ -217,8 +217,11 @@ def svg_cena(pauta: dict) -> str:
     atores = ""
     for q, fn in (("primo", P.primo), ("rubro", P.juninho)):      # Juninho na frente
         x, y, k = POS[q]
+        if pauta.get("solo"):
+            x, y, k = 540, 820, .94
         e, g = direcao(b0, q)
-        atores += f'<g transform="translate({x},{y}) scale({k})">{fn(e, g)}</g>'
+        oculto = ' style="display:none"' if pauta.get('solo') and pauta['solo'] != q else ''
+        atores += f'<g{oculto} transform="translate({x},{y}) scale({k})">{fn(e, g)}</g>'
     cx, cy = WIDTH / 2, 1000
     return (f'<svg id="cena" xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}">'
             f'{P.defs()}<g id="cam" transform="translate({cx},{cy}) scale(1) translate({-cx},{-cy})">'
@@ -285,7 +288,7 @@ def escrever_composicao(conteudo: dict, projeto: Path, font_path: Path, cues: li
             A(f'tl.to("#{quem}-cotoveloD",{{attr:{{transform:"rotate({-(c_d + 16)})"}},duration:.18,yoyo:true,repeat:1,ease:"sine.inOut"}},{a + d*.5 + .3:.3f});')
         # câmera
         forte = i and (b.get("plano") in {"close", "impacto"} or b.get("humor") in INTENSOS)
-        x, y = cabeca(quem) if forte else (WIDTH / 2, 1000)
+        x, y = ((540, 780) if conteudo.get("solo") else cabeca(quem)) if forte else (WIDTH / 2, 1000)
         esc = (1.2 if b.get("plano") == "impacto" else 1.13) if forte else 1.0
         A(f'tl.to("#cam",{{attr:{{transform:"{_cam(x, y, esc)}"}},duration:.45,ease:"power2.out"}},{a});')
         if i:
@@ -341,7 +344,7 @@ def escrever_composicao(conteudo: dict, projeto: Path, font_path: Path, cues: li
         f'<style>{css}</style></head><body>'
         f'<div id="root" data-composition-id="mengao-v3" data-start="0" data-width="{WIDTH}" data-height="{HEIGHT}" data-duration="{dur}" data-fps="{FPS}">'
         f'{svg_cena(conteudo)}'
-        '<header><div class="brand">MENGÃO DA SALA</div><div class="live"><span id="status"></span>AO VIVO DA SALA</div></header>'
+        '<header><div class="brand">MENGÃO DA SALA</div><div class="live"><span id="status"></span>RESENHA DA NAÇÃO</div></header>'
         f'<div class="banner"><div class="selo">{hf._escape(selo)}</div>'
         f'<div class="capa" style="font-size:{capa_tam}px">{hf._escape(capa)}</div></div>'
         f'{"".join(clips)}'

@@ -68,7 +68,7 @@ class HyperFramesTests(unittest.TestCase):
 
     def test_motor_padrao_cobre_solo_e_dupla_sem_exigir_nova_fala(self):
         for b in [[roteiro.batida('Um torcedor no sofá.', tipo='reacao')], self.conteudo()['batidas']]:
-            pauta = dict(formato='o_sofa_nao_aguenta', humor='euforico', capa='SALA', batidas=b)
+            pauta = dict(formato='o_sofa_nao_aguenta', humor='euforico', capa='SALA', batidas=b, versao_editorial=5)
             with tempfile.TemporaryDirectory() as d, patch.dict('os.environ', {}, clear=True), patch.object(gerar, 'gerar_v3', return_value=Path(d)/'video.mp4') as render:
                 gerar.gerar({'pauta': pauta}, 'diario', Path(d)/'video.mp4')
                 dirigido = render.call_args.args[0]
@@ -76,14 +76,15 @@ class HyperFramesTests(unittest.TestCase):
                 self.assertEqual([x['fala'] for x in dirigido['batidas']][:len(b)], [x['fala'] for x in b])
                 self.assertEqual(dirigido['batidas'][-1]['tipo'], 'cta')
 
-    def test_motor_anterior_continua_acessivel_para_recuperacao(self):
+    def test_pauta_legada_bloqueada_mesmo_com_motor_antigo(self):
         pauta = dict(formato='o_sofa_nao_aguenta', humor='euforico', capa='SALA',
                      batidas=[roteiro.batida('Um torcedor no sofá.', tipo='reacao')])
         with tempfile.TemporaryDirectory() as d, patch.dict('os.environ', {'FLAMENGO_MOTOR': 'dupla'}, clear=True), \
                 patch.object(gerar, 'gerar_hyperframes', return_value=Path(d)/'video.mp4') as antigo, \
                 patch.object(gerar, 'gerar_v3') as novo:
-            gerar.gerar({'pauta': pauta}, 'diario', Path(d)/'video.mp4')
-            antigo.assert_called_once()
+            with self.assertRaisesRegex(ValueError, 'legada'):
+                gerar.gerar({'pauta': pauta}, 'diario', Path(d)/'video.mp4')
+            antigo.assert_not_called()
             novo.assert_not_called()
 
     def test_placar_nao_confirmado_continua_bloqueado_antes_do_render(self):

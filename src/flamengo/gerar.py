@@ -41,10 +41,13 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
         print("[trava] sem partida encerrada e confirmada — nenhum vídeo hoje")
         return None
 
+    if pauta.get("versao_editorial", 0) < 5:
+        raise ValueError("Pauta legada desativada: use src.flamengo.programacao (Gil/Cida).")
     pauta = quadros.dirigir(pauta)
+    pauta["versao_editorial"] = 5
     destino = destino.resolve()
     trab = destino.parent / f"trab_{destino.stem}"
-    motor = os.environ.get("FLAMENGO_MOTOR", "v3")
+    motor = "v3" # Elenco novo obrigatório; não retornar aos personagens retirados.
     if motor == "v3":
         return gerar_v3(pauta, destino, trab, snapshot)
     # Recuperação deliberada: FLAMENGO_MOTOR=dupla (ou hyperframes) volta ao motor aprovado em 30/09.

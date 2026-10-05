@@ -75,7 +75,7 @@ class ComposicaoTests(unittest.TestCase):
     @unittest.skipUnless(FONT.is_file(), 'fonte DejaVu ausente')
     def test_composicao_anima_rig_e_marca_versao(self):
         meta, html = self.escrever(self.conteudo())
-        self.assertEqual(meta['versao_visual'], 'hyperframes-v3')
+        self.assertEqual(meta['versao_visual'], 'hyperframes-v4-gil-cida')
         self.assertEqual(meta['personagens'], 'rig-svg-v3')
         self.assertIn('window.__timelines["mengao-v3"]', html)
         self.assertIn('#rubro-fala-aberta', html)            # boca pelo áudio

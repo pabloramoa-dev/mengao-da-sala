@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   recuperar:
-    if: vars.PUBLICAR == 'true'
+    if: false # Arquivado: elenco antigo. Recuperação agora usa recibos da cobertura.
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

@@ -35,28 +35,13 @@ jobs:
         with:
           path: ~/.cache/flamengo_kokoro
           key: kokoro-v1
-      - name: Gerar amostras v3 sem publicar (plantao, primo rival e pos-jogo ficticio)
+      - name: Gerar amostras Gil e Cida sem publicar
         run: |
-          mkdir -p saida
-          python -m tools.teste_v3 --plantao saida/plantao_pauta.json
-          python -m src.flamengo.gerar --formato diario --pauta saida/plantao_pauta.json --out saida/plantao_da_sala_teste.mp4
-          ffmpeg -y -ss 6 -i saida/plantao_da_sala_teste.mp4 -frames:v 1 saida/frame_plantao.png
-          python -c "import json; from src.flamengo.quadros import primo,dirigir; json.dump(dirigir(primo('teste')),open('saida/pauta.json','w'))"
-          python -m src.flamengo.gerar --formato diario --pauta saida/pauta.json --out saida/primo_rival_teste.mp4
-          python -c "import json; from src.flamengo.quadros import sofa,dirigir; json.dump(dirigir(sofa('teste')),open('saida/solo.json','w'))"
-          python -m src.flamengo.gerar --formato diario --pauta saida/solo.json --out saida/sofa_teste.mp4
-          ffmpeg -y -ss 2 -i saida/sofa_teste.mp4 -frames:v 1 saida/frame_solo.png
-          python tools/teste_hyperframes.py --analise saida/analise_teste.json
-          python -m src.flamengo.gerar --formato pos_jogo_v2 --analise saida/analise_teste.json --out saida/pos_jogo_teste.mp4
-          python tools/teste_hyperframes.py --conferir saida/plantao_da_sala_teste.json saida/primo_rival_teste.json saida/sofa_teste.json saida/pos_jogo_teste.json
-          ffmpeg -y -ss 2 -i saida/pos_jogo_teste.mp4 -frames:v 1 saida/frame_pos_jogo.png
-          python -m tools.teste_cobertura
-          python -m src.flamengo.gerar --formato diario --pauta saida/pre_pauta_teste.json --out saida/pre_jogo_teste.mp4
-          python -m src.flamengo.gerar --formato diario --pauta saida/tabela_pauta_teste.json --out saida/tabela_semanal_teste.mp4
-          python tools/teste_hyperframes.py --conferir saida/pre_jogo_teste.json saida/tabela_semanal_teste.json
-          ffmpeg -y -ss 14 -i saida/tabela_semanal_teste.mp4 -frames:v 1 -update 1 saida/frame_tabela.png
-          python -m src.flamengo.stories --pauta saida/pauta.json
-          ffmpeg -y -ss 2 -i saida/primo_rival_teste.mp4 -frames:v 1 saida/frame_teste.png
+          python -m tools.teste_gil_cida --render-silencioso
+          for quadro in pre palpite pos; do
+            ffmpeg -y -ss 2 -i "saida/${quadro}_teste.mp4" -frames:v 1 "saida/${quadro}_frame.png"
+          done
+          python -m src.flamengo.render.tabela_card --pauta saida/tabela_pauta.json --out saida/tabela_teste.jpg
       - uses: actions/upload-artifact@v4
         with:
           name: amostra-hyperframes-producao
@@ -65,6 +50,7 @@ jobs:
             saida/*.json
             saida/*.txt
             saida/*.png
+            saida/*.jpg
             saida/stories/*.png
           retention-days: 30
 

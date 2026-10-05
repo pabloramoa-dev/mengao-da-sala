@@ -7,6 +7,10 @@ REGISTRO = Path('data/publicacoes.json')
 
 
 def chave(legenda, meta):
+    if meta.get('formato') == 'palpite_cida' and meta.get('jogo_id'):
+        return 'palpite:' + str(meta['jogo_id'])
+    if meta.get('formato') == 'tabela_card' and meta.get('dia'):
+        return 'card:' + meta['dia']
     if meta.get('jogo_id') and meta.get('formato') in {'pos_jogo_v2', 'pre_jogo'}:
         return ('pos:' if meta['formato'] == 'pos_jogo_v2' else 'pre:') + str(meta['jogo_id'])
     if meta.get('formato') == 'tabela_semanal' and meta.get('semana'):
@@ -32,6 +36,7 @@ def registrar(legenda, meta, status, **extra):
     antigo = next((x for x in ler()['itens'] if x['chave'] == k), {})
     item = {**antigo, 'chave':k, 'formato':meta.get('formato'), 'status':status,
             'atualizado_em':datetime.now(timezone.utc).isoformat(),
+            'dia':meta.get('dia'), 'palpite':meta.get('palpite'), 'jogo_utc':meta.get('jogo_utc'),
             'jogo_id':meta.get('jogo_id'), 'enquete':meta.get('enquete'),
             'semana':meta.get('semana'), 'coletado_em':meta.get('coletado_em'),
             'duracao_segundos':meta.get('duracao_segundos'),

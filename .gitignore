@@ -7,3 +7,5 @@ __pycache__/
 data/metricas.json
 docs/RESULTADOS_30_DIAS.md
 *Chave_Relatorios.pem
+
+saida/
