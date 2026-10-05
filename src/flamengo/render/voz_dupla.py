@@ -38,8 +38,8 @@ from src.flamengo.render.voz import masterizar
 
 SR = 44100
 VOZES = {
-    "rubro": dict(voz="pt-BR-AntonioNeural", rate=6, reserva="pm_alex"),
-    "primo": dict(voz="en-US-AndrewMultilingualNeural", rate=-4, reserva="pm_santa"),
+    "rubro": dict(voz="pt-BR-AntonioNeural", rate=-2, reserva="pm_alex"),
+    "primo": dict(voz="pt-BR-FranciscaNeural", rate=-2, reserva="pf_dora"),
 }
 # humor -> (ajuste de velocidade em %, ajuste de tom em Hz)
 EMOCAO = {"euforico": (8, 6), "indignado": (5, 3), "tenso": (6, 2), "chocado": (3, 8),

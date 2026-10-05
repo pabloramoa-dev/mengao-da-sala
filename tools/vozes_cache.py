@@ -14,8 +14,8 @@ import json
 import sys
 from pathlib import Path
 
-VOZES = {"rubro": dict(voz="pt-BR-AntonioNeural", rate=6),
-         "primo": dict(voz="en-US-AndrewMultilingualNeural", rate=-4)}
+VOZES = {"rubro": dict(voz="pt-BR-AntonioNeural", rate=-2),
+         "primo": dict(voz="pt-BR-FranciscaNeural", rate=-2)}
 EMOCAO = {"euforico": (8, 6), "indignado": (5, 3), "tenso": (6, 2), "chocado": (3, 8),
           "rindo": (4, 4), "debochado": (-5, -3), "sofrendo": (-8, -5), "neutra": (0, 0)}
 

@@ -1,164 +1,118 @@
-name: Cobertura completa do Flamengo
-
-# Pré/pós de todas as partidas da agenda agregada e tabela toda segunda às 19h BRT.
-# Recibos por partida e semana; uma pendência processada em cada execução.
-# PUBLICA SOMENTE se a variavel do repositorio PUBLICAR=true. Sem ela: modo ensaio.
-
+name: Gil e Dona Cida — calendário do Flamengo
 on:
   schedule:
-    - cron: "11,31,51 * * * *" # fila independente; pré/pós por jogo e tabela semanal
+    - cron: '0,10,20,30,40,50 * * * *'
   workflow_dispatch:
     inputs:
       ensaio:
-        description: "Gerar sem publicar"
+        description: Gerar sem publicar
         type: boolean
         default: true
-
+  workflow_call:
+    inputs:
+      ensaio:
+        type: boolean
+        default: true
 permissions:
   contents: write
-
 concurrency:
-  group: video-pos-jogo          # mesma fila do pos-jogo: os dois fazem commit
+  group: video-pos-jogo
   cancel-in-progress: false
-
 jobs:
-  video:
+  cobertura:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
-      - name: Pauta do dia
+          python-version: '3.11'
+      - name: Reconciliar publicações inconclusivas
+        if: vars.PUBLICAR == 'true' && inputs.ensaio != true
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python -m src.flamengo.reconciliar
+      - name: Selecionar pauta e pesquisar notícias
         id: pauta
         env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}   # esquete do primo com dado real do dia
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           set +e
-          python -m src.flamengo.cobertura --out data/pauta_cobertura.json
+          python -m src.flamengo.programacao --out data/pauta_cobertura.json
           cod=$?
           set -e
-          if [ $cod -eq 3 ]; then
-            echo "tem=false" >> "$GITHUB_OUTPUT"
-            echo "- Sem cobertura nova: partidas/semana já cobertas ou fora da janela." >> "$GITHUB_STEP_SUMMARY"
+          if [ "$cod" -eq 3 ]; then
+            echo 'tem=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          [ $cod -ne 0 ] && exit $cod
-          echo "tem=true" >> "$GITHUB_OUTPUT"
-          echo "tag=$(date -u +%Y%m%d%H%M)" >> "$GITHUB_OUTPUT"
-
-      - name: Dependencias de render
+          [ "$cod" -eq 0 ] || exit "$cod"
+          echo 'tem=true' >> "$GITHUB_OUTPUT"
+          python - <<'PY'
+          import json, os
+          p=json.load(open('data/pauta_cobertura.json'))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('tipo='+('card' if p['formato']=='tabela_card' else 'video')+'\n')
+          PY
+      - name: Dependências
         if: steps.pauta.outputs.tem == 'true'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng fonts-dejavu-core
-          python -m pip install -q -U pip setuptools wheel
           python -m pip install -q -r requirements.txt
-          # fonte da colagem (etiquetas, legenda, carimbo) — a mesma do @previsaorj
-          mkdir -p ~/.local/share/fonts/poppins
-          for f in Poppins-Bold.ttf Poppins-Regular.ttf; do
-            curl -fsSL --retry 3 -o ~/.local/share/fonts/poppins/$f https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/$f
-          done
-          fc-cache -f >/dev/null
-
-      - name: Preparar HyperFrames
-        if: steps.pauta.outputs.tem == 'true'
-        uses: ./.github/actions/setup-hyperframes
-
-      - name: Cache das vozes da dupla
-        if: steps.pauta.outputs.tem == 'true'
-        uses: actions/cache@v4
+      - uses: ./.github/actions/setup-hyperframes
+        if: steps.pauta.outputs.tipo == 'video'
+      - uses: actions/cache@v4
+        if: steps.pauta.outputs.tipo == 'video'
         with:
           path: ~/.cache/flamengo_vozes
-          key: flamengo-edge-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: flamengo-edge-${{ runner.os }}-
-
-      - name: Cache do modelo de voz
+          key: flamengo-gil-cida-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: flamengo-gil-cida-${{ runner.os }}-
+      - name: Gerar Reel
+        if: steps.pauta.outputs.tipo == 'video'
+        env:
+          FLAMENGO_MOTOR: v3
+        run: python -m src.flamengo.gerar --formato diario --pauta data/pauta_cobertura.json --out saida/conteudo.mp4
+      - name: Gerar card
+        if: steps.pauta.outputs.tipo == 'card'
+        run: python -m src.flamengo.render.tabela_card --pauta data/pauta_cobertura.json --out saida/conteudo.jpg
+      - uses: actions/upload-artifact@v4
         if: steps.pauta.outputs.tem == 'true'
-        uses: actions/cache@v4
         with:
-          path: ~/.cache/flamengo_kokoro
-          key: kokoro-v1
-
-      - name: Gerar vídeo com HyperFrames e vozes da dupla
-        if: steps.pauta.outputs.tem == 'true'
-        run: |
-          mkdir -p saida
-          python -m src.flamengo.gerar --formato diario --pauta data/pauta_cobertura.json \
-            --out saida/cobertura_${{ steps.pauta.outputs.tag }}.mp4
-          echo "----- LEGENDA -----"
-          cat saida/cobertura_${{ steps.pauta.outputs.tag }}.txt
-
-      - name: Gerar cards de Stories
-        if: steps.pauta.outputs.tem == 'true'
-        run: python -m src.flamengo.stories --pauta data/pauta_cobertura.json
-
-      - name: Guardar video e legenda
-        if: steps.pauta.outputs.tem == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: reel-cobertura-${{ steps.pauta.outputs.tag }}
+          name: gil-cida-${{ github.run_id }}
           path: |
-            saida/*.mp4
-            saida/*.txt
-            saida/*.json
-            saida/stories/*
+            saida/conteudo.*
             data/pauta_cobertura.json
           retention-days: 30
-
-      - name: Publicar no Instagram
-        id: publicar
+      - name: Publicar no horário e confirmar recibo
         if: steps.pauta.outputs.tem == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
         env:
           GH_TOKEN: ${{ github.token }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           EXPECTED_IG_USERNAME: mengaodasala
+          TIPO: ${{ steps.pauta.outputs.tipo }}
         run: |
-          set -euo pipefail
-          T=${{ steps.pauta.outputs.tag }}
+          python -m src.flamengo.programacao --validar-envio data/pauta_cobertura.json
           python -m src.flamengo.publicar --so-verificar
-          TAG="cobertura-$T"
-          cp "saida/cobertura_$T.mp4" REEL.mp4
-          gh release create "$TAG" REEL.mp4 saida/stories/story_do_dia.png --title "$TAG" --notes "Cobertura @mengaodasala"
-          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/REEL.mp4"
-          python -m src.flamengo.publicar --video-url "$URL" --legenda "saida/cobertura_$T.txt"
-          gh release list --limit 100 --json tagName --jq '.[10:][].tagName' | while read -r R; do
-            gh release delete "$R" --cleanup-tag --yes || true
-          done
-
-      - name: Publicar Story com convite para a resenha
-        if: steps.pauta.outputs.tem == 'true' && vars.PUBLICAR == 'true' && inputs.ensaio != true
-        env:
-          IG_USER_ID: ${{ secrets.IG_USER_ID }}
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-          EXPECTED_IG_USERNAME: mengaodasala
-        run: |
-          URL="https://github.com/${{ github.repository }}/releases/download/cobertura-${{ steps.pauta.outputs.tag }}/story_do_dia.png"
-          python -m src.flamengo.publicar --story --video-url "$URL" --legenda saida/stories/story_do_dia.txt
-
-      - name: Preservar recibo inclusive em falha
+          TAG="cobertura-${{ github.run_id }}-${{ github.run_attempt }}"
+          if [ "$TIPO" = card ]; then
+            gh release create "$TAG" saida/conteudo.jpg --title "$TAG" --notes 'Tabela do Brasileirão'
+            python -m src.flamengo.publicar --image --video-url "https://github.com/${{ github.repository }}/releases/download/$TAG/conteudo.jpg" --legenda saida/conteudo.txt
+          else
+            gh release create "$TAG" saida/conteudo.mp4 --title "$TAG" --notes 'Gil e Dona Cida'
+            python -m src.flamengo.publicar --video-url "https://github.com/${{ github.repository }}/releases/download/$TAG/conteudo.mp4" --legenda saida/conteudo.txt
+          fi
+      - name: Preservar recibos mesmo em falha
         if: always()
         run: |
-          if [ -f data/publicacoes.json ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data/publicacoes.json
-            git diff --cached --quiet || git commit -m "Atualiza recibos de publicação"
-            git pull --rebase -q && git push
-          fi
-
-      - name: Resumo da execução
-        if: always()
-        env:
-          RESULTADO: ${{ job.status }}
-          PUBLICACAO: ${{ steps.publicar.outcome }}
-          TEM_PAUTA: ${{ steps.pauta.outputs.tem }}
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/publicacoes.json
+          git diff --cached --quiet || git commit -m 'Registra publicação Gil/Cida'
+          git pull --rebase -q && git push
+      - name: Aviso de falha
+        if: failure()
         run: |
-          echo "- Resultado: $RESULTADO; pauta: $TEM_PAUTA; publicação: $PUBLICACAO." >> "$GITHUB_STEP_SUMMARY"
-          if [ "$RESULTADO" = "failure" ]; then
-            echo "::error::Falha na cobertura. Consulte a etapa vermelha; vídeo gerado não significa publicado."
-          fi
+          echo '::error::Publicação não confirmada. Nova tentativa na próxima execução; consulte o recibo e as notificações de falha do GitHub Actions.'
+          echo 'Falha na cobertura Gil/Cida. Não confundir artefato gerado com publicação.' >> "$GITHUB_STEP_SUMMARY"
