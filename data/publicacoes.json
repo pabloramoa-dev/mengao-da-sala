@@ -218,6 +218,20 @@
       "versao_editorial": 3,
       "container_id": "18122048692786157",
       "media_id": "18478008985117254"
+    },
+    {
+      "chave": "471182048a0fe2635fedec38",
+      "formato": "contagem",
+      "status": "publicado",
+      "atualizado_em": "2026-10-05T21:31:53.981469+00:00",
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": null,
+      "duracao_segundos": 18.610999999999997,
+      "versao_editorial": 4,
+      "container_id": "18122439079786157",
+      "media_id": "18079645076378284"
     }
   ]
 }

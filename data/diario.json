@@ -1,6 +1,6 @@
 {
-  "data": "2026-10-04",
-  "formato": "a_nacao_escala",
+  "data": "2026-10-05",
+  "formato": "contagem",
   "episodios": [
     "primo:analista",
     "primo:calma",
@@ -22,6 +22,10 @@
     {
       "data": "2026-10-04",
       "formato": "a_nacao_escala"
+    },
+    {
+      "data": "2026-10-05",
+      "formato": "contagem"
     }
   ]
 }
