@@ -28,6 +28,7 @@ from pathlib import Path
 
 from src.flamengo.render import hyperframes as hf
 from src.flamengo.render import personagens_v4 as P
+from src.flamengo.render import quintal
 
 VERSION = "hyperframes-v4-gil-cida"
 WIDTH, HEIGHT, FPS = hf.WIDTH, hf.HEIGHT, hf.FPS
@@ -43,7 +44,7 @@ REACAO = {
 }
 INTENSOS = {"euforico", "indignado", "chocado"}
 SELOS = {"plantao_da_sala": "PLANTÃO DA SALA", "pos_jogo_v2": "PÓS-JOGO", "pos_jogo": "PÓS-JOGO",
-         "pre_jogo": "PRÉ-JOGO", "tabela_semanal": "TABELA DA SEMANA", "primo_rival": "DESAFIO DO PRIMO",
+         "palpite_cida": "PALPITE NO QUINTAL", "pre_jogo": "PRÉ-JOGO", "tabela_semanal": "TABELA DA SEMANA", "primo_rival": "DESAFIO DO PRIMO",
          "o_sofa_nao_aguenta": "RESENHA DO SOFÁ", "voce_sabia": "VOCÊ SABIA?", "conta_do_titulo": "CONTA DO TÍTULO",
          "contagem": "CONTAGEM REGRESSIVA", "zoeira_rival": "ZOEIRA DA SALA", "hoje_tem_mengao": "HOJE TEM MENGÃO",
          "a_nacao_escala": "A NAÇÃO ESCOLHE", "a_nacao_respondeu": "A NAÇÃO RESPONDEU", "eu_avisei": "ANTES E DEPOIS"}
@@ -214,6 +215,11 @@ def caber(texto, font_path, largura, max_linhas, altura, maior, menor):
 
 def svg_cena(pauta: dict) -> str:
     b0 = pauta["batidas"][0]
+    exterior = pauta.get("solo") == "primo" or pauta.get("formato") == "palpite_cida"
+    fundo = quintal.fundo() if exterior else cenario()
+    frente = "" if exterior else f'<g transform="translate(0,85)">{sofa()}</g>'
+    luz = "" if exterior else f'<rect width="{WIDTH}" height="{HEIGHT}" fill="url(#tvluz)" pointer-events="none"/>'
+    painel = quintal.moldura() if exterior else tv_moldura()
     atores = ""
     for q, fn in (("primo", P.primo), ("rubro", P.juninho)):      # Juninho na frente
         x, y, k = POS[q]
@@ -225,9 +231,8 @@ def svg_cena(pauta: dict) -> str:
     cx, cy = WIDTH / 2, 1000
     return (f'<svg id="cena" xmlns="http://www.w3.org/2000/svg" width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}">'
             f'{P.defs()}<g id="cam" transform="translate({cx},{cy}) scale(1) translate({-cx},{-cy})">'
-            f'<g id="tremor" transform="translate(0,0)">{cenario()}{atores}<g transform="translate(0,85)">{sofa()}</g></g></g>'
-            f'<rect width="{WIDTH}" height="{HEIGHT}" fill="url(#tvluz)" pointer-events="none"/>'
-            f'{tv_moldura()}</svg>')
+            f'<g id="tremor" transform="translate(0,0)">{fundo}{atores}{frente}</g></g>'
+            f'{luz}{painel}</svg>')
 
 
 # ------------------------------------------------------------------ composição
