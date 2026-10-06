@@ -6,7 +6,7 @@ A rotina ativa é `.github/workflows/cobertura.yml`, com verificação a cada de
 |---|---|---|
 | Gil: pré-jogo | Dia anterior à partida | 19h |
 | Dona Cida: palpite | Dia da partida, antes do início | 9h |
-| Gil: pós-jogo | Dia seguinte, resultado encerrado confirmado | 12h |
+| Gil: pós-jogo | Dia seguinte, resultado encerrado confirmado | 6h |
 | Card JPEG do Brasileirão | Dias sem os três quadros | 19h |
 
 A geração pode começar 30 minutos antes. O envio espera o horário e consulta novamente a agenda. Adiamento, mudança de horário, mudança de pauta ou virada do dia bloqueiam o envio. GitHub Actions e Instagram podem atrasar ou falhar; o código não promete precisão absoluta nem publicação garantida. Falhas ficam na execução e nas notificações de Actions configuradas na conta. A próxima execução tenta novamente dentro da data correta.

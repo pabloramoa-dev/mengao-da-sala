@@ -1,6 +1,6 @@
 # Programação atual: Gil e Dona Cida
 
-Desde 05/10/2026, consulte [operação Gil/Cida](docs/GIL_CIDA.md). Pré na véspera às 19h; palpite às 9h; pós no dia seguinte às 12h; card nos dias livres. Os quadros descritos abaixo são documentação histórica.
+Desde 05/10/2026, consulte [operação Gil/Cida](docs/GIL_CIDA.md). Pré na véspera às 19h; palpite às 9h; pós no dia seguinte às 6h; card nos dias livres. Os quadros descritos abaixo são documentação histórica.
 
 # Mengão da Sala — v3 (personagens animados + Plantão da Sala)
 
