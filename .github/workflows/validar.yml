@@ -37,8 +37,9 @@ jobs:
           key: kokoro-v1
       - name: Gerar amostras Gil e Cida sem publicar
         run: |
-          python -m tools.teste_gil_cida --render-silencioso
+          python -m tools.teste_gil_cida
           for quadro in pre palpite pos; do
+            python -m src.flamengo.gerar --formato diario --pauta "saida/${quadro}_pauta.json" --out "saida/${quadro}_teste.mp4"
             ffmpeg -y -ss 2 -i "saida/${quadro}_teste.mp4" -frames:v 1 "saida/${quadro}_frame.png"
           done
           python -m src.flamengo.render.tabela_card --pauta saida/tabela_pauta.json --out saida/tabela_teste.jpg
