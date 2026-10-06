@@ -49,7 +49,7 @@ def main():
         if post['status'] != 'publicado' or not post.get('media_id'): continue
         if agora-datetime.fromisoformat(post['atualizado_em']) > timedelta(days=30): continue
         mid = post['media_id']
-        row = {k:post.get(k) for k in ('media_id','formato','duracao_segundos','versao_editorial')}
+        row = {k:post.get(k) for k in ('media_id','formato','duracao_segundos','versao_editorial','engajamento')}
         for m in METRICAS:
             try:
                 d = _req('GET',f'{base}/{mid}/insights',{'metric':m,'access_token':token})

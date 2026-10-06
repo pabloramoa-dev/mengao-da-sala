@@ -42,6 +42,7 @@ def registrar(legenda, meta, status, **extra):
             'jogo_id':meta.get('jogo_id'), 'enquete':meta.get('enquete'),
             'semana':meta.get('semana'), 'coletado_em':meta.get('coletado_em'),
             'duracao_segundos':meta.get('duracao_segundos'),
+            'engajamento':meta.get('engajamento', antigo.get('engajamento')),
             'versao_editorial':meta.get('versao_editorial'), **extra}
     salvar(item)
     return item

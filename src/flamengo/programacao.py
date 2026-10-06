@@ -133,12 +133,15 @@ def montar(agora, cfg=None):
     # Notícias opcionais: falhas da pesquisa não bloqueiam os dados confirmados do jogo.
     from src.flamengo.coletor.pesquisa import enriquecer
     p = enriquecer(p, j, agora)
+    from src.flamengo.engajamento import aplicar
+    p = aplicar(p, j)
     p = quadros.dirigir(p)
     ator = 'primo' if modo == 'palpite' else 'rubro'  # IDs técnicos do rig, nomes públicos Gil/Cida.
     p.update(apresentador='Dona Cida' if modo=='palpite' else 'Gil', solo=ator, versao_editorial=5,
              dia=agora.astimezone(BRT).date().isoformat(), jogo_utc=j['utc'])
     for b in p['batidas']:
-        b.update(personagem=ator, plano='close' if b['tipo'] in {'abre','pergunta'} else 'aberto')
+        b.update(personagem=ator)
+        b.setdefault('plano', 'aberto')
         b['fala'] = b['fala'].replace('primo', 'Nação').replace('Primo', 'Nação')
         b['legenda'] = b['fala']
     p['publicar_em'] = publicar_em
