@@ -33,6 +33,35 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         run: python -m src.flamengo.reconciliar
+      - name: Perguntas diárias nos Stories
+        id: stories
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          EXPECTED_IG_USERNAME: mengaodasala
+          PUBLICAR: ${{ vars.PUBLICAR }}
+          ENSAIO: ${{ inputs.ensaio }}
+        run: |
+          python -m pip install -q pillow
+          if [ "$PUBLICAR" = true ] && [ "$ENSAIO" != true ]; then
+            python -m src.flamengo.stories_respostas
+          else
+            python -m src.flamengo.stories_respostas --ensaio
+          fi
+      - name: Avisar falha dos Stories sem bloquear o Reel
+        if: steps.stories.outcome == 'failure'
+        run: |
+          echo '::warning::Story não confirmado. Será tentado novamente; consulte os recibos.'
+          echo 'Story não confirmado: conferir etapa de perguntas e recibos.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stories-respostas-${{ github.run_id }}
+          path: saida/stories_respostas/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Instalar leitor de notícias
         run: python -m pip install -q -r requirements-noticias.txt
       - name: Selecionar pauta e pesquisar notícias

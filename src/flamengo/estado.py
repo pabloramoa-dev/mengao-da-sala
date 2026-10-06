@@ -7,6 +7,8 @@ REGISTRO = Path('data/publicacoes.json')
 
 
 def chave(legenda, meta):
+    if meta.get('formato') == 'story_resposta':
+        return 'story-resposta:' + str(meta['dia']) + ':' + str(meta['slot'])
     if meta.get('formato') == 'palpite_cida' and meta.get('jogo_id'):
         return 'palpite:' + str(meta['jogo_id'])
     if meta.get('formato') == 'tabela_card' and meta.get('dia'):
@@ -38,6 +40,7 @@ def registrar(legenda, meta, status, **extra):
             'atualizado_em':datetime.now(timezone.utc).isoformat(),
             'memoria_editorial':meta.get('memoria_editorial', antigo.get('memoria_editorial', [])),
             'analise_palpite':meta.get('analise_palpite', antigo.get('analise_palpite')),
+            'slot':meta.get('slot'), 'interacao':meta.get('interacao'),
             'dia':meta.get('dia'), 'palpite':meta.get('palpite'), 'jogo_utc':meta.get('jogo_utc'),
             'jogo_id':meta.get('jogo_id'), 'enquete':meta.get('enquete'),
             'semana':meta.get('semana'), 'coletado_em':meta.get('coletado_em'),
