@@ -36,6 +36,8 @@ def registrar(legenda, meta, status, **extra):
     antigo = next((x for x in ler()['itens'] if x['chave'] == k), {})
     item = {**antigo, 'chave':k, 'formato':meta.get('formato'), 'status':status,
             'atualizado_em':datetime.now(timezone.utc).isoformat(),
+            'memoria_editorial':meta.get('memoria_editorial', antigo.get('memoria_editorial', [])),
+            'analise_palpite':meta.get('analise_palpite', antigo.get('analise_palpite')),
             'dia':meta.get('dia'), 'palpite':meta.get('palpite'), 'jogo_utc':meta.get('jogo_utc'),
             'jogo_id':meta.get('jogo_id'), 'enquete':meta.get('enquete'),
             'semana':meta.get('semana'), 'coletado_em':meta.get('coletado_em'),

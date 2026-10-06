@@ -169,6 +169,7 @@ def _jogo(e: dict, liga: str, time_id: str) -> dict:
             "utc": e.get("date", ""), "status": ((comp.get("status") or {}).get("type") or {}),
             "adversario": _curto((eles.get("team") or {}).get("displayName")),
             "em_casa": nos.get("homeAway") == "home",
+            "campo_neutro": bool(comp.get("neutralSite", False)),
             "estadio": (comp.get("venue") or {}).get("fullName"),
             "adversario_id": str((eles.get("team") or {}).get("id") or ""),
             "fase": (e.get("seasonType") or {}).get("name"),

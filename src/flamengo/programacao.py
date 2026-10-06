@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from src.flamengo import cobertura as base, diario, estado, roteiro, quadros
 from src.flamengo.coletor import pos_jogo
+from src.flamengo.palpite import calcular
 
 BRT = ZoneInfo('America/Sao_Paulo')
 FORMATOS = {'pre': 'pre_jogo', 'palpite': 'palpite_cida', 'pos': 'pos_jogo_v2', 'tabela': 'tabela_card'}
@@ -65,9 +66,8 @@ def selecionar(agora, feitos, futuros, itens, cfg):
 def palpite(j, feitos, rivais, agora):
     f = base.forma(feitos, agora)
     r = base.forma(rivais, agora)
-    # Palpite editorial simples, explicitamente opinião; nunca probabilidade/garantia.
-    bons = f['vitorias'] >= r['vitorias']
-    placar = [2, 1] if bons else [1, 1]
+    analise = calcular(j, feitos, rivais, agora)
+    placar = analise['placar'] or [1, 1]
     local = diario._utc(j['utc']).astimezone(BRT)
     falas = ['Hoje tem Mengão, e eu já tenho meu palpite!',
              f"Flamengo e {j['adversario']}, pela {j['competicao']}, hoje às {local:%H:%M}."]
@@ -75,10 +75,20 @@ def palpite(j, feitos, rivais, agora):
         falas.append(f"O Flamengo venceu {f['vitorias']} dos últimos {f['jogos']} jogos registrados.")
     if r['jogos']:
         falas.append(f"O adversário venceu {r['vitorias']} dos últimos {r['jogos']} jogos registrados.")
+    if analise['status'] == 'ok':
+        falas.append('Para esse palpite, pesei os gols marcados e sofridos, os jogos recentes e o mando de campo.')
+        ultimo_f = analise['flamengo']['ultimo']
+        ultimo_r = analise['adversario']['ultimo']
+        descanso_f = (diario._utc(j['utc'])-diario._utc(ultimo_f)).days
+        descanso_r = (diario._utc(j['utc'])-diario._utc(ultimo_r)).days
+        if 0 <= descanso_f <= 14 and 0 <= descanso_r <= 14 and descanso_f != descanso_r:
+            falas.append(f'Pelas partidas registradas, são {descanso_f} dias desde o último jogo do Flamengo e {descanso_r} do adversário.')
+    else:
+        falas.append('Hoje a amostra está curta: esse placar é só meu feeling de torcedora, sem base estatística suficiente.')
     falas += [f"Meu palpite é {placar[0]} a {placar[1]}. É opinião de torcedora, o jogo decide!",
               'Amanhã o Gil confere se eu acertei. E você, qual placar arrisca?']
     return dict(formato='palpite_cida', jogo_id=j['id'], humor='debochado',
-                capa='O PALPITE DA CIDA', palpite=placar, batidas=[roteiro.batida(f) for f in falas],
+                capa='O PALPITE DA CIDA', palpite=placar, analise_palpite=analise, batidas=[roteiro.batida(f) for f in falas],
                 fontes=[j['fonte']], coletado_em=agora.isoformat(), competicao=j['competicao'])
 
 
