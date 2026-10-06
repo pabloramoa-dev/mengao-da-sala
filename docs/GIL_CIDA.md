@@ -27,4 +27,5 @@ Dona Cida registra um palpite editorial simples baseado na forma recente dispon�
 
 ## Verificação
 
-`python -m pytest -q` testa seleção, fronteiras de data, sobreposição, recibos, imagens e pesquisa. `python -m tools.teste_gil_cida` gera pautas fictícias para os quatro quadros. O workflow validar gera três MP4 e um JPEG sem publicar. Pautas anteriores à versão editorial 5 são recusadas pelo gerador ativo.
+`python -m pytest -q` testa seleção, fronteiras de data, sobreposição, recibos, imagens e pesquisa. `python -m tools.teste_gil_cida` gera pautas fictícias para os quatro quadros. O workflow validar gera três MP4 com narração e um JPEG sem publicar. O envio de roteiros fictícios ao serviço Microsoft foi autorizado pelo usuário em 06/10/2026; o modo silencioso permanece disponível na ferramenta de teste. Pautas anteriores à versão editorial 5 são recusadas pelo gerador ativo.
+
