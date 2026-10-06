@@ -23,6 +23,7 @@ def main():
                       'documentos':p['pesquisa'].get('documentos_lidos',0),
                       'leitores':p['pesquisa'].get('leitores',[]),
                       'palpite':p['analise_palpite']['status'],
+                      'erro':p['pesquisa'].get('erro'),'http':p['pesquisa'].get('http_status'),'codigo':p['pesquisa'].get('codigo'),
                       'amostras':[p['analise_palpite'][t]['jogos'] for t in ('flamengo','adversario')]},ensure_ascii=False))
 
 
