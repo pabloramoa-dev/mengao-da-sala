@@ -246,6 +246,23 @@
       "versao_editorial": 3,
       "container_id": "18122439301786157",
       "media_id": "17895418437420782"
+    },
+    {
+      "chave": "card:2026-10-05",
+      "formato": "tabela_card",
+      "status": "publicado",
+      "atualizado_em": "2026-10-06T02:17:11.828429+00:00",
+      "dia": "2026-10-05",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-06T02:15:54.974186+00:00",
+      "duracao_segundos": null,
+      "versao_editorial": 5,
+      "container_id": "18122502835786157",
+      "media_id": "18113029373025548"
     }
   ]
 }
