@@ -329,6 +329,34 @@
       "versao_editorial": 5,
       "container_id": "18123045778786157",
       "media_id": "18094610783345020"
+    },
+    {
+      "chave": "pre:401841251",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-10-07T23:53:03.350963+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-07",
+      "palpite": null,
+      "jogo_utc": "2026-10-08T22:30Z",
+      "jogo_id": "401841251",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-07T23:48:40.994658+00:00",
+      "duracao_segundos": 37.071,
+      "engajamento": {
+        "versao": 1,
+        "variante": 2,
+        "gancho": "Como você jogaria contra Santos? Vamos aos fatos.",
+        "acao": "comentario",
+        "cta": "Qual é sua maior preocupação para esse jogo? Conta nos comentários."
+      },
+      "versao_editorial": 5,
+      "container_id": "18123088789786157",
+      "media_id": "18083274980694695"
     }
   ]
 }
