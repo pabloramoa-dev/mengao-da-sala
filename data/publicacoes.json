@@ -546,6 +546,28 @@
       "versao_editorial": 5,
       "container_id": "18123645985786157",
       "media_id": "18080334542353760"
+    },
+    {
+      "chave": "story-resposta:2026-10-10:vespera",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-10-10T18:00:03.018061+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "vespera",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-10-10",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-10T17:59:38.478956+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18123982855786157",
+      "media_id": "18129704905793661"
     }
   ]
 }
