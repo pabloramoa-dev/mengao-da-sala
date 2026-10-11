@@ -69,23 +69,26 @@ def palpite(j, feitos, rivais, agora):
     analise = calcular(j, feitos, rivais, agora)
     placar = analise['placar'] or [1, 1]
     local = diario._utc(j['utc']).astimezone(BRT)
+    horario = roteiro.por_extenso(local.hour) + (' hora' if local.hour == 1 else ' horas')
+    if local.minute:
+        horario += ' e ' + roteiro.por_extenso(local.minute)
     falas = ['Hoje tem Mengão, e eu já tenho meu palpite!',
-             f"Flamengo e {j['adversario']}, pela {j['competicao']}, hoje às {local:%H:%M}."]
+             f"Hoje o Flamengo pega o {j['adversario']}, às {horario}. É jogo de {j['competicao']}."]
     if f['jogos']:
-        falas.append(f"O Flamengo venceu {f['vitorias']} dos últimos {f['jogos']} jogos registrados.")
+        falas.append(f"Olha os últimos {f['jogos']} jogos que eu tenho aqui: o Flamengo ganhou {f['vitorias']}.")
     if r['jogos']:
-        falas.append(f"O adversário venceu {r['vitorias']} dos últimos {r['jogos']} jogos registrados.")
+        falas.append(f"Já o {j['adversario']} ganhou {r['vitorias']} dos últimos {r['jogos']} que eu vi na lista.")
     if analise['status'] == 'ok':
-        falas.append('Para esse palpite, pesei os gols marcados e sofridos, os jogos recentes e o mando de campo.')
+        falas.append('Eu olhei quem anda fazendo gol, quem anda levando e quem joga em casa.')
         ultimo_f = analise['flamengo']['ultimo']
         ultimo_r = analise['adversario']['ultimo']
         descanso_f = (diario._utc(j['utc'])-diario._utc(ultimo_f)).days
         descanso_r = (diario._utc(j['utc'])-diario._utc(ultimo_r)).days
         if 0 <= descanso_f <= 14 and 0 <= descanso_r <= 14 and descanso_f != descanso_r:
-            falas.append(f'Pelas partidas registradas, são {descanso_f} dias desde o último jogo do Flamengo e {descanso_r} do adversário.')
+            falas.append(f'Pela lista aqui, o Flamengo vem de {descanso_f} dias sem jogar. O outro lado, de {descanso_r}.')
     else:
-        falas.append('Hoje a amostra está curta: esse placar é só meu feeling de torcedora, sem base estatística suficiente.')
-    falas += [f"Meu palpite é {placar[0]} a {placar[1]}. É opinião de torcedora, o jogo decide!",
+        falas.append('Tenho poucos jogos aqui pra comparar. Hoje eu vou no meu palpite mesmo!')
+    falas += [f"Meu palpite é {placar[0]} a {placar[1]}. É meu palpite, viu? Não é certeza!",
               'Amanhã o Gil confere se eu acertei. E você, qual placar arrisca?']
     return dict(formato='palpite_cida', jogo_id=j['id'], humor='debochado',
                 capa='O PALPITE DA CIDA', palpite=placar, analise_palpite=analise, batidas=[roteiro.batida(f) for f in falas],
@@ -117,7 +120,7 @@ def montar(agora, cfg=None):
         p = palpite(j, feitos, rivais, agora) if modo == 'palpite' else base.pre_jogo(j, feitos, rivais, agora, diario.tabela() if j['liga']=='bra.1' else None)
         if modo == 'pre':
             p['capa'] = 'AMANHÃ TEM MENGÃO\n' + j['adversario'].upper()
-            p['batidas'][0] = roteiro.batida('Amanhã tem Mengão! Vamos ao que pode decidir esse confronto.', tipo='abre')
+            p['batidas'][0] = roteiro.batida('Amanhã tem Mengão! E aí, tá confiante?', tipo='abre')
     else:
         detalhado = pos_jogo.detalhes({**j, 'data':j['utc'], 'fla_id':diario.FLA})
         p = roteiro.pos_jogo_v2({'jogo':detalhado}, diario.tabela() if j['liga']=='bra.1' else None)
@@ -128,7 +131,7 @@ def montar(agora, cfg=None):
         if anterior:
             n, e = anterior['palpite']
             certo = [n,e] == [j['gols_nossos'],j['gols_deles']]
-            p['batidas'].insert(2, roteiro.batida(f"A Dona Cida palpitou {n} a {e}. " + ('Acertou o placar!' if certo else 'Dessa vez o campo contou outra história!')))
+            p['batidas'].insert(2, roteiro.batida(f"A Dona Cida palpitou {n} a {e}. " + ('Acertou o placar!' if certo else 'Errou dessa vez! Amanhã ela vai dizer que foi por pouco.')))
         p['capa'] = 'A RESENHA DO GIL'
     # Notícias opcionais: falhas da pesquisa não bloqueiam os dados confirmados do jogo.
     from src.flamengo.coletor.pesquisa import enriquecer

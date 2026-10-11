@@ -162,8 +162,8 @@ CTA = {
                 "Qual foi o craque do jogo? Deixa o nome nos comentários!"],
     "empate": ["O que você mudaria no segundo tempo?",
                "Faltou o quê pra vencer? Comenta aí."],
-    "derrota": ["Qual setor precisa melhorar no próximo jogo?",
-                "Qual mudança você faria para o próximo jogo?"],
+    "derrota": ["Onde o time precisa melhorar? Fala aí.",
+                "Quem você trocava pro próximo jogo?"],
 }
 
 
@@ -231,12 +231,12 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         batidas.append(batida(f"A disputa de pênaltis terminou {por_extenso(pn)} a {por_extenso(pe)}.",
                               tipo="placar", placar=f"PÊNALTIS {pn} x {pe}"))
     if jogo.get("competicao"):
-        batidas.append(batida("Esse foi o resultado pela " + jogo["competicao"] + "."))
+        batidas.append(batida("Foi jogo de " + jogo["competicao"] + "."))
     estatisticas = jogo.get("estatisticas") or {}
     stats = estatisticas.get(str(jogo.get("fla_id", "819"))) or {}
     if str(stats.get("totalShots", "")).isdigit() and str(stats.get("shotsOnTarget", "")).isdigit():
         total, alvo = int(stats["totalShots"]), int(stats["shotsOnTarget"])
-        batidas.append(batida(f"O Flamengo finalizou {por_extenso(total)} vezes: {por_extenso(alvo)} no alvo.",
+        batidas.append(batida(f"O Mengão chutou {por_extenso(total)} vezes. {por_extenso(alvo).capitalize()} foram no gol.",
                               cartao=f"CHUTES {total} · NO ALVO {alvo}"))
     if stats.get("possessionPct") is not None:
         try:
@@ -244,13 +244,13 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         except (ValueError, TypeError):
             posse = None
         if posse is not None and 0 <= posse <= 100:
-            batidas.append(batida(f"A posse do Mengão foi de {decimal_fala(posse)} por cento. Ter a bola não é tudo: precisa criar chances.",
+            batidas.append(batida(f"O Mengão ficou com a bola {decimal_fala(posse)} por cento do tempo. Mas tem que fazer gol, né?",
                                   cartao=f"POSSE {posse:g}%"))
     # melhor (vitória) ou pior (empate/derrota) — número do Cartola, sempre
     if cartola:
         alvo = cartola[0] if res == "vitoria" else cartola[-1]
         rotulo = "a maior pontuação" if res == "vitoria" else "a menor pontuação"
-        fala = (f"No Cartola, {rotulo} foi de {alvo['nome']}, "
+        fala = (f"No Cartola, quem ficou com {rotulo} foi o {alvo['nome']}, "
                 f"com {decimal_fala(alvo['pontos'])} pontos.")
         legenda = fala.replace(decimal_fala(alvo["pontos"]), f"{alvo['pontos']:.1f}".replace(".", ","))
         batidas.append(batida(fala, legenda=legenda, tipo="nota",
@@ -282,12 +282,12 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         if gol_proximo_da_troca(jogo.get("gols", []), s):
             gancho = f"Logo depois do {saiu} fazer o gol!"
         elif any(t in s["saiu"].lower() for t in topo):
-            gancho = f"Você manteria o {saiu} em campo?"
+            gancho = f"Você deixava o {saiu} no jogo?"
         else:
             gancho = None
         if gancho:
             batidas.append(batida(gancho, tipo="mexida", minuto=minuto, saiu=saiu, entrou=entrou))
-        batidas.append(batida("Você faria essa troca ou manteria o time?", tipo="pergunta", cartao="TROCAR OU MANTER?"))
+        batidas.append(batida("Você fazia essa troca? Eu quero saber.", tipo="pergunta", cartao="TROCAR OU MANTER?"))
 
     batidas.append(batida(_escolha(CTA[res], semente + "cta"), tipo="cta"))
     topo = {"vitoria_lider": "SEGUE O LÍDER", "vitoria": "VITÓRIA DO MENGÃO",
@@ -299,7 +299,7 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
 def local_do_jogo(jogo):
     estadio = jogo.get("estadio") or ""
     if estadio:
-        return f"no estádio {estadio}"
+        return ("na " if estadio.lower().startswith("arena") else "no ") + estadio
     return "em casa" if jogo.get("em_casa", jogo.get("mandante")) else "fora de casa"
 
 

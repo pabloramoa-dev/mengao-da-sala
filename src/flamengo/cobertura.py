@@ -72,29 +72,29 @@ def pre_jogo(j, feitos, rivais, agora, tabela=None):
     horario += ' e meia' if data.minute == 30 else (' e ' + roteiro.por_extenso(data.minute) if data.minute else '')
     if data.hour not in {0,12}: horario += ' da noite' if data.hour >= 18 else ' da tarde' if data.hour >= 12 else ' da manhã'
     artigo = 'pelo' if j['competicao'].startswith(('Brasileirão','Campeonato','Mundial','Torneio','Derby')) else 'pela'
-    b = [roteiro.batida('Primo, antes do palpite: vamos olhar o que esse jogo pede!', tipo='abre'),
-         roteiro.batida(f"Flamengo enfrenta {j['adversario']} {artigo} {j['competicao']}, dia {dia}, {horario}.",
+    b = [roteiro.batida('E aí, tá confiante pra esse jogo?', tipo='abre'),
+         roteiro.batida(f"O Flamengo pega o {j['adversario']} {artigo} {j['competicao']}, dia {dia}, {horario}.",
                         cartao=f"{j['adversario']} · {data:%d/%m %H:%M} BRT")]
     fase = (j.get('fase') or '').lower().replace('-', '').replace(' ', '')
     rotulo = next((nome for termo,nome in [('quarterfinal','quartas de final'),('semifinal','semifinal'),('roundof16','oitavas de final')] if termo in fase), None)
     if rotulo:
-        b.append(roteiro.batida('A fase informada é '+rotulo+'. Cada detalhe pesa mais no mata-mata.', cartao=rotulo.upper()))
+        b.append(roteiro.batida('Agora é '+rotulo+'. Mata-mata, hein? Não dá pra bobear.', cartao=rotulo.upper()))
     if j.get('estadio'):
         estadio = j['estadio']
         local = ('na ' if estadio.lower().startswith('arena') else 'no ') + ('' if estadio.lower().startswith(('estádio','estadio','arena')) else 'estádio ') + estadio
-        b.append(roteiro.batida('O jogo será '+local+'.', cartao=estadio))
+        b.append(roteiro.batida('A bola vai rolar '+local+'.', cartao=estadio))
     for nome, jogos in [('Flamengo', feitos), (j['adversario'], rivais)]:
         f = forma(jogos, agora)
         if f['jogos']:
-            b.append(roteiro.batida(f"Nos últimos {roteiro.por_extenso(f['jogos'])} jogos registrados, {nome}: "
+            b.append(roteiro.batida(f"Peguei os últimos {roteiro.por_extenso(f['jogos'])} jogos do {nome} aqui. Deu "
                      f"{quantidade(f['vitorias'], 'vitória', 'vitórias', True)}, {quantidade(f['empates'], 'empate', 'empates')} e "
                      f"{quantidade(f['derrotas'], 'derrota', 'derrotas', True)}.", cartao=f"{nome}: {f['vitorias']}V {f['empates']}E {f['derrotas']}D"))
     if j['liga'] == 'bra.1' and tabela:
-        b.append(roteiro.batida(f"Na coleta atual, o Mengão é {roteiro.ordinal(tabela['posicao'])}, com {roteiro.por_extenso(tabela['pontos'])} pontos.",
+        b.append(roteiro.batida(f"Na tabela que eu tenho aqui, o Mengão tá em {roteiro.ordinal(tabela['posicao'])}, com {roteiro.por_extenso(tabela['pontos'])} pontos.",
                                tipo='tabela', posicao=tabela['posicao'], pontos=tabela['pontos']))
     else:
-        b.append(roteiro.batida('Minha leitura: criar chances sem se expor demais. Palpite é palpite; resultado vem no campo.'))
-    b.extend([roteiro.batida('Você atacaria desde o início ou controlaria o jogo primeiro?', tipo='pergunta'),
+        b.append(roteiro.batida('Eu quero ver o time indo pra cima, mas sem deixar a defesa aberta. Senão complica.'))
+    b.extend([roteiro.batida('Você ia pra cima logo ou começava mais na calma?', tipo='pergunta'),
               roteiro.batida('Segue o Mengão da Sala. Depois do apito final, a resenha volta!', tipo='cta')])
     return {'formato':'pre_jogo', 'jogo_id':j['id'], 'humor':'tenso', 'capa':'ANTES DO APITO\n'+j['adversario'].upper(),
             'batidas':b, 'fontes':[j['fonte']], 'coletado_em':agora.isoformat(), 'competicao':j['competicao']}

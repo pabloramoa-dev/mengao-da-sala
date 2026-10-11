@@ -17,7 +17,7 @@ def test_cida_revela_palpite_sem_duplicar_nem_apagar_incerteza():
     p=dict(formato='palpite_cida',palpite=[1,1],analise_palpite={'status':'amostra_insuficiente'},batidas=[batida('Hoje tem Mengão, e eu já tenho meu palpite!'),batida('Hoje a amostra está curta.'),batida('Meu palpite é 1 a 1. É opinião!'),batida('Amanhã o Gil confere se eu acertei.')])
     r=aplicar(p,{'id':'1','adversario':'Santos'})
     texto=' '.join(b['fala'] for b in r['batidas'])
-    assert texto.count('1 a 1')==1 and 'feeling' in texto and 'amostra está curta' in texto
+    assert texto.count('1 a 1')==1 and 'no palpite mesmo' in texto and 'amostra está curta' in texto
 
 
 def test_pos_preserva_penaltis_e_comparacao_da_cida():

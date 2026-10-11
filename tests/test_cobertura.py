@@ -96,7 +96,7 @@ def test_post_empate_em_copa_nao_inventa_ponto_e_estatisticas():
        'gols_nossos':1,'gols_deles':1,'adversario':'Rival','em_casa':True,'estatisticas':{'819':{'totalShots':'12','shotsOnTarget':'4','possessionPct':'61.5'}}}
     p=roteiro.pos_jogo_v2({'jogo':j},{'posicao':1})
     text=' '.join(b['fala'] for b in p['batidas'])
-    assert 'Um ponto' not in text and 'doze vezes' in text and 'quatro no alvo' in text
+    assert 'Um ponto' not in text and 'doze vezes' in text and 'Quatro foram no gol' in text
 
 
 def test_penaltis_nao_vira_vitoria_no_tempo_normal():

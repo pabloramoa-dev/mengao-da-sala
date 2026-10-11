@@ -136,6 +136,13 @@ def enriquecer(p,j,agora):
                  'Desfalques e escalações sempre devem ser atribuídos à fonte; não declare confirmação independente. '
                  'Evite repetir os fatos da memória, exceto se houver mudança concreta de situação. '
                  'Não transforme opinião, rumor ou escalação provável em confirmação. Reescreva com palavras próprias. '
+                 'A fala vai ser dita em voz alta por um torcedor, numa conversa de casa. '
+                 'Use português brasileiro simples, informal e frases curtas: tá, pra, vai jogar, fica de fora. '
+                 'Gil é direto, reage como quem conversa vendo futebol; Dona Cida dá seu pitaco com humor de vizinha. '
+                 'Sem voz de apresentador, linguagem de relatório, metáforas prontas ou gíria em toda frase. '
+                 'Não use termos como confronto decisivo, cenário, desempenho da equipe ou diante disso. '
+                 'Exemplo de tom: O jogador pode ficar de fora. Ainda é dúvida pro jogo. '
+                 'Não acrescente reação que invente algo do jogo, bordão, insulto, nem certeza ausente na fonte. '
                  'Responda JSON {"fatos":[{"fonte":0,"evidencia":"trecho literal contínuo do documento",'
                  '"fala":"uma frase curta e fiel"}]}. Se não houver evidência relevante, retorne fatos vazio.')
         body={'model':os.environ.get('GROQ_MODEL','llama-3.3-70b-versatile'),'temperature':0.15,'max_tokens':900,

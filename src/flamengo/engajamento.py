@@ -16,29 +16,29 @@ def aplicar(pauta, jogo):
     antigas=p['batidas']
     corpo=[b for b in antigas if b.get('tipo') not in {'abre','cta','pergunta'}]
     if formato=='pre_jogo':
-        ganchos=[f'Flamengo contra {rival}: confiança ou preocupação?',
-                 f'Antes de cravar vitória contra {rival}, olha esse confronto.',
-                 f'Como você jogaria contra {rival}? Vamos aos fatos.']
+        ganchos=[f'Amanhã é contra o {rival}. Tá confiante ou tá com o pé atrás?',
+                 f'Já tá contando com a vitória contra o {rival}? Calma aí, rapaz.',
+                 f'E aí, dá pra ganhar do {rival}? Olha o que eu separei aqui.']
         gancho=ganchos[variante]
         titulo='CONFIANÇA OU PREOCUPAÇÃO?'
-        finais=[('Comente: atacar desde o início ou controlar primeiro? E por quê?', 'ATACAR OU CONTROLAR?', 'comentario'),
-                ('Manda esta prévia para quem vai assistir ao jogo com você.', 'PRÉVIA PARA O GRUPO', 'compartilhar'),
-                ('Qual é sua maior preocupação para esse jogo? Conta nos comentários.', 'QUAL É SUA PREOCUPAÇÃO?', 'comentario')]
+        finais=[('Você iria pra cima logo ou começava na calma? Conta aí.', 'ATACAR OU CONTROLAR?', 'comentario'),
+                ('Manda pro amigo que vai ver esse jogo contigo.', 'PRÉVIA PARA O GRUPO', 'compartilhar'),
+                ('O que tá te deixando com o pé atrás nesse jogo? Fala aí.', 'QUAL É SUA PREOCUPAÇÃO?', 'comentario')]
         noticias=[b for b in corpo if b.get('tipo')=='noticia']
         outros=[b for b in corpo if b.get('tipo')!='noticia']
         corpo=noticias+outros
     elif formato=='palpite_cida':
         n,e=p['palpite']
         insuficiente=p.get('analise_palpite',{}).get('status')=='amostra_insuficiente'
-        gancho=(f'No feeling: {n} a {e}. Você concorda comigo?' if insuficiente else
-                f'Meu palpite é {n} a {e}. Vou te contar por quê.')
+        gancho=(f'Vou de {n} a {e}, no palpite mesmo. E você?' if insuficiente else
+                f'Meu palpite é {n} a {e}. Quer saber por quê? Olha só.')
         titulo=f'PALPITE DA CIDA: {n} × {e}'
         # A abertura anterior e os pedidos duplicados são substituídos, não empilhados.
         corpo=[b for b in corpo if not b['fala'].startswith(('Hoje tem Mengão,','Meu palpite é','Amanhã o Gil confere'))]
-        corpo.append(batida('É opinião de torcedora. Amanhã o Gil compara com o resultado.'))
-        finais=[('Deixa seu placar nos comentários antes de a bola rolar.', 'QUAL É O SEU PLACAR?', 'comentario'),
-                ('Manda para aquele amigo que sempre discorda do meu palpite.', 'CIDA OU SEU AMIGO?', 'compartilhar'),
-                ('Concorda comigo? Comenta seu placar e o motivo.', 'PLACAR + MOTIVO', 'comentario')]
+        corpo.append(batida('É só meu palpite, hein! Amanhã o Gil vem me cobrar.'))
+        finais=[('Quanto vai ser? Bota teu placar aí antes do jogo!', 'QUAL É O SEU PLACAR?', 'comentario'),
+                ('Manda praquele amigo que nunca concorda comigo.', 'CIDA OU SEU AMIGO?', 'compartilhar'),
+                ('Vai no meu palpite ou vai chutar outro? Conta aí.', 'PLACAR + MOTIVO', 'comentario')]
     else:
         # A fala de placar já contém o resultado e, se houver, a disputa de pênaltis.
         placar=next((b for b in corpo if b.get('tipo')=='placar'),None)
@@ -48,9 +48,9 @@ def aplicar(pauta, jogo):
         titulo='SUA RESENHA DO JOGO'
         retorno=[b for b in corpo if b['fala'].startswith('A Dona Cida palpitou')]
         corpo=retorno+[b for b in corpo if b not in retorno]
-        finais=[('Qual lance mudou o jogo para você? Conta nos comentários.', 'QUAL LANCE MUDOU O JOGO?', 'comentario'),
-                ('Manda esta resenha para quem assistiu ao jogo com você.', 'CONTINUA NO GRUPO', 'compartilhar'),
-                ('Quem foi o destaque do Flamengo? Comenta o nome e o motivo.', 'SEU DESTAQUE + MOTIVO', 'comentario')]
+        finais=[('Qual lance não sai da tua cabeça? Conta aí.', 'QUAL LANCE MUDOU O JOGO?', 'comentario'),
+                ('Manda pra quem viu o jogo contigo. Quero ver se concorda.', 'CONTINUA NO GRUPO', 'compartilhar'),
+                ('Quem jogou mais pelo Mengão? Fala o nome aí.', 'SEU DESTAQUE + MOTIVO', 'comentario')]
     fala,cartao,acao=finais[variante]
     abertura=batida(gancho,tipo='abre',cartao=titulo)
     abertura.update(plano='close',gesto='apontar')
