@@ -568,6 +568,34 @@
       "versao_editorial": 5,
       "container_id": "18123982855786157",
       "media_id": "18129704905793661"
+    },
+    {
+      "chave": "pre:401841263",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-10-11T00:32:32.333197+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-10",
+      "palpite": null,
+      "jogo_utc": "2026-10-11T20:30Z",
+      "jogo_id": "401841263",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-11T00:27:48.906744+00:00",
+      "duracao_segundos": 36.248999999999995,
+      "engajamento": {
+        "versao": 1,
+        "variante": 0,
+        "gancho": "Flamengo contra Fluminense: confiança ou preocupação?",
+        "acao": "comentario",
+        "cta": "Comente: atacar desde o início ou controlar primeiro? E por quê?"
+      },
+      "versao_editorial": 5,
+      "container_id": "18124069987786157",
+      "media_id": "17937119472128173"
     }
   ]
 }
