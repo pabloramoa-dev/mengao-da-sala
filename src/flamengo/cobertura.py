@@ -72,7 +72,7 @@ def pre_jogo(j, feitos, rivais, agora, tabela=None):
     horario += ' e meia' if data.minute == 30 else (' e ' + roteiro.por_extenso(data.minute) if data.minute else '')
     if data.hour not in {0,12}: horario += ' da noite' if data.hour >= 18 else ' da tarde' if data.hour >= 12 else ' da manhã'
     artigo = 'pelo' if j['competicao'].startswith(('Brasileirão','Campeonato','Mundial','Torneio','Derby')) else 'pela'
-    b = [roteiro.batida('E aí, tá confiante pra esse jogo?', tipo='abre'),
+    b = [roteiro.batida('Pode vir quem for: eu vou de vitória do Mengão!', tipo='abre'),
          roteiro.batida(f"O Flamengo pega o {j['adversario']} {artigo} {j['competicao']}, dia {dia}, {horario}.",
                         cartao=f"{j['adversario']} · {data:%d/%m %H:%M} BRT")]
     fase = (j.get('fase') or '').lower().replace('-', '').replace(' ', '')
@@ -93,10 +93,11 @@ def pre_jogo(j, feitos, rivais, agora, tabela=None):
         b.append(roteiro.batida(f"Na tabela que eu tenho aqui, o Mengão tá em {roteiro.ordinal(tabela['posicao'])}, com {roteiro.por_extenso(tabela['pontos'])} pontos.",
                                tipo='tabela', posicao=tabela['posicao'], pontos=tabela['pontos']))
     else:
-        b.append(roteiro.batida('Eu quero ver o time indo pra cima, mas sem deixar a defesa aberta. Senão complica.'))
-    b.extend([roteiro.batida('Você ia pra cima logo ou começava mais na calma?', tipo='pergunta'),
+        b.append(roteiro.batida('Eu quero o Mengão pra cima! Pode vir quem for, eu acredito na vitória.'))
+    b.append(roteiro.batida('Meu palpite é dois a um pro Flamengo! Aqui é Mengão, ganhar é obrigação.'))
+    b.extend([roteiro.batida('Eu vou de vitória do Mengão! Qual é teu placar?', tipo='pergunta'),
               roteiro.batida('Segue o Mengão da Sala. Depois do apito final, a resenha volta!', tipo='cta')])
-    return {'formato':'pre_jogo', 'jogo_id':j['id'], 'humor':'tenso', 'capa':'ANTES DO APITO\n'+j['adversario'].upper(),
+    return {'formato':'pre_jogo', 'jogo_id':j['id'], 'humor':'debochado', 'palpite':[2, 1], 'capa':'ANTES DO APITO\n'+j['adversario'].upper(),
             'batidas':b, 'fontes':[j['fonte']], 'coletado_em':agora.isoformat(), 'competicao':j['competicao']}
 
 
