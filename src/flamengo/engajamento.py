@@ -16,26 +16,26 @@ def aplicar(pauta, jogo):
     antigas=p['batidas']
     corpo=[b for b in antigas if b.get('tipo') not in {'abre','cta','pergunta'}]
     if formato=='pre_jogo':
-        ganchos=[f'Amanhã é contra o {rival}. Tá confiante ou tá com o pé atrás?',
-                 f'Já tá contando com a vitória contra o {rival}? Calma aí, rapaz.',
-                 f'E aí, dá pra ganhar do {rival}? Olha o que eu separei aqui.']
+        ganchos=[f'Amanhã é contra o {rival}. Eu vou de vitória do Mengão!',
+                 f'Contra o {rival}, meu palpite é Mengão na cabeça! Ganhar é obrigação.',
+                 f'Pode vir o {rival}! Eu acredito no Mengão e vou de vitória!']
         gancho=ganchos[variante]
-        titulo='CONFIANÇA OU PREOCUPAÇÃO?'
+        titulo='GANHAR É OBRIGAÇÃO!'
         finais=[('Você iria pra cima logo ou começava na calma? Conta aí.', 'ATACAR OU CONTROLAR?', 'comentario'),
                 ('Manda pro amigo que vai ver esse jogo contigo.', 'PRÉVIA PARA O GRUPO', 'compartilhar'),
-                ('O que tá te deixando com o pé atrás nesse jogo? Fala aí.', 'QUAL É SUA PREOCUPAÇÃO?', 'comentario')]
+                ('Eu vou de Mengão! Qual placar você tá pensando? Fala aí.', 'QUANTO VAI SER?', 'comentario')]
         noticias=[b for b in corpo if b.get('tipo')=='noticia']
         outros=[b for b in corpo if b.get('tipo')!='noticia']
         corpo=noticias+outros
     elif formato=='palpite_cida':
         n,e=p['palpite']
         insuficiente=p.get('analise_palpite',{}).get('status')=='amostra_insuficiente'
-        gancho=(f'Vou de {n} a {e}, no palpite mesmo. E você?' if insuficiente else
-                f'Meu palpite é {n} a {e}. Quer saber por quê? Olha só.')
+        gancho=(f'Vou de {n} a {e} pro Flamengo! Comigo é Mengão sempre. E você?' if insuficiente else
+                f'Meu palpite é {n} a {e} pro Flamengo! Pode vir quem for!')
         titulo=f'PALPITE DA CIDA: {n} × {e}'
         # A abertura anterior e os pedidos duplicados são substituídos, não empilhados.
         corpo=[b for b in corpo if not b['fala'].startswith(('Hoje tem Mengão,','Meu palpite é','Amanhã o Gil confere'))]
-        corpo.append(batida('É só meu palpite, hein! Amanhã o Gil vem me cobrar.'))
+        corpo.append(batida('Aqui é Flamengo, ganhar é obrigação! Amanhã o Gil confere meu palpite.'))
         finais=[('Quanto vai ser? Bota teu placar aí antes do jogo!', 'QUAL É O SEU PLACAR?', 'comentario'),
                 ('Manda praquele amigo que nunca concorda comigo.', 'CIDA OU SEU AMIGO?', 'compartilhar'),
                 ('Vai no meu palpite ou vai chutar outro? Conta aí.', 'PLACAR + MOTIVO', 'comentario')]
