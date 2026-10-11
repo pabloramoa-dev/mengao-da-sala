@@ -67,7 +67,10 @@ def palpite(j, feitos, rivais, agora):
     f = base.forma(feitos, agora)
     r = base.forma(rivais, agora)
     analise = calcular(j, feitos, rivais, agora)
-    placar = analise['placar'] or [1, 1]
+    placar = list(analise['placar'] or [2, 1])
+    # Flamengo primeiro, inclusive fora de casa; palpite de torcedora.
+    placar[0] = max(placar[0], placar[1] + 1)
+    analise['criterio_editorial'] = 'torcedora_sempre_vitoria_flamengo'
     local = diario._utc(j['utc']).astimezone(BRT)
     horario = roteiro.por_extenso(local.hour) + (' hora' if local.hour == 1 else ' horas')
     if local.minute:
@@ -88,7 +91,7 @@ def palpite(j, feitos, rivais, agora):
             falas.append(f'Pela lista aqui, o Flamengo vem de {descanso_f} dias sem jogar. O outro lado, de {descanso_r}.')
     else:
         falas.append('Tenho poucos jogos aqui pra comparar. Hoje eu vou no meu palpite mesmo!')
-    falas += [f"Meu palpite é {placar[0]} a {placar[1]}. É meu palpite, viu? Não é certeza!",
+    falas += [f"Meu palpite é {placar[0]} a {placar[1]}. pro Flamengo! Aqui é Mengão, ganhar é obrigação!",
               'Amanhã o Gil confere se eu acertei. E você, qual placar arrisca?']
     return dict(formato='palpite_cida', jogo_id=j['id'], humor='debochado',
                 capa='O PALPITE DA CIDA', palpite=placar, analise_palpite=analise, batidas=[roteiro.batida(f) for f in falas],
