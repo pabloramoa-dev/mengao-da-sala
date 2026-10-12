@@ -145,7 +145,7 @@ def enriquecer(p,j,agora):
                  'Não acrescente reação que invente algo do jogo, bordão, insulto, nem certeza ausente na fonte. '
                  'Responda JSON {"fatos":[{"fonte":0,"evidencia":"trecho literal contínuo do documento",'
                  '"fala":"uma frase curta e fiel"}]}. Se não houver evidência relevante, retorne fatos vazio.')
-        body={'model':os.environ.get('GROQ_MODEL','llama-3.3-70b-versatile'),'temperature':0.15,'max_tokens':900,
+        body={'model':os.environ.get('GROQ_MODEL','openai/gpt-oss-120b'),'temperature':0.15,'max_tokens':900,
               'response_format':{'type':'json_object'},'messages':[{'role':'system','content':sistema},
               {'role':'user','content':json.dumps({'partida':j,'quadro':p['formato'],'agora':agora.isoformat(),'documentos':[{**d,'texto':d['texto'][:3500]} for d in docs],'memoria':memoria[-8:]},ensure_ascii=False)}]}
         req=urllib.request.Request('https://api.groq.com/openai/v1/chat/completions',data=json.dumps(body).encode(),headers={'Authorization':'Bearer '+key,'Content-Type':'application/json','User-Agent':noticias.UA})
