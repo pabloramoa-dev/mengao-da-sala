@@ -13,12 +13,21 @@ FORMATOS = {'pre': 'pre_jogo', 'palpite': 'palpite_cida', 'pos': 'pos_jogo_v2', 
 
 
 def agenda_segura():
-    """As duas respostas são obrigatórias: falha parcial não significa dia livre."""
+    """Combina duas consultas redundantes sem transformar timeout em dia livre.
+
+    Se uma consulta falhar, a outra só é aceita como fallback quando ela própria
+    contém partidas encerradas E futuras. Assim continuamos conservadores sem
+    derrubar a cobertura por uma falha transitória de um endpoint redundante.
+    """
     feitos, futuros = {}, {}
+    falhas = []
+    respostas = 0
     for extra in ('', '?fixture=true'):
         dados=diario.pegar(f'{diario.ESPN}/all/teams/{diario.FLA}/schedule{extra}')
         if not dados or 'events' not in dados:
-            raise RuntimeError('Agenda parcial indisponível; suspender seleção.')
+            falhas.append(extra or 'principal')
+            continue
+        respostas += 1
         for evento in dados['events']:
             j=diario._jogo(evento,'all',diario.FLA)
             st=j['status']
@@ -26,6 +35,12 @@ def agenda_segura():
             elif st.get('state') in {'pre','in'} and st.get('name') not in {'STATUS_POSTPONED','STATUS_CANCELED','STATUS_CANCELLED'}:
                 futuros[j['id']]=j
     for ident in feitos:futuros.pop(ident,None)
+    if respostas == 0:
+        raise RuntimeError('Agenda indisponível; as consultas da ESPN falharam.')
+    if falhas and not (feitos and futuros):
+        raise RuntimeError('Agenda parcial indisponível; fallback não comprovou passado e futuro.')
+    if falhas:
+        print(f"[programacao] agenda parcial aceita com segurança; consulta ausente: {', '.join(falhas)}")
     return sorted(feitos.values(),key=lambda j:j['utc']),sorted(futuros.values(),key=lambda j:j['utc'])
 
 
