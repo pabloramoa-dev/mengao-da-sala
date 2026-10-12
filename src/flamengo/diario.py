@@ -136,15 +136,24 @@ for id_, capa_, frases_ in [
                   "falas":frases_, "legendas":[None]*len(frases_), "fonte":FONTE_MANTO})
 
 # ------------------------------------------------------------------ coleta
-def pegar(url: str):
-    time.sleep(1.0)
+def pegar(url: str, tentativas: int = 3):
+    """GET resiliente para fontes públicas; só devolve None após novas tentativas."""
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=40) as r:
-            return json.loads(r.read().decode("utf-8", "ignore"))
-    except Exception as exc:                       # sem dado = formato fica de fora
-        print(f"[diario] falhou {url[:90]}: {exc}")
-        return None
+    ultimo = None
+    for tentativa in range(1, max(1, tentativas) + 1):
+        try:
+            if tentativa == 1:
+                time.sleep(1.0)
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.loads(r.read().decode("utf-8", "ignore"))
+        except Exception as exc:
+            ultimo = exc
+            if tentativa < tentativas:
+                espera = min(12, 2 ** tentativa)
+                print(f"[diario] tentativa {tentativa}/{tentativas} falhou {url[:75]}: {exc}; retry em {espera}s")
+                time.sleep(espera)
+    print(f"[diario] falhou {url[:90]} após {tentativas} tentativas: {ultimo}")
+    return None
 
 
 def _curto(nome: str | None) -> str:
