@@ -29,6 +29,10 @@ def aplicar(pauta, jogo):
         corpo=noticias+outros
     elif formato=='palpite_cida':
         n,e=p['palpite']
+        # Regra editorial fixa: Cida é sempre otimista e nunca prevê empate/derrota.
+        if n <= e:
+            n = e + 1
+            p['palpite'] = [n, e]
         insuficiente=p.get('analise_palpite',{}).get('status')=='amostra_insuficiente'
         gancho=(f'Vou de {n} a {e} pro Flamengo! Comigo é Mengão sempre. E você?' if insuficiente else
                 f'Meu palpite é {n} a {e} pro Flamengo! Pode vir quem for!')
