@@ -735,6 +735,56 @@
       "versao_editorial": 5,
       "container_id": "18124266808786157",
       "media_id": "18026992460917235"
+    },
+    {
+      "chave": "story-resposta:2026-10-12:resenha",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-10-12T16:51:19.270994+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "resenha",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-10-12",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-12T16:50:54.419885+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18124664725786157",
+      "media_id": "17987503787880979"
+    },
+    {
+      "chave": "pos:401841263",
+      "formato": "pos_jogo_v2",
+      "status": "publicado",
+      "atualizado_em": "2026-10-12T16:55:36.980007+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-12",
+      "palpite": null,
+      "jogo_utc": "2026-10-11T20:30Z",
+      "jogo_id": "401841263",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-12T16:51:23.945675+00:00",
+      "duracao_segundos": 31.708,
+      "engajamento": {
+        "versao": 1,
+        "variante": 1,
+        "gancho": "É o Mengão lá em cima! Um a zero no Fluminense, no Estadio do Maracana.",
+        "acao": "compartilhar",
+        "cta": "Manda pra quem viu o jogo contigo. Quero ver se concorda."
+      },
+      "versao_editorial": 5,
+      "container_id": "18124665733786157",
+      "media_id": "18138801211733483"
     }
   ]
 }
