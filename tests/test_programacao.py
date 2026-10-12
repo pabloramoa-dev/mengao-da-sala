@@ -39,6 +39,17 @@ def test_sem_card_em_dias_reservados_ou_agenda_incompleta():
     with pytest.raises(RuntimeError):p.selecionar(dt(6,19),[],[],[],CFG)
     with patch.object(p.diario,'pegar',side_effect=[{'events':[]},None]),pytest.raises(RuntimeError):p.agenda_segura()
 
+def test_agenda_segura_usa_resposta_completa_quando_redundante_falha():
+    dados={'events':[{'tipo':'feito'},{'tipo':'futuro'}]}
+    def converter(evento, liga, time_id):
+        if evento['tipo']=='feito':
+            return dict(id='feito',utc=dt(5,20).isoformat(),status={'completed':True},adversario='A')
+        return dict(id='futuro',utc=dt(15,20).isoformat(),status={'state':'pre','name':'STATUS_SCHEDULED'},adversario='B')
+    with patch.object(p.diario,'pegar',side_effect=[dados,None]), patch.object(p.diario,'_jogo',side_effect=converter):
+        feitos, futuros = p.agenda_segura()
+    assert [j['id'] for j in feitos] == ['feito']
+    assert [j['id'] for j in futuros] == ['futuro']
+
 def test_recibo_bloqueia_repeticao_e_preserva_palpite(tmp_path):
     with patch.object(estado,'REGISTRO',tmp_path/'r.json'):
         m=dict(formato='palpite_cida',jogo_id='42',palpite=[2,1],dia='2026-10-08')
