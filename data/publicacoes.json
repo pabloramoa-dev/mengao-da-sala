@@ -851,6 +851,44 @@
       "versao_editorial": 5,
       "container_id": "18125390020786157",
       "media_id": "18071396936767339"
+    },
+    {
+      "chave": "pre:401912523",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-10-15T00:07:23.765391+00:00",
+      "memoria_editorial": [
+        {
+          "id": "f2b243ac9c409538be23e914",
+          "fala": "Segundo ge — Flamengo, o time já chegou na Argentina, tá tudo pronto pra partida.",
+          "link": "https://ge.globo.com/futebol/times/flamengo/noticia/2026/10/13/flamengo-chega-a-argentina-para-semifinal-da-libertadores-e-alerta-por-agressividade-do-estudiantes.ghtml",
+          "publicado_em": "2026-10-14T02:12:56+00:00"
+        }
+      ],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-14",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-10-16T00:30Z",
+      "jogo_id": "401912523",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-15T00:01:50.580631+00:00",
+      "duracao_segundos": 59.538,
+      "engajamento": {
+        "versao": 1,
+        "variante": 1,
+        "gancho": "Contra o Estudiantes, meu palpite é Mengão na cabeça! Ganhar é obrigação.",
+        "acao": "compartilhar",
+        "cta": "Manda pro amigo que vai ver esse jogo contigo."
+      },
+      "versao_editorial": 5,
+      "container_id": "18125467795786157",
+      "media_id": "17990715956859657"
     }
   ]
 }
