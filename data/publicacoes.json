@@ -889,6 +889,146 @@
       "versao_editorial": 5,
       "container_id": "18125467795786157",
       "media_id": "17990715956859657"
+    },
+    {
+      "chave": "story-resposta:2026-10-15:vencedor:401912523",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-10-15T14:19:12.096923+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "vencedor:401912523",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-10-15",
+      "palpite": null,
+      "jogo_utc": "2026-10-16T00:30Z",
+      "jogo_id": "401912523",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-15T14:18:47.838389+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18125679826786157",
+      "media_id": "18101692283638685"
+    },
+    {
+      "chave": "story-resposta:2026-10-15:placar:401912523",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-10-15T14:19:33.410731+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "placar:401912523",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-10-15",
+      "palpite": null,
+      "jogo_utc": "2026-10-16T00:30Z",
+      "jogo_id": "401912523",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-15T14:18:47.838389+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18125679973786157",
+      "media_id": "18335984527277336"
+    },
+    {
+      "chave": "palpite:401912523",
+      "formato": "palpite_cida",
+      "status": "publicado",
+      "atualizado_em": "2026-10-15T14:23:56.961136+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": {
+        "metodo": "medias_recentes_mando_v1",
+        "flamengo": {
+          "jogos": 8,
+          "vitorias": 6,
+          "marcados": 1.6165943391189683,
+          "sofridos": 0.7754179147081661,
+          "ultimo": "2026-10-11T20:30Z",
+          "fontes": [
+            "https://www.espn.com/soccer/match/_/gameId/401913077",
+            "https://www.espn.com/soccer/match/_/gameId/401841225",
+            "https://www.espn.com/soccer/match/_/gameId/401912543",
+            "https://www.espn.com/soccer/match/_/gameId/401841237",
+            "https://www.espn.com/soccer/match/_/gameId/401912526",
+            "https://www.espn.com/soccer/match/_/gameId/401841241",
+            "https://www.espn.com/soccer/match/_/gameId/401841251",
+            "https://www.espn.com/soccer/match/_/gameId/401841263"
+          ]
+        },
+        "adversario": {
+          "jogos": 8,
+          "vitorias": 3,
+          "marcados": 1.5579959786350026,
+          "sofridos": 0.9678336904420792,
+          "ultimo": "2026-10-10T20:00Z",
+          "fontes": [
+            "https://www.espn.com/soccer/match/_/gameId/401841540",
+            "https://www.espn.com/soccer/match/_/gameId/401912541",
+            "https://www.espn.com/soccer/match/_/gameId/401841554",
+            "https://www.espn.com/soccer/match/_/gameId/401912540",
+            "https://www.espn.com/soccer/match/_/gameId/401841582",
+            "https://www.espn.com/soccer/match/_/gameId/401913078",
+            "https://www.espn.com/soccer/match/_/gameId/401841590",
+            "https://www.espn.com/soccer/match/_/gameId/401841610"
+          ]
+        },
+        "calibrado": false,
+        "fontes": [
+          "https://www.espn.com/soccer/match/_/gameId/401913077",
+          "https://www.espn.com/soccer/match/_/gameId/401841225",
+          "https://www.espn.com/soccer/match/_/gameId/401912543",
+          "https://www.espn.com/soccer/match/_/gameId/401841237",
+          "https://www.espn.com/soccer/match/_/gameId/401912526",
+          "https://www.espn.com/soccer/match/_/gameId/401841241",
+          "https://www.espn.com/soccer/match/_/gameId/401841251",
+          "https://www.espn.com/soccer/match/_/gameId/401841263",
+          "https://www.espn.com/soccer/match/_/gameId/401841540",
+          "https://www.espn.com/soccer/match/_/gameId/401912541",
+          "https://www.espn.com/soccer/match/_/gameId/401841554",
+          "https://www.espn.com/soccer/match/_/gameId/401912540",
+          "https://www.espn.com/soccer/match/_/gameId/401841582",
+          "https://www.espn.com/soccer/match/_/gameId/401913078",
+          "https://www.espn.com/soccer/match/_/gameId/401841590",
+          "https://www.espn.com/soccer/match/_/gameId/401841610"
+        ],
+        "status": "ok",
+        "placar": [
+          1,
+          1
+        ],
+        "estimativas": [
+          1.29,
+          1.17
+        ],
+        "criterio_editorial": "torcedora_sempre_vitoria_flamengo"
+      },
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-15",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-10-16T00:30Z",
+      "jogo_id": "401912523",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-15T14:19:37.111527+00:00",
+      "duracao_segundos": 39.183,
+      "engajamento": {
+        "versao": 1,
+        "variante": 2,
+        "gancho": "Meu palpite é 2 a 1 pro Flamengo! Pode vir quem for!",
+        "acao": "comentario",
+        "cta": "Vai no meu palpite ou vai chutar outro? Conta aí."
+      },
+      "versao_editorial": 5,
+      "container_id": "18125681581786157",
+      "media_id": "17931215655410601"
     }
   ]
 }
