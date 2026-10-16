@@ -1029,6 +1029,41 @@
       "versao_editorial": 5,
       "container_id": "18125681581786157",
       "media_id": "17931215655410601"
+    },
+    {
+      "chave": "pos:401912523",
+      "formato": "pos_jogo_v2",
+      "status": "publicado",
+      "atualizado_em": "2026-10-16T09:00:44.023351+00:00",
+      "memoria_editorial": [
+        {
+          "id": "3922c74fed030b9c1449eb62",
+          "fala": "Segundo Placar, flamengo ficou 0 a 0 com o Estudiantes.",
+          "link": "https://placar.com.br/copa-libertadores/rossi-garante-empate-do-flamengo-fora-de-casa-na-ida-da-semifinal/",
+          "publicado_em": "2026-10-16T02:24:39+00:00"
+        }
+      ],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-16",
+      "palpite": null,
+      "jogo_utc": "2026-10-16T00:30Z",
+      "jogo_id": "401912523",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-16T08:31:01.656077+00:00",
+      "duracao_segundos": 41.894999999999996,
+      "engajamento": {
+        "versao": 1,
+        "variante": 1,
+        "gancho": "Empate. Zero a zero com o Estudiantes, no Estadio Jorge Luis Hirschi.",
+        "acao": "compartilhar",
+        "cta": "Manda pra quem viu o jogo contigo. Quero ver se concorda."
+      },
+      "versao_editorial": 5,
+      "container_id": "18125943355786157",
+      "media_id": "18101538590167977"
     }
   ]
 }
