@@ -1108,6 +1108,37 @@
       "versao_editorial": 5,
       "container_id": "18126478429786157",
       "media_id": "18046035197636091"
+    },
+    {
+      "chave": "pre:401841269",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-10-17T23:10:09.256216+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-17",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-10-18T21:30Z",
+      "jogo_id": "401841269",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-17T23:05:49.749583+00:00",
+      "duracao_segundos": 44.915,
+      "engajamento": {
+        "versao": 1,
+        "variante": 1,
+        "gancho": "Contra o Bahia, meu palpite é Mengão na cabeça! Ganhar é obrigação.",
+        "acao": "compartilhar",
+        "cta": "Manda pro amigo que vai ver esse jogo contigo."
+      },
+      "versao_editorial": 5,
+      "container_id": "18126567574786157",
+      "media_id": "18465967741137509"
     }
   ]
 }
