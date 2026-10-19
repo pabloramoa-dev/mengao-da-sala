@@ -96,6 +96,11 @@ def gerar_v3(pauta: dict, destino: Path, trab: Path, snapshot: dict) -> Path:
     conteudo = dict(pauta, segs=audio["segs"])
     (trab / "conteudo.json").write_text(json.dumps(conteudo, ensure_ascii=False), encoding="utf-8")
     meta = hyperframes_v3.renderizar(conteudo, audio, destino, trab, RAIZ)
+    # Mantem rigs SVG, gestos, as vozes Gil/Cida e a fala 100% original.
+    if pauta.get("interatividade"):
+        from tools.native_video_finisher import apply_from_metadata
+        interativo = apply_from_metadata(destino, pauta, RAIZ)
+        meta["acabamento_nativo"] = interativo
     destino.with_suffix(".txt").write_text(pauta.get("legenda_post") or legenda_post(pauta, snapshot), encoding="utf-8")
     destino.with_suffix(".json").write_text(json.dumps({
         **pauta, **meta, "motor_voz": audio["motor_voz"], "camada_personagens": "rig-svg-v3",
