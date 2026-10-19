@@ -1,0 +1,13 @@
+{
+  "interatividade": {
+    "modo": "quiz",
+    "pergunta": "Quantos jogadores cada time tem no início de uma partida?",
+    "opcoes": [
+      "Dez",
+      "Onze",
+      "Doze"
+    ],
+    "resposta": "Onze jogadores",
+    "segundos": 2.7
+  }
+}
