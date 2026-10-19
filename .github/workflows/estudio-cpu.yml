@@ -34,6 +34,20 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core espeak-ng
           python tools/cpu_studio.py --spec examples/cpu_piloto.json --output output/estudio_cpu.mp4 --tts espeak
+      - name: B-roll local sintetico sem rede
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p output
+          ffmpeg -y -loglevel error -f lavfi -i 'testsrc2=size=640x360:rate=25' -t 3 -c:v libx264 -preset ultrafast -pix_fmt yuv420p output/clip_teste.mp4
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('examples/cpu_piloto.json').read_text(encoding='utf-8'))
+          d['scenes'][0]['video'] = 'clip_teste.mp4'
+          d['scenes'][0]['media_credit'] = 'clipe sintetico gerado no CI; nenhuma licenca externa'
+          Path('output/piloto_broll.json').write_text(json.dumps(d, ensure_ascii=False), encoding='utf-8')
+          PY
+          python tools/cpu_studio.py --spec output/piloto_broll.json --output output/estudio_cpu_broll.mp4 --tts none
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
         with:
