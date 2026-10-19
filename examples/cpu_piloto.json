@@ -1,0 +1,27 @@
+{
+  "name": "GIL E DONA CIDA",
+  "style": "mengao",
+  "footer": "Responde nos comentarios, Nacao!",
+  "scenes": [
+    {
+      "title": "Desafio do Mengao",
+      "text": "Gil e Dona Cida chegaram com uma pergunta sobre futebol!",
+      "seconds": 4
+    },
+    {
+      "title": "Pergunta da rodada",
+      "text": "Com quantos jogadores cada time inicia uma partida de futebol em campo?",
+      "seconds": 4
+    },
+    {
+      "title": "Escolha sua resposta",
+      "text": "A: 9 jogadores. B: 10 jogadores. C: 11 jogadores. D: 12 jogadores.",
+      "seconds": 4
+    },
+    {
+      "title": "Resposta certa",
+      "text": "Alternativa C: 11 jogadores. Acertou? Chama um amigo para o proximo desafio!",
+      "seconds": 4
+    }
+  ]
+}

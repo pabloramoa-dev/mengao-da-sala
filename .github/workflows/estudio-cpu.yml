@@ -1,0 +1,58 @@
+name: Estudio CPU gratuito - piloto
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/cpu_studio.py
+      - tools/test_cpu_studio.py
+      - examples/cpu_piloto.json
+      - .github/workflows/estudio-cpu.yml
+  workflow_dispatch:
+  push:
+    branches: [feat/estudio-cpu-gratuito-20261019]
+    paths:
+      - tools/cpu_studio.py
+      - examples/cpu_piloto.json
+      - .github/workflows/estudio-cpu.yml
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pillow
+      - run: python -m unittest discover -s tools -p test_cpu_studio.py -v
+      - run: python tools/cpu_studio.py --spec examples/cpu_piloto.json --check-only
+      - name: Render e QA sem publicar (somente manual)
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core espeak-ng
+          python tools/cpu_studio.py --spec examples/cpu_piloto.json --output output/estudio_cpu.mp4 --tts espeak
+      - name: B-roll local sintetico sem rede
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p output
+          ffmpeg -y -loglevel error -f lavfi -i 'testsrc2=size=640x360:rate=25' -t 3 -c:v libx264 -preset ultrafast -pix_fmt yuv420p output/clip_teste.mp4
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path('examples/cpu_piloto.json').read_text(encoding='utf-8'))
+          d['scenes'][0]['video'] = 'clip_teste.mp4'
+          d['scenes'][0]['media_credit'] = 'clipe sintetico gerado no CI; nenhuma licenca externa'
+          Path('output/piloto_broll.json').write_text(json.dumps(d, ensure_ascii=False), encoding='utf-8')
+          PY
+          python tools/cpu_studio.py --spec output/piloto_broll.json --output output/estudio_cpu_broll.mp4 --tts none
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
+        with:
+          name: estudo-cpu-piloto
+          path: |
+            output/estudio_cpu.mp4
+            output/estudio_cpu.json
+          retention-days: 1
