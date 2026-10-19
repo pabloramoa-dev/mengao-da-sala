@@ -29,13 +29,13 @@ jobs:
       - run: python -m unittest discover -s tools -p test_cpu_studio.py -v
       - run: python tools/cpu_studio.py --spec examples/cpu_piloto.json --check-only
       - name: Render e QA sem publicar (somente manual)
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core espeak-ng
           python tools/cpu_studio.py --spec examples/cpu_piloto.json --output output/estudio_cpu.mp4 --tts espeak
       - uses: actions/upload-artifact@v4
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
         with:
           name: estudo-cpu-piloto
           path: |
