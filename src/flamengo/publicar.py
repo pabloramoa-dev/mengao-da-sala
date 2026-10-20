@@ -119,6 +119,9 @@ def main() -> int:
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
     anterior = next((x for x in estado.ler()['itens'] if x['chave'] == estado.chave(legenda, meta)), {})
     media = anterior.get("media_id") if anterior.get("status") == "publicado" else (None if a.story else encontrar_publicado(legenda))
+    if anterior.get("status") == "publicado":
+        print("[ig] Conteúdo já confirmado; nenhum reenvio.")
+        return 0
     if not media:
         if anterior.get("status") == "publicacao_pendente":
             raise RuntimeError("Publicação anterior inconclusiva: reconciliar container antes de reenviar")

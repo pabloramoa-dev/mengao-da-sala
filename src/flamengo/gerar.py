@@ -106,6 +106,8 @@ def gerar_v3(pauta: dict, destino: Path, trab: Path, snapshot: dict) -> Path:
         **pauta, **meta, "motor_voz": audio["motor_voz"], "camada_personagens": "rig-svg-v3",
         "vozes": voz_dupla.VOZES, "falas": [b["fala"] for b in pauta["batidas"]], "publicado": False,
     }, ensure_ascii=False, indent=2), encoding="utf-8")
+    from tools.channel_ops import record_render
+    record_render(destino, pauta, RAIZ)
     return destino
 
 

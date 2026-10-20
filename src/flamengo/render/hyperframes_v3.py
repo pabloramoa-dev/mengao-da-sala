@@ -393,6 +393,7 @@ def renderizar(conteudo: dict, audio: dict, destino: Path, trabalho: Path, raiz:
     env = dict(os.environ, HYPERFRAMES_FFMPEG_PATH=shutil.which("ffmpeg") or "ffmpeg",
                HYPERFRAMES_FFPROBE_PATH=shutil.which("ffprobe") or "ffprobe", HYPERFRAMES_TELEMETRY_DISABLED="1")
     subprocess.run([node, str(cli), "lint", str(projeto)], check=True, cwd=raiz, env=env)
+    subprocess.run([node, str(raiz / "video/validate-production-layout.mjs"), str(projeto)], check=True, cwd=raiz, env=env)
     parcial = destino.with_name(destino.stem + ".rendering.mp4")
     try:
         subprocess.run([node, str(cli), "render", str(projeto), "--output", str(parcial), "--fps", str(FPS),
