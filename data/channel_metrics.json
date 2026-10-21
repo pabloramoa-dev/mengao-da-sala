@@ -1,0 +1,78 @@
+{
+  "measurements": [
+    {
+      "media_id": "17937172092393949",
+      "window": "72h",
+      "age_hours": 77.35,
+      "collected_at": "2026-10-21T19:17:58.635520+00:00",
+      "metrics": {
+        "reach": 33,
+        "shares": 0,
+        "saved": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
+    },
+    {
+      "media_id": "18465967741137509",
+      "window": "72h",
+      "age_hours": 92.13,
+      "collected_at": "2026-10-21T19:17:58.635520+00:00",
+      "metrics": {
+        "reach": 35,
+        "shares": 0,
+        "saved": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
+    },
+    {
+      "media_id": "18101538590167977",
+      "window": "72h",
+      "age_hours": 130.29,
+      "collected_at": "2026-10-21T19:17:58.635520+00:00",
+      "metrics": {
+        "reach": 6,
+        "shares": 0,
+        "saved": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
+    },
+    {
+      "media_id": "17931215655410601",
+      "window": "72h",
+      "age_hours": 148.9,
+      "collected_at": "2026-10-21T19:17:58.635520+00:00",
+      "metrics": {
+        "reach": 11,
+        "shares": 0,
+        "saved": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
+    },
+    {
+      "media_id": "17990715956859657",
+      "window": "72h",
+      "age_hours": 163.18,
+      "collected_at": "2026-10-21T19:17:58.635520+00:00",
+      "metrics": {
+        "reach": 12,
+        "shares": 0,
+        "saved": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
+    }
+  ],
+  "status": "ok",
+  "errors": [],
+  "updated_at": "2026-10-21T19:17:58.635520+00:00",
+  "account": "mengaodasala"
+}
