@@ -1322,6 +1322,44 @@
       "versao_editorial": 5,
       "container_id": "18127679236786157",
       "media_id": "18040597151836977"
+    },
+    {
+      "chave": "pre:401912521",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-10-21T22:43:29.415732+00:00",
+      "memoria_editorial": [
+        {
+          "id": "b5b74f7f9862f62f62ce8b97",
+          "fala": "Segundo ge — Flamengo, arrascaeta ainda tá de fora, não pode mexer no punho.",
+          "link": "https://ge.globo.com/futebol/times/flamengo/noticia/2026/10/21/escalacao-do-flamengo-jardim-tem-um-retorno-e-uma-duvida-para-decisao-contra-o-estudiantes.ghtml",
+          "publicado_em": "2026-10-21T22:24:40+00:00"
+        }
+      ],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-21",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-10-23T00:30Z",
+      "jogo_id": "401912521",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-21T22:39:40.131246+00:00",
+      "duracao_segundos": 59.702,
+      "engajamento": {
+        "versao": 1,
+        "variante": 0,
+        "gancho": "Amanhã é contra o Estudiantes. Eu vou de vitória do Mengão!",
+        "acao": "comentario",
+        "cta": "Você iria pra cima logo ou começava na calma? Conta aí."
+      },
+      "versao_editorial": 5,
+      "container_id": "18127759006786157",
+      "media_id": "18012805184978842"
     }
   ]
 }
