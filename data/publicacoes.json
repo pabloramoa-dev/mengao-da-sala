@@ -1360,6 +1360,152 @@
       "versao_editorial": 5,
       "container_id": "18127759006786157",
       "media_id": "18012805184978842"
+    },
+    {
+      "chave": "story-resposta:2026-10-22:vencedor:401912521",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-10-22T15:58:57.541516+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "vencedor:401912521",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-10-22",
+      "palpite": null,
+      "jogo_utc": "2026-10-23T00:30Z",
+      "jogo_id": "401912521",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-22T15:58:32.563364+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18127950157786157",
+      "media_id": "18186715054418178"
+    },
+    {
+      "chave": "story-resposta:2026-10-22:placar:401912521",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-10-22T15:59:19.790579+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "placar:401912521",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-10-22",
+      "palpite": null,
+      "jogo_utc": "2026-10-23T00:30Z",
+      "jogo_id": "401912521",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-22T15:58:32.563364+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18127950238786157",
+      "media_id": "17924772702431610"
+    },
+    {
+      "chave": "palpite:401912521",
+      "formato": "palpite_cida",
+      "status": "publicado",
+      "atualizado_em": "2026-10-22T16:03:53.981065+00:00",
+      "memoria_editorial": [
+        {
+          "id": "2f1121c6b07167cd638dab9d",
+          "fala": "Segundo Placar, plata pode entrar no lugar de Paquetá.",
+          "link": "https://placar.com.br/copa-libertadores/arrascaeta-de-volta-as-mudancas-no-esquema-de-jardim-contra-o-estudiantes/",
+          "publicado_em": "2026-10-22T14:00:41+00:00"
+        }
+      ],
+      "analise_palpite": {
+        "metodo": "medias_recentes_mando_v1",
+        "flamengo": {
+          "jogos": 8,
+          "vitorias": 5,
+          "marcados": 1.5836453037256988,
+          "sofridos": 0.5511954590462865,
+          "ultimo": "2026-10-18T21:30Z",
+          "fontes": [
+            "https://www.espn.com/soccer/match/_/gameId/401912543",
+            "https://www.espn.com/soccer/match/_/gameId/401841237",
+            "https://www.espn.com/soccer/match/_/gameId/401912526",
+            "https://www.espn.com/soccer/match/_/gameId/401841241",
+            "https://www.espn.com/soccer/match/_/gameId/401841251",
+            "https://www.espn.com/soccer/match/_/gameId/401841263",
+            "https://www.espn.com/soccer/match/_/gameId/401912523",
+            "https://www.espn.com/soccer/match/_/gameId/401841269"
+          ]
+        },
+        "adversario": {
+          "jogos": 8,
+          "vitorias": 3,
+          "marcados": 1.1699152238014425,
+          "sofridos": 1.1222998538324342,
+          "ultimo": "2026-10-18T21:00Z",
+          "fontes": [
+            "https://www.espn.com/soccer/match/_/gameId/401841554",
+            "https://www.espn.com/soccer/match/_/gameId/401912540",
+            "https://www.espn.com/soccer/match/_/gameId/401841582",
+            "https://www.espn.com/soccer/match/_/gameId/401913078",
+            "https://www.espn.com/soccer/match/_/gameId/401841590",
+            "https://www.espn.com/soccer/match/_/gameId/401841610",
+            "https://www.espn.com/soccer/match/_/gameId/401912523",
+            "https://www.espn.com/soccer/match/_/gameId/401841623"
+          ]
+        },
+        "calibrado": false,
+        "fontes": [
+          "https://www.espn.com/soccer/match/_/gameId/401912543",
+          "https://www.espn.com/soccer/match/_/gameId/401841237",
+          "https://www.espn.com/soccer/match/_/gameId/401912526",
+          "https://www.espn.com/soccer/match/_/gameId/401841241",
+          "https://www.espn.com/soccer/match/_/gameId/401841251",
+          "https://www.espn.com/soccer/match/_/gameId/401841263",
+          "https://www.espn.com/soccer/match/_/gameId/401912523",
+          "https://www.espn.com/soccer/match/_/gameId/401841269",
+          "https://www.espn.com/soccer/match/_/gameId/401841554",
+          "https://www.espn.com/soccer/match/_/gameId/401912540",
+          "https://www.espn.com/soccer/match/_/gameId/401841582",
+          "https://www.espn.com/soccer/match/_/gameId/401913078",
+          "https://www.espn.com/soccer/match/_/gameId/401841590",
+          "https://www.espn.com/soccer/match/_/gameId/401841610",
+          "https://www.espn.com/soccer/match/_/gameId/401841623"
+        ],
+        "status": "ok",
+        "placar": [
+          1,
+          1
+        ],
+        "estimativas": [
+          1.35,
+          0.86
+        ],
+        "criterio_editorial": "torcedora_sempre_vitoria_flamengo"
+      },
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-22",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-10-23T00:30Z",
+      "jogo_id": "401912521",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-22T15:59:24.083514+00:00",
+      "duracao_segundos": 36.864,
+      "engajamento": {
+        "versao": 1,
+        "variante": 0,
+        "gancho": "Meu palpite é 2 a 1 pro Flamengo! Pode vir quem for!",
+        "acao": "comentario",
+        "cta": "Quanto vai ser? Bota teu placar aí antes do jogo!"
+      },
+      "versao_editorial": 5,
+      "container_id": "18127951741786157",
+      "media_id": "18086961716327052"
     }
   ]
 }
