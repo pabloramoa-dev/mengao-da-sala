@@ -1506,6 +1506,47 @@
       "versao_editorial": 5,
       "container_id": "18127951741786157",
       "media_id": "18086961716327052"
+    },
+    {
+      "chave": "pos:401912521",
+      "formato": "pos_jogo_v2",
+      "status": "publicado",
+      "atualizado_em": "2026-10-23T12:03:35.302919+00:00",
+      "memoria_editorial": [
+        {
+          "id": "a5bad04d8d507b893a7022f9",
+          "fala": "Segundo ge — Flamengo, errou Jorginho, Paquetá e Bruno, ficou fora",
+          "link": "https://ge.globo.com/futebol/times/flamengo/noticia/2026/10/23/analise-flamengo-e-incompetente-no-ataque-nao-encaixa-o-jogo-nos-180-minutos-e-cai-diante-do-estudiantes.ghtml",
+          "publicado_em": "2026-10-23T07:00:00+00:00"
+        },
+        {
+          "id": "eb6a40b6c4a37b5cfdb2e6eb",
+          "fala": "Segundo ge — Flamengo, estudiantes ganhou nos pênaltis e vai jogar a final contra o Palmeiras",
+          "link": "https://ge.globo.com/blogs/meia-encarnada/post/2026/10/23/flamengo-levou-uma-aula-de-libertadores-do-estudiantes.ghtml",
+          "publicado_em": "2026-10-23T10:00:00+00:00"
+        }
+      ],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-23",
+      "palpite": null,
+      "jogo_utc": "2026-10-23T00:30Z",
+      "jogo_id": "401912521",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-23T11:59:07.183632+00:00",
+      "duracao_segundos": 47.367,
+      "engajamento": {
+        "versao": 1,
+        "variante": 0,
+        "gancho": "Ficou no empate. Zero a zero com o Estudiantes, no Estadio do Maracana.",
+        "acao": "comentario",
+        "cta": "Qual lance não sai da tua cabeça? Conta aí."
+      },
+      "versao_editorial": 5,
+      "container_id": "18128153110786157",
+      "media_id": "17913420279471448"
     }
   ]
 }
