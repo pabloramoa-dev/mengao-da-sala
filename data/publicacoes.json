@@ -1591,6 +1591,28 @@
       "versao_editorial": 5,
       "container_id": "18128505259786157",
       "media_id": "18021575840942577"
+    },
+    {
+      "chave": "card:2026-10-24",
+      "formato": "tabela_card",
+      "status": "publicado",
+      "atualizado_em": "2026-10-24T22:56:06.228826+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-24",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-24T22:43:09.839245+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18128567497786157",
+      "media_id": "18133466764774515"
     }
   ]
 }
