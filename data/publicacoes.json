@@ -1635,6 +1635,50 @@
       "versao_editorial": 5,
       "container_id": "18128818111786157",
       "media_id": "17914241628286308"
+    },
+    {
+      "chave": "pre:401841286",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-10-25T22:32:08.230384+00:00",
+      "memoria_editorial": [
+        {
+          "id": "f33fe275150efc4465042543",
+          "fala": "Segundo ge — Flamengo, flamengo pode retomar a ponta contra o Atlético-MG.",
+          "link": "https://ge.globo.com/futebol/times/flamengo/noticia/2026/10/25/de-novo-opcao-no-flamengo-arrascaeta-tenta-recuperar-seu-100percent-entre-reta-final-e-data-fifa.ghtml",
+          "publicado_em": "2026-10-25T07:00:00+00:00"
+        },
+        {
+          "id": "f33fe275150efc4465042543",
+          "fala": "Segundo ge — Flamengo, jogo é segunda, 20h, no Maracanã.",
+          "link": "https://ge.globo.com/futebol/times/flamengo/noticia/2026/10/25/de-novo-opcao-no-flamengo-arrascaeta-tenta-recuperar-seu-100percent-entre-reta-final-e-data-fifa.ghtml",
+          "publicado_em": "2026-10-25T07:00:00+00:00"
+        }
+      ],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-25",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-10-26T23:00Z",
+      "jogo_id": "401841286",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-25T22:27:08.625247+00:00",
+      "duracao_segundos": 55.972,
+      "engajamento": {
+        "versao": 1,
+        "variante": 0,
+        "gancho": "Amanhã é contra o Galo. Eu vou de vitória do Mengão!",
+        "acao": "comentario",
+        "cta": "Você iria pra cima logo ou começava na calma? Conta aí."
+      },
+      "versao_editorial": 5,
+      "container_id": "18128876641786157",
+      "media_id": "18068777561789271"
     }
   ]
 }
