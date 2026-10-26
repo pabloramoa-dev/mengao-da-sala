@@ -13,7 +13,7 @@ A geração pode começar 30 minutos antes. O envio espera o horário e consulta
 
 Uma única fila evita concorrência entre rotinas. Recibos usam quadro+partida ou data do card. Se a resposta do Instagram se perder, a reconciliação consulta o container antes de liberar novo envio. Estados ambíguos bloqueiam reenvio. `PUBLICAR=true` e os secrets existentes continuam necessários; ensaios não publicam.
 
-Gil e Dona Cida usam novos desenhos SVG articulados, com HyperFrames, expressões e visemas. As chaves internas `rubro` e `primo` são mantidas apenas para compatibilidade com os pivôs do render. Nomes exibidos: GIL e DONA CIDA. Apresentação solo por quadro. Vozes: AntonioNeural e FranciscaNeural, com reserva masculina/feminina do Kokoro quando Edge falha.
+Gil e Dona Cida usam novos desenhos SVG articulados, com HyperFrames, expressões e visemas. As chaves internas `rubro` e `primo` são mantidas apenas para compatibilidade com os pivôs do render. Nomes exibidos: GIL e DONA CIDA. Apresentação solo por quadro. Vozes: **Gil usa Kokoro `pm_alex` como principal**, com `pt-BR-AntonioNeural` como reserva caso o Kokoro falhe. **Dona Cida mantém `pt-BR-FranciscaNeural` como principal**, com Kokoro `pf_dora` como reserva. A escolha do motor de voz e seu fallback são feitos por personagem, sem trocar o timbre de ambos quando apenas um serviço falha.
 
 ## Pesquisa e Agent Reach
 
