@@ -106,6 +106,28 @@ def _kokoro(texto, voz):
         return _ler(a)
 
 
+def sintetizar_fala(quem: str, texto: str, voz_edge: str,
+                   rate: str, pitch: str) -> tuple[np.ndarray, str]:
+    """Sintetiza uma fala com motor principal do personagem e fallback específico."""
+    cfg = VOZES.get(quem, VOZES["rubro"])
+    if cfg["motor"] == "kokoro":
+        # Gil: Kokoro pm_alex sempre antes de qualquer tentativa do Edge.
+        try:
+            return _kokoro(texto, cfg["voz_principal"]), "kokoro"
+        except Exception as exc:
+            print(f"[voz] Kokoro indisponível para Gil ({exc}); usando Edge reserva",
+                  file=sys.stderr)
+            return _ler(edge_mp3(texto, voz_edge, rate, pitch)), "edge"
+
+    # Dona Cida: Edge Francisca, sem alteração no timbre principal.
+    try:
+        return _ler(edge_mp3(texto, voz_edge, rate, pitch)), "edge"
+    except Exception as exc:
+        print(f"[voz] Edge indisponível para Dona Cida ({exc}); usando Kokoro reserva",
+              file=sys.stderr)
+        return _kokoro(texto, cfg["reserva"]), "kokoro"
+
+
 def narrar(batidas: list[dict], trabalho: Path, raiz: Path) -> dict:
     """Mesma interface do voz.narrar(): narracao.wav, narracao_master.wav, segs, lip."""
     import soundfile as sf
@@ -117,27 +139,7 @@ def narrar(batidas: list[dict], trabalho: Path, raiz: Path) -> dict:
         falas.append((quem, voz, rate, pitch, b["fala"]))
     audios, motores = [], []
     for quem, voz_edge, rate, pitch, texto in falas:
-        cfg = VOZES.get(quem, VOZES["rubro"])
-        if cfg["motor"] == "kokoro":
-            # Gil: Kokoro pm_alex sempre antes de qualquer tentativa do Edge.
-            try:
-                audio = _kokoro(texto, cfg["voz_principal"])
-                usado = "kokoro"
-            except Exception as exc:
-                print(f"[voz] Kokoro indisponível para Gil ({exc}); usando Edge reserva",
-                      file=sys.stderr)
-                audio = _ler(edge_mp3(texto, voz_edge, rate, pitch))
-                usado = "edge"
-        else:
-            # Dona Cida: Edge Francisca, sem alteração no timbre principal.
-            try:
-                audio = _ler(edge_mp3(texto, voz_edge, rate, pitch))
-                usado = "edge"
-            except Exception as exc:
-                print(f"[voz] Edge indisponível para Dona Cida ({exc}); usando Kokoro reserva",
-                      file=sys.stderr)
-                audio = _kokoro(texto, cfg["reserva"])
-                usado = "kokoro"
+        audio, usado = sintetizar_fala(quem, texto, voz_edge, rate, pitch)
         audios.append(audio)
         motores.append(usado)
     motor = motores[0] if len(set(motores)) == 1 else "misto"
