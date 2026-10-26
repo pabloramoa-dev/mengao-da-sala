@@ -96,7 +96,9 @@ jobs:
       - uses: actions/cache@v4
         if: steps.pauta.outputs.tipo == 'video'
         with:
-          path: ~/.cache/flamengo_vozes
+          path: |
+            ~/.cache/flamengo_vozes
+            ~/.cache/flamengo_kokoro
           key: flamengo-gil-cida-${{ runner.os }}-${{ github.run_id }}
           restore-keys: flamengo-gil-cida-${{ runner.os }}-
       - name: Gerar Reel
