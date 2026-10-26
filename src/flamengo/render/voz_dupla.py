@@ -1,24 +1,15 @@
-"""Vozes da dupla — Edge TTS (vozes neurais da Microsoft), escolhidas de ouvido.
+"""Vozes de Gil e Dona Cida no motor v3 do Mengão da Sala.
 
-Pablo ouviu 6 candidatos no workflow "Teste de vozes" (28/09/2026) e escolheu
-a opção 2. O Kokoro ficou robótico demais para diálogo.
+    GIL       = Kokoro pm_alex (principal), Edge AntonioNeural (reserva).
+    DONA CIDA = Edge FranciscaNeural (principal), Kokoro pf_dora (reserva).
 
-    JUNINHO       = pt-BR-AntonioNeural, 6% mais rápido
-    PRIMO SECADOR = en-US-AndrewMultilingualNeural falando português, 4% mais
-                    lento (a pontinha de sotaque combina com o "secador")
+O Edge TTS usa um serviço não oficial e pode ficar indisponível. A escolha é
+independente por personagem: falha na Dona Cida não troca a voz do Gil.
+Para cada fala existe um fallback explícito, sem alterar os personagens.
 
-Edge TTS (github.com/rany2/edge-tts) usa o serviço de leitura do navegador
-Edge: não pede chave, mas depende de internet e é uso não oficial. Por isso:
-  * cada fala tenta 3 vezes;
-  * se o Edge cair, a esquete sai com o Kokoro (voz antiga) em vez de não sair;
-  * CACHE por fala ($FLAMENGO_VOZ_CACHE): o mesmo texto com a mesma voz nunca
-    é pedido duas vezes. A chave é voz_chave() — tools/vozes_cache.py usa a
-    mesma fórmula para gerar áudio fora daqui.
-
-Emoção por fala: o humor mexe na VELOCIDADE e um pouco no TOM de cada fala
-(eufórico acelera e sobe, sofrendo arrasta e desce). Silêncio do começo/fim de
-cada fala é aparado para a conversa ficar ágil. Masterização Vox igual aos
-outros canais (ganho fixo + limitador, alvo -16,5 LUFS, sem loudnorm).
+Emoção por fala no Edge: velocidade e tom. Kokoro segue speed=1.04.
+Aparar silêncios, gerar os segmentos de lip-sync e masterizar para -16,5 LUFS
+continua igual ao processo anterior.
 """
 from __future__ import annotations
 
@@ -38,8 +29,12 @@ from src.flamengo.render.voz import masterizar
 
 SR = 44100
 VOZES = {
-    "rubro": dict(voz="pt-BR-AntonioNeural", rate=-2, reserva="pm_alex"),
-    "primo": dict(voz="pt-BR-FranciscaNeural", rate=-2, reserva="pf_dora"),
+    # IDs técnicos herdados: rubro=Gil e primo=Dona Cida.
+    # "voz" fica como configuração do Edge (reserva para o Gil).
+    "rubro": dict(motor="kokoro", voz_principal="pm_alex",
+                  voz="pt-BR-AntonioNeural", rate=-2, reserva="pt-BR-AntonioNeural"),
+    "primo": dict(motor="edge", voz="pt-BR-FranciscaNeural",
+                  rate=-2, reserva="pf_dora"),
 }
 # humor -> (ajuste de velocidade em %, ajuste de tom em Hz)
 EMOCAO = {"euforico": (8, 6), "indignado": (5, 3), "tenso": (6, 2), "chocado": (3, 8),
@@ -115,19 +110,37 @@ def narrar(batidas: list[dict], trabalho: Path, raiz: Path) -> dict:
     """Mesma interface do voz.narrar(): narracao.wav, narracao_master.wav, segs, lip."""
     import soundfile as sf
     trabalho.mkdir(parents=True, exist_ok=True)
-    motor = "edge"
     falas = []
     for b in batidas:
         quem = b.get("personagem", "rubro")
         voz, rate, pitch = parametros(quem, b.get("humor", "neutra"))
         falas.append((quem, voz, rate, pitch, b["fala"]))
-    try:
-        audios = [_ler(edge_mp3(t, v, r, p)) for _q, v, r, p, t in falas]
-    except Exception as exc:
-        # sem Edge, a esquete sai com a voz antiga — melhor que o dia ficar sem post
-        print(f"[voz] Edge TTS indisponível ({exc}); usando Kokoro", file=sys.stderr)
-        motor = "kokoro"
-        audios = [_kokoro(t, VOZES.get(q, VOZES["rubro"])["reserva"]) for q, _v, _r, _p, t in falas]
+    audios, motores = [], []
+    for quem, voz_edge, rate, pitch, texto in falas:
+        cfg = VOZES.get(quem, VOZES["rubro"])
+        if cfg["motor"] == "kokoro":
+            # Gil: Kokoro pm_alex sempre antes de qualquer tentativa do Edge.
+            try:
+                audio = _kokoro(texto, cfg["voz_principal"])
+                usado = "kokoro"
+            except Exception as exc:
+                print(f"[voz] Kokoro indisponível para Gil ({exc}); usando Edge reserva",
+                      file=sys.stderr)
+                audio = _ler(edge_mp3(texto, voz_edge, rate, pitch))
+                usado = "edge"
+        else:
+            # Dona Cida: Edge Francisca, sem alteração no timbre principal.
+            try:
+                audio = _ler(edge_mp3(texto, voz_edge, rate, pitch))
+                usado = "edge"
+            except Exception as exc:
+                print(f"[voz] Edge indisponível para Dona Cida ({exc}); usando Kokoro reserva",
+                      file=sys.stderr)
+                audio = _kokoro(texto, cfg["reserva"])
+                usado = "kokoro"
+        audios.append(audio)
+        motores.append(usado)
+    motor = motores[0] if len(set(motores)) == 1 else "misto"
 
     buf, segs, t = [], [], 0.0
     for i, (b, s) in enumerate(zip(batidas, audios)):
