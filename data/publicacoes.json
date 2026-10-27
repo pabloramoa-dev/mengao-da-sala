@@ -1847,6 +1847,28 @@
       "versao_editorial": 5,
       "container_id": "18129317284786157",
       "media_id": "17953151379314968"
+    },
+    {
+      "chave": "story-resposta:2026-10-27:resenha",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-10-27T17:57:23.821599+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "resenha",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-10-27",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-27T17:57:00.142715+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18129396355786157",
+      "media_id": "18082203932353042"
     }
   ]
 }
