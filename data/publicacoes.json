@@ -1891,6 +1891,37 @@
       "versao_editorial": 5,
       "container_id": "18129702508786157",
       "media_id": "18103123163531889"
+    },
+    {
+      "chave": "pre:401841292",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-10-28T23:29:28.299365+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-28",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-10-29T23:00Z",
+      "jogo_id": "401841292",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-28T23:25:21.504167+00:00",
+      "duracao_segundos": 37.674,
+      "engajamento": {
+        "versao": 1,
+        "variante": 2,
+        "gancho": "Pode vir o Vasco! Eu acredito no Mengão e vou de vitória!",
+        "acao": "comentario",
+        "cta": "Eu vou de Mengão! Qual placar você tá pensando? Fala aí."
+      },
+      "versao_editorial": 5,
+      "container_id": "18129745513786157",
+      "media_id": "18639938884003348"
     }
   ]
 }
