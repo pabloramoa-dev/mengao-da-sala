@@ -2062,6 +2062,34 @@
       "versao_editorial": 5,
       "container_id": "18129943306786157",
       "media_id": "17955297423302910"
+    },
+    {
+      "chave": "pos:401841292",
+      "formato": "pos_jogo_v2",
+      "status": "publicado",
+      "atualizado_em": "2026-10-30T13:57:21.735839+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-10-30",
+      "palpite": null,
+      "jogo_utc": "2026-10-29T23:00Z",
+      "jogo_id": "401841292",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-10-30T13:53:44.368912+00:00",
+      "duracao_segundos": 29.982999999999997,
+      "engajamento": {
+        "versao": 1,
+        "variante": 1,
+        "gancho": "Segue o líder! Quatro a um no Vasco da Gama, no Joao Havelange Stadium.",
+        "acao": "compartilhar",
+        "cta": "Manda pra quem viu o jogo contigo. Quero ver se concorda."
+      },
+      "versao_editorial": 5,
+      "container_id": "18130184374786157",
+      "media_id": "18074123282493423"
     }
   ]
 }
