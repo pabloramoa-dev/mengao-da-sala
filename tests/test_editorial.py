@@ -35,6 +35,26 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(nota['dados']['rotulo'],'MAIOR PONTUAÇÃO')
         self.assertNotIn('melhor em campo',nota['fala'])
 
+    def test_malvadao_venceu_apenas_quando_flamengo_vence(self):
+        from src.flamengo import engajamento
+        for resultado in ('vitoria', 'empate', 'derrota'):
+            jogo = dict(self.jogo(), resultado=resultado)
+            pauta = roteiro.pos_jogo_v2({'jogo': jogo})
+            pauta = engajamento.aplicar(pauta, jogo)
+            falas = ' '.join(b['fala'] for b in pauta['batidas'])
+            if resultado == 'vitoria':
+                self.assertIn('O Malvadão venceu!', falas)
+            else:
+                self.assertNotIn('Malvadão venceu', falas)
+
+    def test_malvadao_venceu_em_vitoria_nos_penaltis(self):
+        jogo = dict(self.jogo(), gols_nossos=1, gols_deles=1,
+                    penaltis={'nos': 4, 'eles': 3})
+        pauta = roteiro.pos_jogo_v2({'jogo': jogo})
+        falas = ' '.join(b['fala'] for b in pauta['batidas'])
+        self.assertIn('O Malvadão venceu!', falas)
+        self.assertIn('A decisão foi nos pênaltis.', falas)
+
     def test_votos_sem_texto_livre_e_sem_duplicata(self):
         cs=[{'from':{'id':'1'},'text':'A','timestamp':'1'},
             {'from':{'id':'1'},'text':'B','timestamp':'2'},
