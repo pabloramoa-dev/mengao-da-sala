@@ -94,7 +94,7 @@ def pos_jogo(snap: dict) -> dict | None:
 
     if jogo["resultado"] == "vitoria":
         humor = "euforico"
-        abre = f"Vitória! {placar_fala} no {jogo['adversario']}, {onde}."
+        abre = f"O Malvadão venceu! Foi {placar_fala} no {jogo['adversario']}, {onde}."
         meio = "Time no jeito, torcida no bolso, e a tabela agradece."
     elif jogo["resultado"] == "empate":
         humor = "indignado"
@@ -209,7 +209,7 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
     grito = _escolha(GIRIAS[chave], semente)
     placar_fala = placar_fala[0].upper() + placar_fala[1:]
     if res == "vitoria":
-        abre = f"{grito} {placar_fala} no {adv}, {onde}."
+        abre = f"O Malvadão venceu! {grito} {placar_fala} no {adv}, {onde}."
         humor = "euforico"
     elif res == "empate":
         abre = f"{grito} {placar_fala} com o {adv}, {onde}."
@@ -219,7 +219,8 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         humor = "indignado"
 
     if jogo.get("penaltis"):
-        abre = f"O jogo ficou {placar_fala.lower()} com o {adv}, {onde}. A decisão foi nos pênaltis."
+        vitoria = "O Malvadão venceu! " if res == "vitoria" else ""
+        abre = f"{vitoria}O jogo ficou {placar_fala.lower()} com o {adv}, {onde}. A decisão foi nos pênaltis."
     gancho = {"vitoria":"O sofá sobreviveu. Agora vamos falar dessa vitória!",
               "empate":("Um ponto na tabela. E uma pergunta na sala: o que faltou?" if jogo.get("liga", "bra.1") == "bra.1" else "O jogo terminou empatado. O que faltou para o Mengão?"),
               "derrota":"O jogo acabou. O que você mudaria para o próximo?"}[res]
