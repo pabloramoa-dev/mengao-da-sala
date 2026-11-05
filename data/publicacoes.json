@@ -2449,6 +2449,41 @@
       "versao_editorial": 5,
       "container_id": "18131490139786157",
       "media_id": "18118898345002138"
+    },
+    {
+      "chave": "pos:401841307",
+      "formato": "pos_jogo_v2",
+      "status": "publicado",
+      "atualizado_em": "2026-11-05T11:16:22.583097+00:00",
+      "memoria_editorial": [
+        {
+          "id": "0694ab5e31c9893873b4dcd8",
+          "fala": "Segundo ge — Flamengo, carrascal saiu com a perna pesada, não deu pra continuar.",
+          "link": "https://ge.globo.com/futebol/times/flamengo/noticia/2026/11/04/jardim-analisa-vitoria-do-flamengo-sobre-o-gremio.ghtml",
+          "publicado_em": "2026-11-05T00:58:21+00:00"
+        }
+      ],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-11-05",
+      "palpite": null,
+      "jogo_utc": "2026-11-04T22:30Z",
+      "jogo_id": "401841307",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-05T11:12:32.535787+00:00",
+      "duracao_segundos": 35.903999999999996,
+      "engajamento": {
+        "versao": 1,
+        "variante": 2,
+        "gancho": "O Malvadão venceu! É o Mengão lá em cima! Três a um no Grêmio, no Estadio do Maracana.",
+        "acao": "comentario",
+        "cta": "Quem jogou mais pelo Mengão? Fala o nome aí."
+      },
+      "versao_editorial": 5,
+      "container_id": "18131649880786157",
+      "media_id": "18024727793713176"
     }
   ]
 }
