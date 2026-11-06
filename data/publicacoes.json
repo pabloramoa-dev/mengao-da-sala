@@ -2506,6 +2506,28 @@
       "versao_editorial": 5,
       "container_id": "18131734960786157",
       "media_id": "18648603043040704"
+    },
+    {
+      "chave": "story-resposta:2026-11-06:estadio",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-11-06T20:31:52.813141+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "estadio",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-11-06",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-06T20:31:26.030737+00:00",
+      "duracao_segundos": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18131989252786157",
+      "media_id": "17977282046942415"
     }
   ]
 }
