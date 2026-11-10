@@ -35,7 +35,7 @@ def aplicar(pauta, jogo):
         titulo=f'PALPITE DA CIDA: {n} × {e}'
         # A abertura anterior e os pedidos duplicados são substituídos, não empilhados.
         corpo=[b for b in corpo if not b['fala'].startswith(('Hoje tem Mengão,','Meu palpite é','Amanhã o Gil confere'))]
-        corpo.append(batida('Aqui é Flamengo, ganhar é obrigação! Amanhã o Gil confere meu palpite.'))
+        corpo.append(batida('Aqui é Flamengo, ganhar é obrigação! Depois do apito o Gil confere meu palpite.'))
         finais=[('Quanto vai ser? Bota teu placar aí antes do jogo!', 'QUAL É O SEU PLACAR?', 'comentario'),
                 ('Manda praquele amigo que nunca concorda comigo.', 'CIDA OU SEU AMIGO?', 'compartilhar'),
                 ('Vai no meu palpite ou vai chutar outro? Conta aí.', 'PLACAR + MOTIVO', 'comentario')]

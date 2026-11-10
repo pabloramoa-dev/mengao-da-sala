@@ -19,6 +19,9 @@ def criar(pauta, destino):
             fonte = ImageFont.truetype(str(FONTE), tamanho)
         d.text((540, y), texto, font=fonte, fill=cor, anchor='mm')
     linhas = pauta['capa'].upper().splitlines()
+    if pauta['formato'] in {'pre_jogo','palpite_cida'} and pauta.get('palpite'):
+        nos, eles = pauta['palpite']
+        linhas = [f'{nos} × {eles}', 'PALPITE']
     if pauta['formato'] == 'tabela_card':
         fla = next(r for r in pauta['classificacao'] if str(r['id']) == '819')
         linhas = [f"{fla['rank']}º LUGAR", 'BRASILEIRÃO']
