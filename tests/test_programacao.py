@@ -22,10 +22,10 @@ def test_pre_somente_vespera_nao_janela_24h():
     assert p.selecionar(dt(8,8),[],[j],[],CFG)[0] is None
     assert p.selecionar(dt(8,9),[],[j],[],CFG)[0]=='palpite'
 
-def test_pos_so_dia_seguinte_seis_horas():
+def test_pos_imediato_com_recuperacao_no_dia_seguinte():
     j=feito()
-    assert p.selecionar(dt(8,23),[j],[],[],CFG)[0] is None
-    assert p.selecionar(dt(9,5),[j],[],[],CFG)[0] is None
+    assert p.selecionar(dt(8,23),[j],[],[],CFG)[0]=='pos'
+    assert p.selecionar(dt(9,5),[j],[],[],CFG)[0]=='pos'
     assert p.selecionar(dt(9,6),[j],[],[],CFG)[0]=='pos'
     assert p.selecionar(dt(10,12),[j],[],[],CFG)[0] is None
 
@@ -67,7 +67,7 @@ def test_pendente_nao_duplica_e_jogo_iniciado_nao_palpite():
 
 def test_sobreposicao_pos_pre():
     assert p.selecionar(dt(9,6),[feito()], [jogo(10)],[],CFG)[0]=='pos'
-    assert p.selecionar(dt(9,19),[feito()], [jogo(10)],[],CFG)[0]=='pre'
+    assert p.selecionar(dt(9,19),[feito()], [jogo(10)],[],CFG)[0]=='pos'
 
 def test_pesquisa_rejeita_evidencia_inventada_e_numero_novo():
     doc=dict(texto='O atleta ainda é dúvida para a próxima partida do Flamengo.',veiculo='Fonte',link='https://example.com',quando='2026-10-05',rumor=True)

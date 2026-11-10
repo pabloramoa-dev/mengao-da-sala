@@ -1,5 +1,7 @@
 name: Pós-jogo — calendário Gil e Cida
 on:
+  schedule:
+    - cron: '*/10 * * * *'
   workflow_dispatch:
     inputs:
       ensaio:
@@ -11,5 +13,5 @@ jobs:
   cobertura:
     uses: ./.github/workflows/cobertura.yml
     with:
-      ensaio: ${{ inputs.ensaio }}
+      ensaio: ${{ github.event_name == 'workflow_dispatch' && inputs.ensaio }}
     secrets: inherit

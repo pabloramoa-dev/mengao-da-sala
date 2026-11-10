@@ -71,7 +71,7 @@ def encontrar_publicado(legenda: str, limite: int = 100) -> str | None:
                  if " ".join((m.get("caption") or "").split()).casefold() == alvo), None)
 
 
-def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None, story=False, image=False) -> str:
+def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None, story=False, image=False, cover_url=None) -> str:
     user, token, base, _ = _cfg()
     meta = meta or {}
     params = {"media_type":"STORIES", "image_url":video_url, "access_token":token} if story else {
@@ -79,6 +79,8 @@ def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None
         "share_to_feed":"true", "access_token":token}
     if image:
         params = {"image_url":video_url, "caption":legenda, "access_token":token}
+    if cover_url and not (image or story):
+        params["cover_url"] = cover_url
     cont = _req("POST", f"{base}/{user}/media", params)["id"]
     estado.registrar(legenda, meta, "processando", container_id=cont)
     print(f"[ig] container {cont} criado, aguardando processamento")
@@ -102,6 +104,7 @@ def publicar_reel(video_url: str, legenda: str, espera_max: int = 420, meta=None
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--video-url")
+    ap.add_argument("--cover-url")
     ap.add_argument("--image", action="store_true", help="Publicar JPEG no feed")
     ap.add_argument("--story", action="store_true", help="video-url aponta para PNG de Story")
     ap.add_argument("--legenda", help="arquivo .txt com a legenda")
@@ -127,7 +130,7 @@ def main() -> int:
             raise RuntimeError("Publicação anterior inconclusiva: reconciliar container antes de reenviar")
         estado.registrar(legenda, meta, "gerado")
         try:
-            media = publicar_reel(a.video_url, legenda, meta=meta, story=a.story, image=a.image)
+            media = publicar_reel(a.video_url, legenda, meta=meta, story=a.story, image=a.image, cover_url=a.cover_url)
         except Exception:
             atual = next(x for x in estado.ler()['itens'] if x['chave'] == estado.chave(legenda,meta))
             if atual.get('status') != 'publicacao_pendente':

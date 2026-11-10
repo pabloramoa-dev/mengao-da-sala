@@ -124,7 +124,8 @@ def dirigir(pauta):
     p = deepcopy(pauta)
     curto = p['formato'] in {'primo_rival','o_sofa_nao_aguenta','eu_avisei'}
     p['duracao_alvo'] = [25,42] if p['formato'] == 'primo_rival' else [12,20] if curto else [35,50] if p['formato'] == 'voce_sabia' else [20,35]
-    if p['formato'] in {'pre_jogo', 'pos_jogo_v2'}: p['duracao_alvo'] = [35, 65]
+    if p['formato'] == 'pre_jogo': p['duracao_alvo'] = [0, 30]
+    if p['formato'] == 'pos_jogo_v2': p['duracao_alvo'] = [25, 35]
     if p['formato'] == 'tabela_semanal': p['duracao_alvo'] = [45, 75]
     if p['formato'] == 'plantao_da_sala': p['duracao_alvo'] = [15, 25]
     p['versao_editorial'] = 4

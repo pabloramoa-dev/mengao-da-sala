@@ -88,6 +88,32 @@ def gerar(snapshot: dict, formato: str, destino: Path) -> Path | None:
     return destino
 
 
+def ajustar_duracao(destino, formato):
+    """Ajusta imagem e áudio juntos, mantendo o tom e conferindo o arquivo final."""
+    def medir(arquivo):
+        return float(subprocess.check_output(['ffprobe','-v','error','-show_entries',
+                     'format=duration','-of','csv=p=0', str(arquivo)]))
+    duracao = medir(destino)
+    minimo, maximo = (25, 35) if formato == 'pos_jogo_v2' else (0, 30)
+    if minimo <= duracao <= maximo:
+        return duracao
+    alvo = minimo + .2 if duracao < minimo else maximo - .2
+    fator = duracao / alvo
+    temp = destino.with_suffix('.ajuste.mp4')
+    try:
+        subprocess.run(['ffmpeg','-v','error','-y','-i',str(destino),
+                        '-vf',f'setpts=PTS/{fator},fps=30','-af',f'atempo={fator}',
+                        '-c:v','libx264','-preset','veryfast','-pix_fmt','yuv420p','-c:a','aac',
+                        '-movflags','+faststart',str(temp)],check=True)
+        final = medir(temp)
+        if not minimo <= final <= maximo:
+            raise ValueError(f'Duração do Reel fora da faixa: {final}')
+        temp.replace(destino)
+        return final
+    finally:
+        temp.unlink(missing_ok=True)
+
+
 def gerar_v3(pauta: dict, destino: Path, trab: Path, snapshot: dict) -> Path:
     """Motor padrão v3: personagens em rig SVG animados direto no HyperFrames/GSAP."""
     from src.flamengo.render import voz_dupla, hyperframes_v3
@@ -101,6 +127,8 @@ def gerar_v3(pauta: dict, destino: Path, trab: Path, snapshot: dict) -> Path:
         from tools.native_video_finisher import apply_from_metadata
         interativo = apply_from_metadata(destino, pauta, RAIZ)
         meta["acabamento_nativo"] = interativo
+    if pauta['formato'] in {'pos_jogo_v2', 'pre_jogo'}:
+        meta['duracao_segundos'] = ajustar_duracao(destino, pauta['formato'])
     destino.with_suffix(".txt").write_text(pauta.get("legenda_post") or legenda_post(pauta, snapshot), encoding="utf-8")
     destino.with_suffix(".json").write_text(json.dumps({
         **pauta, **meta, "motor_voz": audio["motor_voz"], "camada_personagens": "rig-svg-v3",

@@ -29,3 +29,19 @@ def test_pos_preserva_penaltis_e_comparacao_da_cida():
     assert 'pênaltis' in r['batidas'][0]['fala']
     assert r['batidas'][1]['fala'].startswith('A Dona Cida')
     assert any('4 a 3' in b['fala'] for b in r['batidas'])
+
+
+def test_replay_exige_lista_de_gols_compativel_com_o_placar():
+    from src.flamengo.roteiro import pos_jogo_v2
+    jogo = dict(id='42', status='FINISHED', resultado='vitoria', adversario='Santos',
+                gols_nossos=2, gols_deles=1, gols=[dict(minuto='10', nosso=True),
+                dict(minuto='42', nosso=False),dict(minuto="90+2'", nosso=True)])
+    def montar():
+        return aplicar(pos_jogo_v2({'jogo':jogo}), jogo)['batidas']
+    bats = montar()
+    assert bats[0]['dados']['placar'] == '2 x 1'
+    gol = next(b for b in bats if b['tipo']=='gol')
+    assert gol['dados']['anterior']=='1 × 1'
+    assert 'vascaíno' in bats[-1]['fala']
+    jogo['gols'].pop()
+    assert all(b['tipo']!='gol' for b in montar())

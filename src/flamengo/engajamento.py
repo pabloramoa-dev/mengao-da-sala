@@ -16,17 +16,13 @@ def aplicar(pauta, jogo):
     antigas=p['batidas']
     corpo=[b for b in antigas if b.get('tipo') not in {'abre','cta','pergunta'}]
     if formato=='pre_jogo':
-        ganchos=[f'Amanhã é contra o {rival}. Eu vou de vitória do Mengão!',
-                 f'Contra o {rival}, meu palpite é Mengão na cabeça! Ganhar é obrigação.',
-                 f'Pode vir o {rival}! Eu acredito no Mengão e vou de vitória!']
-        gancho=ganchos[variante]
         titulo='GANHAR É OBRIGAÇÃO!'
-        finais=[('Você iria pra cima logo ou começava na calma? Conta aí.', 'ATACAR OU CONTROLAR?', 'comentario'),
-                ('Manda pro amigo que vai ver esse jogo contigo.', 'PRÉVIA PARA O GRUPO', 'compartilhar'),
-                ('Eu vou de Mengão! Qual placar você tá pensando? Fala aí.', 'QUANTO VAI SER?', 'comentario')]
         noticias=[b for b in corpo if b.get('tipo')=='noticia']
         outros=[b for b in corpo if b.get('tipo')!='noticia']
-        corpo=noticias+outros
+        forma = [b for b in outros if b['fala'].startswith('Peguei os últimos') or b['tipo']=='tabela']
+        corpo=(noticias or forma)[:1] or [batida('Pra mim, quando o Flamengo chama o rival pro próprio campo, entrega a iniciativa. Eu prefiro pressionar lá na frente.')]
+        gancho=f'Contra o {rival}, eu iria pra cima desde o primeiro minuto. Meu palpite é vitória do Mengão.'
+        final=('Você atacaria de saída ou esperaria o rival? Manda pro seu amigo vascaíno.', 'ATACAR DE SAÍDA?', 'compartilhar')
     elif formato=='palpite_cida':
         n,e=p['palpite']
         # Regra editorial fixa: Cida é sempre otimista e nunca prevê empate/derrota.
@@ -43,6 +39,7 @@ def aplicar(pauta, jogo):
         finais=[('Quanto vai ser? Bota teu placar aí antes do jogo!', 'QUAL É O SEU PLACAR?', 'comentario'),
                 ('Manda praquele amigo que nunca concorda comigo.', 'CIDA OU SEU AMIGO?', 'compartilhar'),
                 ('Vai no meu palpite ou vai chutar outro? Conta aí.', 'PLACAR + MOTIVO', 'comentario')]
+        final=finais[variante]
     else:
         # A fala de placar já contém o resultado e, se houver, a disputa de pênaltis.
         placar=next((b for b in corpo if b.get('tipo')=='placar'),None)
@@ -51,18 +48,22 @@ def aplicar(pauta, jogo):
             corpo.remove(placar)
         titulo='SUA RESENHA DO JOGO'
         retorno=[b for b in corpo if b['fala'].startswith('A Dona Cida palpitou')]
-        corpo=retorno+[b for b in corpo if b not in retorno]
-        finais=[('Qual lance não sai da tua cabeça? Conta aí.', 'QUAL LANCE MUDOU O JOGO?', 'comentario'),
-                ('Manda pra quem viu o jogo contigo. Quero ver se concorda.', 'CONTINUA NO GRUPO', 'compartilhar'),
-                ('Quem jogou mais pelo Mengão? Fala o nome aí.', 'SEU DESTAQUE + MOTIVO', 'comentario')]
-    fala,cartao,acao=finais[variante]
+        destaque = next((b for b in corpo if b.get('tipo') in {'gol','mexida'}), None)
+        penaltis = [b for b in corpo if b.get('tipo')=='placar']
+        contexto = next((b for b in corpo if b.get('dados',{}).get('cartao')), None)
+        corpo = retorno[:1] + penaltis + ([destaque or contexto] if destaque or contexto else [])
+        final=('Agora eu quero ver quem sustenta o palpite depois do apito. Manda pro seu amigo vascaíno e pergunta se ele teria coragem de defender esse placar na nossa sala.', 'MANDA PRO RIVAL', 'compartilhar')
+    fala,cartao,acao=final
     abertura=batida(gancho,tipo='abre',cartao=titulo)
+    if formato == 'pos_jogo_v2' and placar is not None:
+        abertura = deepcopy(placar)
+        titulo = p.get('capa') or titulo
     abertura.update(plano='close',gesto='apontar')
     fim=batida(fala,tipo='cta',cartao=cartao)
     fim.update(plano='close',gesto='perguntar' if acao=='comentario' else 'apontar')
     for i,b in enumerate(corpo):
         b['plano']='close' if b.get('tipo') in {'noticia','placar','mexida'} or i%3==2 else 'aberto'
     p['batidas']=[abertura]+corpo+[fim]
-    p['capa']=titulo+'\n'+rival.upper()
+    p['capa']=titulo if formato=='pos_jogo_v2' else titulo+'\n'+rival.upper()
     p['engajamento']={'versao':1,'variante':variante,'gancho':gancho,'acao':acao,'cta':fala}
     return p

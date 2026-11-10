@@ -176,6 +176,11 @@ def tela_tv(pauta: dict, b: dict, i: int, font_path: Path) -> str:
         return ('<div class="tv-tag">BRASILEIRÃO · CLASSIFICAÇÃO</div><table class="tv-tabela"><thead><tr>'
                 '<th>#</th><th>TIME</th><th>PTS</th><th>J</th><th>SG</th></tr></thead>'
                 f'<tbody>{rows}</tbody></table>')
+    if tipo == 'gol' and d.get('anterior'):
+        antes = hf._escape(d['anterior'])
+        depois = hf._escape(d['placar'].replace(' x ', ' × '))
+        return (f'<div class="tv-tag">ÚLTIMO GOL · REPLAY</div><div class="tv-titulo tv-placar">'
+                f'<span class="antes">{antes}</span><span class="depois">{depois}</span></div>')
     p = hf.painel(pauta, b, i)
     if b.get("carimbo") or d.get("cartao"):
         p = dict(p, titulo=str(b.get("carimbo") or d.get("cartao")).upper())
@@ -265,6 +270,12 @@ def escrever_composicao(conteudo: dict, projeto: Path, font_path: Path, cues: li
             if telas:
                 telas[-1][2] = a
             telas.append([tela, a, z])
+            if b.get("tipo") == "gol":
+                painel = f"#tv{len(telas)-1}"
+                A(f'tl.set("{painel} .depois",{{display:"none"}},{a});')
+                A(f'tl.set("{painel} .antes",{{display:"none"}},{a+.24});')
+                A(f'tl.set("{painel} .depois",{{display:"inline-block"}},{a+.24});')
+                A(f'tl.fromTo("{painel} .depois",{{y:24,scale:.9}},{{y:0,scale:1,duration:.3}},{a+.24});')
         elif telas:
             telas[-1][2] = z
 
@@ -370,6 +381,7 @@ def preparar_projeto(trabalho: Path, raiz: Path, fonte: Path) -> Path:
     assets = projeto / "assets"
     assets.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(fonte, assets / "bold.ttf")
+    shutil.copyfile(raiz / "video/assets/fonts/BarlowCondensed-Bold.ttf", assets / "barlow.ttf")
     shutil.copyfile(raiz / "video/assets/composition_v3.css", assets / "composition_v3.css")
     shutil.copyfile(raiz / "video/node_modules/gsap/dist/gsap.min.js", assets / "gsap.min.js")
     return projeto

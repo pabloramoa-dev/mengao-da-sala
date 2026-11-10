@@ -202,25 +202,15 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
     nos, eles = jogo["gols_nossos"], jogo["gols_deles"]
     placar_fala = f"{por_extenso(nos)} a {por_extenso(eles)}"
     placar_tela = f"{nos} x {eles}"
-    onde = local_do_jogo(jogo)
-    lider = bool(tabela and tabela.get("posicao") == 1 and jogo.get("liga", "bra.1") == "bra.1")
-
-    chave = "vitoria_lider" if (res == "vitoria" and lider) else res
-    grito = _escolha(GIRIAS[chave], semente)
-    placar_fala = placar_fala[0].upper() + placar_fala[1:]
-    if res == "vitoria":
-        abre = f"O Malvadão venceu! {grito} {placar_fala} no {adv}, {onde}."
-        humor = "euforico"
-    elif res == "empate":
-        abre = f"{grito} {placar_fala} com o {adv}, {onde}."
-        humor = "tenso"
-    else:
-        abre = f"{grito} {placar_fala} pro {adv}, {onde}."
-        humor = "indignado"
-
+    humor = {"vitoria":"euforico", "empate":"tenso", "derrota":"indignado"}[res]
+    placar_fala = placar_fala.capitalize()
+    abre = f"{placar_fala} entre Flamengo e {adv}. " + {
+        "vitoria":"O Malvadão venceu! Pra mim, rival que cobra espetáculo também tem que engolir resultado.",
+        "empate":"Pra mim, esse empate deixa gosto de oportunidade perdida. Eu queria ver o Mengão arriscar mais.",
+        "derrota":"Pra mim, camisa e tradição não resolvem jogo. Eu cobraria uma resposta no próximo."
+    }[res]
     if jogo.get("penaltis"):
-        vitoria = "O Malvadão venceu! " if res == "vitoria" else ""
-        abre = f"{vitoria}O jogo ficou {placar_fala.lower()} com o {adv}, {onde}. A decisão foi nos pênaltis."
+        abre = f"{placar_fala} entre Flamengo e {adv}. A decisão foi nos pênaltis. " + ("O Malvadão venceu!" if res=="vitoria" else "Essa doeu.")
     gancho = {"vitoria":"O sofá sobreviveu. Agora vamos falar dessa vitória!",
               "empate":("Um ponto na tabela. E uma pergunta na sala: o que faltou?" if jogo.get("liga", "bra.1") == "bra.1" else "O jogo terminou empatado. O que faltou para o Mengão?"),
               "derrota":"O jogo acabou. O que você mudaria para o próximo?"}[res]
@@ -231,6 +221,14 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         pn, pe = jogo["penaltis"]["nos"], jogo["penaltis"]["eles"]
         batidas.append(batida(f"A disputa de pênaltis terminou {por_extenso(pn)} a {por_extenso(pe)}.",
                               tipo="placar", placar=f"PÊNALTIS {pn} x {pe}"))
+    gols = jogo.get("gols") or []
+    if (len(gols) == nos + eles and gols and all(minuto_absoluto(g.get("minuto")) is not None for g in gols)
+            and sum(g.get("nosso") is True for g in gols) == nos):
+        ultimo = max(gols, key=lambda g: minuto_absoluto(g["minuto"]))
+        lado = "do Flamengo" if ultimo["nosso"] else f"do {adv}"
+        antes = f"{nos-int(ultimo['nosso'])} × {eles-int(not ultimo['nosso'])}"
+        batidas.append(batida(f"Gol {lado} aos {por_extenso(minuto_absoluto(ultimo['minuto']))} minutos. Foi o último gol da partida.",
+                              tipo="gol", placar=placar_tela, anterior=antes))
     if jogo.get("competicao"):
         batidas.append(batida("Foi jogo de " + jogo["competicao"] + "."))
     estatisticas = jogo.get("estatisticas") or {}
@@ -291,9 +289,7 @@ def pos_jogo_v2(analise: dict, tabela: dict | None = None) -> dict | None:
         batidas.append(batida("Você fazia essa troca? Eu quero saber.", tipo="pergunta", cartao="TROCAR OU MANTER?"))
 
     batidas.append(batida(_escolha(CTA[res], semente + "cta"), tipo="cta"))
-    topo = {"vitoria_lider": "SEGUE O LÍDER", "vitoria": "VITÓRIA DO MENGÃO",
-            "empate": "SÓ UM PONTO", "derrota": "NÃO DEU"}[chave]
-    capa = f"{topo}\n{placar_tela} {adv}".upper()
+    capa = f"{placar_tela}\n{dict(vitoria='VITÓRIA', empate='EMPATE', derrota='DERROTA')[res]}".upper()
     return {"formato": "pos_jogo_v2", "humor": humor, "capa": capa, "batidas": batidas, "jogo_id": jogo.get("id")}
 
 

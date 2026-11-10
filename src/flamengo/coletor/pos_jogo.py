@@ -92,7 +92,7 @@ def detalhes(jogo: dict) -> dict:
             subs.append({"minuto": minuto, "entrou": m.group(1) if m else None,
                          "saiu": m.group(2) if m else None,
                          "lesao": "injury" in texto.lower()})
-        elif "goal" in tipo:
+        elif tipo in {"goal", "penalty goal", "goal - header", "goal - free-kick"} and (ev.get("team") or {}).get("id"):
             gols.append({"minuto": minuto, "nosso": nosso, "texto": texto})
         elif "card" in tipo and nosso:
             cartoes.append({"minuto": minuto, "texto": texto})
@@ -105,7 +105,10 @@ def detalhes(jogo: dict) -> dict:
         penaltis = {"nos": nos["penaltis"], "eles": eles["penaltis"]}
         if penaltis["nos"] != penaltis["eles"]:
             resultado = "vitoria" if penaltis["nos"] > penaltis["eles"] else "derrota"
-    return {**jogo, "penaltis": penaltis, "adversario": eles.get("time"), "em_casa": nos.get("casa"),
+    apito = next((ev.get("wallclock") for ev in reversed(resumo.get("keyEvents", []))
+                  if (ev.get("type") or {}).get("text", "").lower() in {"full time", "end of match", "match ends"}
+                  and ev.get("wallclock")), None)
+    return {**jogo, "apito_em": apito, "penaltis": penaltis, "adversario": eles.get("time"), "em_casa": nos.get("casa"),
             "gols_nossos": g1, "gols_deles": g2, "resultado": resultado,
             "estadio": ((resumo.get("gameInfo") or {}).get("venue") or {}).get("fullName"),
             "estatisticas": {str((c.get("team") or {}).get("id")): {x.get("name"): x.get("displayValue") for x in c.get("statistics", [])} for c in (resumo.get("boxscore") or {}).get("teams", [])},

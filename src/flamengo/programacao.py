@@ -50,7 +50,7 @@ def selecionar(agora, feitos, futuros, itens, cfg):
     local = agora.astimezone(BRT)
     hoje = local.date()
     reservada = False
-    # Pré e palpite são urgentes; pós vem depois se houver coincidência.
+    # O pós confirmado tem prioridade sobre a preparação das próximas pautas.
     candidatos = []
     for j in futuros:
         data = diario._utc(j['utc']).astimezone(BRT).date()
@@ -66,8 +66,8 @@ def selecionar(agora, feitos, futuros, itens, cfg):
         data = diario._utc(j['utc']).astimezone(BRT).date()
         if data in {hoje, hoje - timedelta(days=1)}:
             reservada = True
-        if data == hoje - timedelta(days=1) and j.get('status', {}).get('completed'):
-            candidatos.append(('pos', j, cfg['pos_hora_brt']))
+        if data in {hoje, hoje - timedelta(days=1)} and j.get('status', {}).get('completed'):
+            candidatos.insert(0, ('pos', j, 0))
     for modo, j, hora in candidatos:
         if local.hour >= hora and not base.publicado(FORMATOS[modo], j['id'], itens=itens):
             return modo, j
@@ -120,8 +120,10 @@ def montar(agora, cfg=None):
     modo, j = selecionar(agora + timedelta(minutes=30), feitos, futuros, itens, cfg)
     if not modo:
         return None
-    hora = cfg[{'pre':'pre_hora_brt','palpite':'palpite_hora_brt','pos':'pos_hora_brt','tabela':'tabela_hora_brt'}[modo]]
+    hora = 0 if modo == 'pos' else cfg[{'pre':'pre_hora_brt','palpite':'palpite_hora_brt','tabela':'tabela_hora_brt'}[modo]]
     publicar_em = agora.astimezone(BRT).replace(hour=hora,minute=0,second=0,microsecond=0).isoformat()
+    if modo == 'pos':
+        publicar_em = agora.isoformat()
     if modo == 'tabela':
         linhas = base.ler_tabela(agora)
         fla = next(x for x in linhas if x['id'] == diario.FLA)
@@ -141,7 +143,7 @@ def montar(agora, cfg=None):
             p['batidas'][0] = roteiro.batida('Amanhã tem Mengão! E aí, tá confiante?', tipo='abre')
     else:
         detalhado = pos_jogo.detalhes({**j, 'data':j['utc'], 'fla_id':diario.FLA})
-        p = roteiro.pos_jogo_v2({'jogo':detalhado}, diario.tabela() if j['liga']=='bra.1' else None)
+        p = roteiro.pos_jogo_v2({'jogo':detalhado})
         if not p:
             raise RuntimeError('Pós-jogo sem resultado encerrado confirmado.')
         p.update(fontes=[j['fonte']], coletado_em=agora.isoformat(), competicao=j['competicao'])
@@ -150,10 +152,15 @@ def montar(agora, cfg=None):
             n, e = anterior['palpite']
             certo = [n,e] == [j['gols_nossos'],j['gols_deles']]
             p['batidas'].insert(2, roteiro.batida(f"A Dona Cida palpitou {n} a {e}. " + ('Acertou o placar!' if certo else 'Errou dessa vez! Amanhã ela vai dizer que foi por pouco.')))
-        p['capa'] = 'A RESENHA DO GIL'
+        p['resultado_confirmado'] = [detalhado['gols_nossos'], detalhado['gols_deles']]
+        p['rival'] = j['adversario']
+        p['confirmado_em'] = agora.isoformat()
+        p['penaltis'] = detalhado.get('penaltis')
+        p['apito_em'] = detalhado.get('apito_em')
     # Notícias opcionais: falhas da pesquisa não bloqueiam os dados confirmados do jogo.
     from src.flamengo.coletor.pesquisa import enriquecer
-    p = enriquecer(p, j, agora)
+    if modo != 'pos':
+        p = enriquecer(p, j, agora)
     from src.flamengo.engajamento import aplicar
     p = aplicar(p, j)
     p = quadros.dirigir(p)
@@ -177,7 +184,7 @@ def validar_envio(p, agora=None):
     while agora < alvo:
         time.sleep(min(30, (alvo-agora).total_seconds()))
         agora = datetime.now(timezone.utc)
-    if agora.astimezone(BRT).date().isoformat() != p['dia']:
+    if p['formato'] != 'pos_jogo_v2' and agora.astimezone(BRT).date().isoformat() != p['dia']:
         raise RuntimeError('Janela encerrada: não publicar pré-jogo em outro dia.')
     feitos, futuros = agenda_segura()
     cfg=json.loads(Path('config/programacao.json').read_text())
@@ -186,6 +193,13 @@ def validar_envio(p, agora=None):
         raise RuntimeError('Pauta mudou, foi publicada ou partida foi adiada; gerar novamente.')
     if p.get('jogo_utc') and j['utc']!=p['jogo_utc']:
         raise RuntimeError('Horário da partida mudou; atualizar pauta antes de publicar.')
+
+    if modo == 'pos':
+        final = pos_jogo.detalhes({**j, 'data':j['utc'], 'fla_id':diario.FLA})
+        if (final['status'] != 'FINISHED' or final['resultado'] is None
+                or [final['gols_nossos'], final['gols_deles']] != p.get('resultado_confirmado')
+                or final.get('penaltis') != p.get('penaltis')):
+            raise RuntimeError('Resultado mudou ou deixou de estar confirmado.')
 
 
 def main():

@@ -44,8 +44,20 @@ def registrar(legenda, meta, status, **extra):
             'dia':meta.get('dia'), 'palpite':meta.get('palpite'), 'jogo_utc':meta.get('jogo_utc'),
             'jogo_id':meta.get('jogo_id'), 'enquete':meta.get('enquete'),
             'semana':meta.get('semana'), 'coletado_em':meta.get('coletado_em'),
-            'duracao_segundos':meta.get('duracao_segundos'),
+            'duracao_segundos':meta.get('duracao_segundos'), 'midia':meta.get('midia', antigo.get('midia')),
             'engajamento':meta.get('engajamento', antigo.get('engajamento')),
             'versao_editorial':meta.get('versao_editorial'), **extra}
+    if meta.get('confirmado_em'):
+        item.setdefault('confirmado_em', meta['confirmado_em'])
+        if meta.get('apito_em'):
+            item['apito_em'] = meta['apito_em']
+        if status == 'publicado':
+            for campo, metrica in [('apito_em','minutos_desde_apito'),('confirmado_em','minutos_desde_confirmacao')]:
+                if item.get(campo):
+                    try:
+                        delta = datetime.fromisoformat(item['atualizado_em']) - datetime.fromisoformat(item[campo])
+                    except (TypeError, ValueError):
+                        continue
+                    item[metrica] = round(delta.total_seconds()/60, 1)
     salvar(item)
     return item

@@ -1,7 +1,5 @@
 name: Gil e Dona Cida — calendário do Flamengo
 on:
-  schedule:
-    - cron: '0,10,20,30,40,50 * * * *'
   workflow_dispatch:
     inputs:
       ensaio:
@@ -89,10 +87,10 @@ jobs:
         if: steps.pauta.outputs.tem == 'true'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq libpango1.0-dev libcairo2-dev ffmpeg espeak-ng fonts-dejavu-core
-          python -m pip install -q -r requirements.txt
+          sudo apt-get install -y -qq ffmpeg espeak-ng fonts-dejavu-core
+          python -m pip install -q kokoro-onnx soundfile numpy edge-tts pillow
       - uses: ./.github/actions/setup-hyperframes
-        if: steps.pauta.outputs.tipo == 'video'
+        if: steps.pauta.outputs.tem == 'true'
       - uses: actions/cache@v4
         if: steps.pauta.outputs.tipo == 'video'
         with:
@@ -106,15 +104,19 @@ jobs:
         env:
           FLAMENGO_MOTOR: v3
         run: python -m src.flamengo.gerar --formato diario --pauta data/pauta_cobertura.json --out saida/conteudo.mp4
-      - name: Gerar card
+      - name: Gerar Reel de tabela
         if: steps.pauta.outputs.tipo == 'card'
-        run: python -m src.flamengo.render.tabela_card --pauta data/pauta_cobertura.json --out saida/conteudo.jpg
+        run: python -m src.flamengo.render.tabela_reel --pauta data/pauta_cobertura.json --out saida/conteudo.mp4
+      - name: Gerar capa
+        if: steps.pauta.outputs.tem == 'true'
+        run: python -m src.flamengo.render.capa data/pauta_cobertura.json saida/capa.jpg
       - uses: actions/upload-artifact@v4
         if: steps.pauta.outputs.tem == 'true'
         with:
           name: gil-cida-${{ github.run_id }}
           path: |
             saida/conteudo.*
+            saida/capa.jpg
             data/pauta_cobertura.json
           retention-days: 30
       - name: Publicar no horário e confirmar recibo
@@ -124,18 +126,13 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           EXPECTED_IG_USERNAME: mengaodasala
-          TIPO: ${{ steps.pauta.outputs.tipo }}
         run: |
           python -m src.flamengo.programacao --validar-envio data/pauta_cobertura.json
           python -m src.flamengo.publicar --so-verificar
           TAG="cobertura-${{ github.run_id }}-${{ github.run_attempt }}"
-          if [ "$TIPO" = card ]; then
-            gh release create "$TAG" saida/conteudo.jpg --title "$TAG" --notes 'Tabela do Brasileirão'
-            python -m src.flamengo.publicar --image --video-url "https://github.com/${{ github.repository }}/releases/download/$TAG/conteudo.jpg" --legenda saida/conteudo.txt
-          else
-            gh release create "$TAG" saida/conteudo.mp4 --title "$TAG" --notes 'Gil e Dona Cida'
-            python -m src.flamengo.publicar --video-url "https://github.com/${{ github.repository }}/releases/download/$TAG/conteudo.mp4" --legenda saida/conteudo.txt
-          fi
+          gh release create "$TAG" saida/conteudo.mp4 saida/capa.jpg --title "$TAG" --notes 'Mengão da Sala'
+          BASE="https://github.com/${{ github.repository }}/releases/download/$TAG"
+          python -m src.flamengo.publicar --video-url "$BASE/conteudo.mp4" --cover-url "$BASE/capa.jpg" --legenda saida/conteudo.txt
       - name: Preservar recibos mesmo em falha
         if: always()
         run: |

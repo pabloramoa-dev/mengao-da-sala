@@ -130,7 +130,7 @@ def collect(root, expected, request=_request, now=None):
             raw=request(base,item['id']+'/insights',token,{'metric':'reach,shares,saved,likes,comments'})
             metrics=normalize_metrics(raw)
             report['measurements'].append({'media_id':item['id'],'window':window,'age_hours':round(age,2),
-                'collected_at':now.isoformat(),'metrics':metrics})
+                'collected_at':now.isoformat(),'media_type':item.get('media_type'),'metrics':metrics})
         except Exception as exc:
             errors.append({'media_id':item['id'],'error':type(exc).__name__})
     report.update(status='partial' if errors else 'ok',errors=errors,updated_at=now.isoformat(),account=expected)

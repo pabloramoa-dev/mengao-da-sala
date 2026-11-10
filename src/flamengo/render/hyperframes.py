@@ -225,6 +225,23 @@ def mixar_audio(conteudo, master: Path, destino: Path):
         s = rng.normal(0, .009, n) * np.sin(np.pi*t/.17)**2
         a, z = int(seg["ini"]*sr), min(n, len(bed)-int(seg["ini"]*sr))
         bed[a:a+z] += s[:z]
+    if conteudo.get('formato') in {'pre_jogo', 'palpite_cida', 'pos_jogo_v2'}:
+        from src.flamengo.render import audio_fx, sfx
+        torcida = sfx.estadio(len(bed) / sr)
+        bed[:len(torcida)] += .07 * torcida[:len(bed)]
+        for batida, seg in zip(conteudo['batidas'], conteudo['segs']):
+            som = None
+            if batida.get('tipo') == 'gol':
+                som = .16 * sfx.impacto()
+            elif seg == conteudo['segs'][0] and conteudo['formato'] == 'pos_jogo_v2':
+                som = .045 * sfx.apito()
+            if som is not None:
+                inicio = round(seg['ini'] * sr)
+                fim = min(inicio + len(som), len(bed))
+                bed[inicio:fim] += som[:fim-inicio]
+        voz, voz_sr = sf.read(master, always_2d=True)
+        ganho = audio_fx.ducking(voz.mean(axis=1), voz_sr)
+        bed *= np.interp(np.arange(len(bed))*voz_sr/sr, np.arange(len(ganho)), ganho)
     sf.write(destino.parent / "bed.wav", bed, sr)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(master), "-i", str(destino.parent / "bed.wav"),
                     "-filter_complex", "[0:a][1:a]amix=inputs=2:duration=longest:normalize=0,alimiter=limit=0.89:level=disabled[a]",

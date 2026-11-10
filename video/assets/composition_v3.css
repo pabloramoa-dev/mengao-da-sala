@@ -30,3 +30,6 @@ footer{position:absolute;left:0;right:0;top:1748px;text-align:center;font-size:2
 #progress{position:absolute;left:56px;top:1796px;width:968px;height:6px;background:#ef344d;transform-origin:left;border-radius:4px}
 #flash{position:absolute;inset:0;background:#ffdda8;opacity:0;pointer-events:none}
 .confetti{position:absolute;top:0;width:13px;height:8px;opacity:0;pointer-events:none}
+
+@font-face{font-family:BarlowCondensed;src:url(assets/barlow.ttf)}
+.capa,.tv-titulo,.tv-tabela{font-family:BarlowCondensed,Bold,sans-serif}
