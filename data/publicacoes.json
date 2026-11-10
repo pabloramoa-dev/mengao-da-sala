@@ -2660,6 +2660,29 @@
       "versao_editorial": 5,
       "container_id": "18132709177786157",
       "media_id": "18651525238049971"
+    },
+    {
+      "chave": "story-resposta:2026-11-10:idolo",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-11-10T18:54:11.664930+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "idolo",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-11-10",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-10T18:53:46.493808+00:00",
+      "duracao_segundos": null,
+      "midia": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18132975964786157",
+      "media_id": "18349068184287742"
     }
   ]
 }
