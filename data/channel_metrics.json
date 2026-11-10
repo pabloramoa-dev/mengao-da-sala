@@ -587,10 +587,25 @@
         "comments": 0,
         "shares_per_1000_reached": null
       }
+    },
+    {
+      "media_id": "18132787048697338",
+      "window": "72h",
+      "age_hours": 92.94,
+      "collected_at": "2026-11-10T21:17:07.389153+00:00",
+      "media_type": "IMAGE",
+      "metrics": {
+        "reach": 0,
+        "shares": 0,
+        "saved": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares_per_1000_reached": null
+      }
     }
   ],
   "status": "ok",
   "errors": [],
-  "updated_at": "2026-11-09T23:46:46.740679+00:00",
+  "updated_at": "2026-11-10T21:17:07.389153+00:00",
   "account": "mengaodasala"
 }
