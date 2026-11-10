@@ -15,7 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-PRESET_BIRA = {"voice": "pm_alex", "pitch": 1.0, "speed": 1.04, "gap": 0.22}
+PRESET_BIRA = {"voice": "pm_alex:0.70+im_nicola:0.30", "pitch": 1.0, "speed": 1.04, "gap": 0.22}
 FILTRO_BIRA = ("highpass=f=80,acompressor=threshold=-18dB:ratio=2:"
                "attack=8:release=180,volume=1.1")
 PACOTE = "src.flamengo.render"

@@ -42,6 +42,6 @@ def test_replay_exige_lista_de_gols_compativel_com_o_placar():
     assert bats[0]['dados']['placar'] == '2 x 1'
     gol = next(b for b in bats if b['tipo']=='gol')
     assert gol['dados']['anterior']=='1 × 1'
-    assert 'vascaíno' in bats[-1]['fala']
+    assert bats[-1]['fala'] == 'Manda pra quem perdeu o jogo contra o Santos.'
     jogo['gols'].pop()
     assert all(b['tipo']!='gol' for b in montar())

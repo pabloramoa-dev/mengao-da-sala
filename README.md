@@ -95,3 +95,9 @@ pip install pytest numpy pillow
 python -m pytest -q
 python -m compileall -q src
 ```
+
+## Vozes e encerramento dos Reels
+
+Gil usa `pm_alex:0.70+im_nicola:0.30` e Dona Cida usa `pf_dora:0.80+bf_emma:0.20`. Na narração em dupla, AntonioNeural e FranciscaNeural são as respectivas reservas.
+
+A narração termina com um único convite de envio ligado ao assunto do vídeo.

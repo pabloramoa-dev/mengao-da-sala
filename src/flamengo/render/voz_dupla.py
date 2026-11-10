@@ -1,7 +1,7 @@
 """Vozes de Gil e Dona Cida no motor v3 do Mengão da Sala.
 
-    GIL       = Kokoro pm_alex (principal), Edge AntonioNeural (reserva).
-    DONA CIDA = Edge FranciscaNeural (principal), Kokoro pf_dora (reserva).
+    GIL       = Mistura Kokoro (principal), Edge AntonioNeural (reserva).
+    DONA CIDA = Mistura Kokoro (principal), Edge FranciscaNeural (reserva).
 
 O Edge TTS usa um serviço não oficial e pode ficar indisponível. A escolha é
 independente por personagem: falha na Dona Cida não troca a voz do Gil.
@@ -31,10 +31,10 @@ SR = 44100
 VOZES = {
     # IDs técnicos herdados: rubro=Gil e primo=Dona Cida.
     # "voz" fica como configuração do Edge (reserva para o Gil).
-    "rubro": dict(motor="kokoro", voz_principal="pm_alex",
+    "rubro": dict(motor="kokoro", voz_principal="pm_alex:0.70+im_nicola:0.30",
                   voz="pt-BR-AntonioNeural", rate=-2, reserva="pt-BR-AntonioNeural"),
-    "primo": dict(motor="edge", voz="pt-BR-FranciscaNeural",
-                  rate=-2, reserva="pf_dora"),
+    "primo": dict(motor="kokoro", voz_principal="pf_dora:0.80+bf_emma:0.20", voz="pt-BR-FranciscaNeural",
+                  rate=-2, reserva="pt-BR-FranciscaNeural"),
 }
 # humor -> (ajuste de velocidade em %, ajuste de tom em Hz)
 EMOCAO = {"euforico": (8, 6), "indignado": (5, 3), "tenso": (6, 2), "chocado": (3, 8),
@@ -95,11 +95,11 @@ def _ler(caminho, aparar=True) -> np.ndarray:
 
 def _kokoro(texto, voz):
     from kokoro_onnx import Kokoro
-    from src.flamengo.render.kokoro import garantir_modelo
+    from src.flamengo.render.kokoro import garantir_modelo, estilo
     import soundfile as sf
     if not hasattr(_kokoro, "k"):
         _kokoro.k = Kokoro(*garantir_modelo())
-    s, sr = _kokoro.k.create(texto, voice=voz, speed=1.04, lang="pt-br")
+    s, sr = _kokoro.k.create(texto, voice=estilo(_kokoro.k, voz), speed=1.04, lang="pt-br")
     with tempfile.TemporaryDirectory() as d:
         a = os.path.join(d, "k.wav")
         sf.write(a, s, sr)
@@ -110,22 +110,12 @@ def sintetizar_fala(quem: str, texto: str, voz_edge: str,
                    rate: str, pitch: str) -> tuple[np.ndarray, str]:
     """Sintetiza uma fala com motor principal do personagem e fallback específico."""
     cfg = VOZES.get(quem, VOZES["rubro"])
-    if cfg["motor"] == "kokoro":
-        # Gil: Kokoro pm_alex sempre antes de qualquer tentativa do Edge.
-        try:
-            return _kokoro(texto, cfg["voz_principal"]), "kokoro"
-        except Exception as exc:
-            print(f"[voz] Kokoro indisponível para Gil ({exc}); usando Edge reserva",
-                  file=sys.stderr)
-            return _ler(edge_mp3(texto, voz_edge, rate, pitch)), "edge"
-
-    # Dona Cida: Edge Francisca, sem alteração no timbre principal.
     try:
-        return _ler(edge_mp3(texto, voz_edge, rate, pitch)), "edge"
+        return _kokoro(texto, cfg["voz_principal"]), "kokoro"
     except Exception as exc:
-        print(f"[voz] Edge indisponível para Dona Cida ({exc}); usando Kokoro reserva",
+        print(f"[voz] Kokoro indisponível para {quem} ({exc}); usando Edge reserva",
               file=sys.stderr)
-        return _kokoro(texto, cfg["reserva"]), "kokoro"
+        return _ler(edge_mp3(texto, voz_edge, rate, pitch)), "edge"
 
 
 def narrar(batidas: list[dict], trabalho: Path, raiz: Path) -> dict:

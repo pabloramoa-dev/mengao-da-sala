@@ -9,7 +9,7 @@ def aplicar(pauta, jogo):
     formato=p['formato']
     if formato not in {'pre_jogo','palpite_cida','pos_jogo_v2'}:
         return p
-    if p.get('engajamento',{}).get('versao')==1:
+    if p.get('engajamento',{}).get('versao')==2:
         return p
     variante=int(sha256((str(jogo.get('id'))+formato).encode()).hexdigest(),16)%3
     rival=jogo.get('adversario') or 'o adversário'
@@ -22,7 +22,7 @@ def aplicar(pauta, jogo):
         forma = [b for b in outros if b['fala'].startswith('Peguei os últimos') or b['tipo']=='tabela']
         corpo=(noticias or forma)[:1] or [batida('Pra mim, quando o Flamengo chama o rival pro próprio campo, entrega a iniciativa. Eu prefiro pressionar lá na frente.')]
         gancho=f'Contra o {rival}, eu iria pra cima desde o primeiro minuto. Meu palpite é vitória do Mengão.'
-        final=('Você atacaria de saída ou esperaria o rival? Manda pro seu amigo vascaíno.', 'ATACAR DE SAÍDA?', 'compartilhar')
+        final=(f'Manda pra quem vai ver Flamengo e {rival} contigo.', 'MANDA PRA QUEM VAI VER', 'compartilhar')
     elif formato=='palpite_cida':
         n,e=p['palpite']
         # Regra editorial fixa: Cida é sempre otimista e nunca prevê empate/derrota.
@@ -36,10 +36,7 @@ def aplicar(pauta, jogo):
         # A abertura anterior e os pedidos duplicados são substituídos, não empilhados.
         corpo=[b for b in corpo if not b['fala'].startswith(('Hoje tem Mengão,','Meu palpite é','Amanhã o Gil confere'))]
         corpo.append(batida('Aqui é Flamengo, ganhar é obrigação! Depois do apito o Gil confere meu palpite.'))
-        finais=[('Quanto vai ser? Bota teu placar aí antes do jogo!', 'QUAL É O SEU PLACAR?', 'comentario'),
-                ('Manda praquele amigo que nunca concorda comigo.', 'CIDA OU SEU AMIGO?', 'compartilhar'),
-                ('Vai no meu palpite ou vai chutar outro? Conta aí.', 'PLACAR + MOTIVO', 'comentario')]
-        final=finais[variante]
+        final=(f'Manda pra quem já deu palpite contra o {rival}.', 'MANDA PRA QUEM PALPITOU', 'compartilhar')
     else:
         # A fala de placar já contém o resultado e, se houver, a disputa de pênaltis.
         placar=next((b for b in corpo if b.get('tipo')=='placar'),None)
@@ -52,7 +49,7 @@ def aplicar(pauta, jogo):
         penaltis = [b for b in corpo if b.get('tipo')=='placar']
         contexto = next((b for b in corpo if b.get('dados',{}).get('cartao')), None)
         corpo = retorno[:1] + penaltis + ([destaque or contexto] if destaque or contexto else [])
-        final=('Agora eu quero ver quem sustenta o palpite depois do apito. Manda pro seu amigo vascaíno e pergunta se ele teria coragem de defender esse placar na nossa sala.', 'MANDA PRO RIVAL', 'compartilhar')
+        final=(f'Manda pra quem perdeu o jogo contra o {rival}.', 'MANDA PRA QUEM PERDEU O JOGO', 'compartilhar')
     fala,cartao,acao=final
     abertura=batida(gancho,tipo='abre',cartao=titulo)
     if formato == 'pos_jogo_v2' and placar is not None:
@@ -65,5 +62,5 @@ def aplicar(pauta, jogo):
         b['plano']='close' if b.get('tipo') in {'noticia','placar','mexida'} or i%3==2 else 'aberto'
     p['batidas']=[abertura]+corpo+[fim]
     p['capa']=titulo if formato=='pos_jogo_v2' else titulo+'\n'+rival.upper()
-    p['engajamento']={'versao':1,'variante':variante,'gancho':gancho,'acao':acao,'cta':fala}
+    p['engajamento']={'versao':2,'variante':variante,'gancho':gancho,'acao':acao,'cta':fala}
     return p

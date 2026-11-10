@@ -21,13 +21,13 @@ def sintetizar(quem):
 
 def test_gil_tem_pm_alex_como_voz_principal():
     assert voz.VOZES["rubro"]["motor"] == "kokoro"
-    assert voz.VOZES["rubro"]["voz_principal"] == "pm_alex"
+    assert voz.VOZES["rubro"]["voz_principal"] == "pm_alex:0.70+im_nicola:0.30"
     with patch.object(voz, "_kokoro", return_value=AMOSTRA) as kokoro, \
          patch.object(voz, "edge_mp3") as edge:
         audio, motor = sintetizar("rubro")
     assert motor == "kokoro"
     assert audio is AMOSTRA
-    kokoro.assert_called_once_with(FALA, "pm_alex")
+    kokoro.assert_called_once_with(FALA, "pm_alex:0.70+im_nicola:0.30")
     edge.assert_not_called()
 
 
@@ -42,22 +42,17 @@ def test_gil_recorre_ao_antonio_se_kokoro_falhar():
     ler.assert_called_once_with(Path("antonio.mp3"))
 
 
-def test_dona_cida_conserva_francisca_como_principal():
-    assert voz.VOZES["primo"]["motor"] == "edge"
-    with patch.object(voz, "edge_mp3", return_value=Path("francisca.mp3")) as edge, \
-         patch.object(voz, "_ler", return_value=AMOSTRA), \
-         patch.object(voz, "_kokoro") as kokoro:
+def test_cida_usa_mistura_propria():
+    with patch.object(voz, "_kokoro", return_value=AMOSTRA) as kokoro:
         audio, motor = sintetizar("primo")
-    assert motor == "edge"
-    assert audio is AMOSTRA
+    assert audio is AMOSTRA and motor == "kokoro"
+    kokoro.assert_called_once_with(FALA, "pf_dora:0.80+bf_emma:0.20")
+
+
+def test_cida_recorre_a_francisca():
+    with patch.object(voz, "_kokoro", side_effect=RuntimeError("offline")), \
+         patch.object(voz, "edge_mp3", return_value=Path("voz.mp3")) as edge, \
+         patch.object(voz, "_ler", return_value=AMOSTRA):
+        audio, motor = sintetizar("primo")
+    assert audio is AMOSTRA and motor == "edge"
     edge.assert_called_once_with(FALA, "pt-BR-FranciscaNeural", "-2%", "+0Hz")
-    kokoro.assert_not_called()
-
-
-def test_dona_cida_recupera_pf_dora_se_edge_falhar():
-    with patch.object(voz, "edge_mp3", side_effect=RuntimeError("offline")), \
-         patch.object(voz, "_kokoro", return_value=AMOSTRA) as kokoro:
-        audio, motor = sintetizar("primo")
-    assert motor == "kokoro"
-    assert audio is AMOSTRA
-    kokoro.assert_called_once_with(FALA, "pf_dora")

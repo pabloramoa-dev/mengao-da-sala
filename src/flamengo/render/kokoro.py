@@ -68,6 +68,14 @@ def resample_44100(s, sr):
     return np.interp(x, xp, s).astype(np.float32)
 
 
+def estilo(modelo, voz):
+    """Aceita um nome simples ou dois estilos com pesos explícitos."""
+    if "+" not in voz:
+        return voz
+    termos = [termo.split(":") for termo in voz.split("+")]
+    return sum(modelo.get_voice_style(nome) * float(peso) for nome, peso in termos)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("roteiro", help="txt: uma batida de narração por linha")
@@ -96,8 +104,8 @@ def main():
     t = 0.0
     for i, txt in enumerate(linhas):
         personagem = elenco[i] if i < len(elenco) else "rubro"
-        voz_atual = "pm_santa" if personagem == "primo" else a.voz
-        s, sr = k.create(txt, voice=voz_atual, speed=a.speed, lang="pt-br")
+        voz_atual = "pf_dora:0.80+bf_emma:0.20" if personagem == "primo" else a.voz
+        s, sr = k.create(txt, voice=estilo(k, voz_atual), speed=a.speed, lang="pt-br")
         s = resample_44100(np.asarray(s, dtype=np.float32), sr)
         ini = t
         buf.append(s); buf.append(gap)
