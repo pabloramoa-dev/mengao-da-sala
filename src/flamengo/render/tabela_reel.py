@@ -8,6 +8,7 @@ import tempfile
 from html import escape
 from pathlib import Path
 from src.flamengo.render.capa import FONTE
+from src.flamengo.render import grafico
 
 
 def renderizar(pauta, destino):
@@ -19,7 +20,10 @@ def renderizar(pauta, destino):
     for i, grupo in enumerate(partes):
         inicio, passo = i * 10 / len(partes), 10 / len(partes)
         rows = ''.join(f'<tr class="{"fla" if str(r["id"])=="819" else ""}"><td>{int(r["rank"])}º</td><td>{escape(r["time"])}</td><td>{int(r["points"])}</td><td>{int(r["gamesPlayed"])}</td></tr>' for r in grupo)
-        paineis.append(f'<section class="clip" data-start="{inicio}" data-duration="{passo}" data-track-index="1" id="grupo{i}"><table><thead><tr><th>POS</th><th>CLUBE</th><th>PTS</th><th>J</th></tr></thead><tbody>{rows}</tbody></table></section>')
+        dados = [(f"{r['rank']}º", int(r['points']), str(r['id'])=='819') for r in grupo]
+        chart, barras = grafico.barras(f"pontos{i}", dados, max(int(r['points']) for r in linhas))
+        anim.append(grafico.animar(barras, inicio))
+        paineis.append(f'<section class="clip" data-start="{inicio}" data-duration="{passo}" data-track-index="1" id="grupo{i}"><table><thead><tr><th>POS</th><th>CLUBE</th><th>PTS</th><th>J</th></tr></thead><tbody>{rows}</tbody></table>{chart}</section>')
         anim.append(f'tl.fromTo("#grupo{i} tbody tr",{{x:45,opacity:0}},{{x:0,opacity:1,duration:.25,stagger:.06}},{inicio});')
     destino.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:

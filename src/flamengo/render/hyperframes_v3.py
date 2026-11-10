@@ -26,6 +26,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from src.flamengo.render import grafico
 from src.flamengo.render import hyperframes as hf
 from src.flamengo.render import personagens_v4 as P
 from src.flamengo.render import quintal
@@ -176,6 +177,11 @@ def tela_tv(pauta: dict, b: dict, i: int, font_path: Path) -> str:
         return ('<div class="tv-tag">BRASILEIRÃO · CLASSIFICAÇÃO</div><table class="tv-tabela"><thead><tr>'
                 '<th>#</th><th>TIME</th><th>PTS</th><th>J</th><th>SG</th></tr></thead>'
                 f'<tbody>{rows}</tbody></table>')
+    if tipo == 'placar' and i == 0 and pauta.get('resultado_confirmado'):
+        chart, _ = grafico.gols(pauta['resultado_confirmado'])
+        titulo = hf._escape(d['placar'].replace(' x ', ' × '))
+        return (f'<div class="tv-tag">PLACAR FINAL</div><div class="tv-titulo tv-placar" style="font-size:68px">{titulo}</div>'
+                f'<div style="width:360px;margin:auto">{chart}</div>')
     if tipo == 'gol' and d.get('anterior'):
         antes = hf._escape(d['anterior'])
         depois = hf._escape(d['placar'].replace(' x ', ' × '))
@@ -270,6 +276,9 @@ def escrever_composicao(conteudo: dict, projeto: Path, font_path: Path, cues: li
             if telas:
                 telas[-1][2] = a
             telas.append([tela, a, z])
+            if i == 0 and b.get("tipo") == "placar" and conteudo.get("resultado_confirmado"):
+                _, serie = grafico.gols(conteudo["resultado_confirmado"])
+                A(grafico.animar(serie, a))
             if b.get("tipo") == "gol":
                 painel = f"#tv{len(telas)-1}"
                 A(f'tl.set("{painel} .depois",{{display:"none"}},{a});')
