@@ -36,7 +36,7 @@ def renderizar(pauta, destino):
         </style></head><body><div id="root" data-composition-id="tabela" data-width="1080" data-height="1920" data-start="0" data-duration="10" data-fps="30"><header>MENGÃO DA SALA</header><h1>BRASILEIRÃO</h1><h2>FLAMENGO · {int(fla["rank"])}º · {int(fla["points"])} PONTOS</h2>{''.join(paineis)}<footer>Fonte: ESPN · @mengaodasala</footer></div>
         <script src="gsap.js"></script><script>const tl=gsap.timeline({{paused:true}});{''.join(anim)}window.__timelines={{tabela:tl}};</script></body></html>''')
         cli = raiz/'video/node_modules/hyperframes/bin/hyperframes.mjs'
-        subprocess.run(['node', str(cli), 'render', tmp, '--output', str(destino.resolve()), '--fps','30','--workers','2','--no-browser-gpu'], check=True, env={**os.environ,'HYPERFRAMES_TELEMETRY_DISABLED':'1'})
+        subprocess.run(['node', str(cli), 'render', tmp, '--output', str(destino.resolve()), '--fps','30','--workers','2','--no-browser-gpu'], check=True, env={**os.environ,'HYPERFRAMES_NO_TELEMETRY':'1'})
     dur = float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',str(destino)]))
     if abs(dur-10) > .1:
         raise ValueError(f'Duração inesperada da tabela: {dur}')

@@ -11,6 +11,8 @@ on:
       ensaio:
         type: boolean
         default: true
+env:
+  HYPERFRAMES_NO_TELEMETRY: "1"
 permissions:
   contents: write
 concurrency:
