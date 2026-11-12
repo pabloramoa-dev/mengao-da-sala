@@ -2752,6 +2752,29 @@
       "versao_editorial": 5,
       "container_id": "18133314952786157",
       "media_id": "18118943108279417"
+    },
+    {
+      "chave": "story-resposta:2026-11-12:companhia",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-11-12T17:25:21.999324+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "companhia",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-11-12",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-12T17:24:57.065432+00:00",
+      "duracao_segundos": null,
+      "midia": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18133511608786157",
+      "media_id": "17871300003662964"
     }
   ]
 }
