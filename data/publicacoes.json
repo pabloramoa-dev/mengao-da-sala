@@ -2821,6 +2821,29 @@
       "versao_editorial": 5,
       "container_id": "18133773742786157",
       "media_id": "18132174052879235"
+    },
+    {
+      "chave": "card:2026-11-13",
+      "formato": "tabela_card",
+      "status": "publicado",
+      "atualizado_em": "2026-11-13T23:37:16.599831+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-11-13",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-13T23:35:18.764860+00:00",
+      "duracao_segundos": 10.0,
+      "midia": "reel",
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18133830916786157",
+      "media_id": "17916012627541927"
     }
   ]
 }
