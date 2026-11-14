@@ -2844,6 +2844,29 @@
       "versao_editorial": 5,
       "container_id": "18133830916786157",
       "media_id": "17916012627541927"
+    },
+    {
+      "chave": "story-resposta:2026-11-14:emocao",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-11-14T16:51:58.302292+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "emocao",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-11-14",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-14T16:51:44.485423+00:00",
+      "duracao_segundos": null,
+      "midia": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18134029921786157",
+      "media_id": "18093864164692649"
     }
   ]
 }
