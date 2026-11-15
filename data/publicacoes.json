@@ -2890,6 +2890,29 @@
       "versao_editorial": 5,
       "container_id": "18134127625786157",
       "media_id": "18110092528954523"
+    },
+    {
+      "chave": "story-resposta:2026-11-15:memoria",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-11-15T15:02:05.832332+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "memoria",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-11-15",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-15T15:01:41.032186+00:00",
+      "duracao_segundos": null,
+      "midia": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18134311366786157",
+      "media_id": "18181126783452466"
     }
   ]
 }
