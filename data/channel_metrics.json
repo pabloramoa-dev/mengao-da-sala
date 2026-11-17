@@ -767,10 +767,25 @@
         "comments": 0,
         "shares_per_1000_reached": 0.0
       }
+    },
+    {
+      "media_id": "17992529241077959",
+      "window": "24h",
+      "age_hours": 46.65,
+      "collected_at": "2026-11-17T22:51:56.569600+00:00",
+      "media_type": "VIDEO",
+      "metrics": {
+        "reach": 106,
+        "shares": 4,
+        "saved": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares_per_1000_reached": 37.74
+      }
     }
   ],
   "status": "ok",
   "errors": [],
-  "updated_at": "2026-11-16T23:44:14.445869+00:00",
+  "updated_at": "2026-11-17T22:51:56.569600+00:00",
   "account": "mengaodasala"
 }
