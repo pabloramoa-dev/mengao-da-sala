@@ -3005,6 +3005,38 @@
       "versao_editorial": 5,
       "container_id": "18134953237786157",
       "media_id": "18112437014241369"
+    },
+    {
+      "chave": "pre:401841313",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-11-18T00:04:22.994616+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-11-17",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-11-18T23:30Z",
+      "jogo_id": "401841313",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-18T00:01:44.981063+00:00",
+      "duracao_segundos": 16.233333,
+      "midia": null,
+      "engajamento": {
+        "versao": 2,
+        "variante": 1,
+        "gancho": "Contra o Athletico, eu iria pra cima desde o primeiro minuto. Meu palpite é vitória do Mengão.",
+        "acao": "compartilhar",
+        "cta": "Manda pra quem vai ver Flamengo e Athletico contigo."
+      },
+      "versao_editorial": 5,
+      "container_id": "18134999629786157",
+      "media_id": "17962277397255004"
     }
   ]
 }
