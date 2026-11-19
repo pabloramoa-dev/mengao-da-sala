@@ -1,0 +1,39 @@
+name: Piloto Gil e Dona Cida conversando
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - tools/piloto_dupla.py
+      - .github/workflows/piloto-dupla.yml
+permissions:
+  contents: read
+env:
+  HYPERFRAMES_NO_TELEMETRY: '1'
+jobs:
+  piloto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar voz e vídeo
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg espeak-ng fonts-dejavu-core
+          python -m pip install numpy pillow soundfile kokoro-onnx edge-tts
+      - uses: ./.github/actions/setup-hyperframes
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/flamengo_kokoro
+          key: kokoro-v1
+      - name: Renderizar conversa sem publicar
+        run: python -m tools.piloto_dupla
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mengao-gil-cida-conversa
+          path: |
+            saida/mengao_gil_cida_conversa.*
+            saida/trab_dupla/segs.json
+          retention-days: 3

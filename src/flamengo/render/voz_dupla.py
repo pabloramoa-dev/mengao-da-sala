@@ -118,7 +118,31 @@ def sintetizar_fala(quem: str, texto: str, voz_edge: str,
         return _ler(edge_mp3(texto, voz_edge, rate, pitch)), "edge"
 
 
-def narrar(batidas: list[dict], trabalho: Path, raiz: Path) -> dict:
+def equalizar_fala(audio: np.ndarray, quem: str) -> np.ndarray:
+    """Clareza e nível por personagem, sem mudar timbre, velocidade ou pausas."""
+    import soundfile as sf
+    from src.flamengo.render.voz import medir_lufs
+    grave, medio, presenca = (75, 260, 2800) if quem == "rubro" else (95, 320, 3200)
+    filtro = (f"highpass=f={grave},equalizer=f={medio}:t=q:w=1:g=-2,"
+              f"equalizer=f={presenca}:t=q:w=1:g=1.5,lowpass=f=11000,"
+              "acompressor=threshold=-20dB:ratio=2:attack=12:release=160:makeup=1")
+    with tempfile.TemporaryDirectory() as d:
+        bruto, tratado = Path(d) / "bruto.wav", Path(d) / "tratado.wav"
+        sf.write(bruto, audio, SR, subtype="FLOAT")
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(bruto),
+                        "-af", filtro, "-ar", str(SR), "-ac", "1", "-c:a", "pcm_f32le",
+                        str(tratado)], check=True)
+        nivel = medir_lufs(tratado)
+        saida, _ = sf.read(tratado, dtype="float32")
+    ganho = 0 if nivel is None else max(-18, min(18, -18 - nivel))
+    saida *= 10 ** (ganho / 20)
+    pico = float(np.max(np.abs(saida))) if len(saida) else 0
+    if pico > .89:
+        saida *= .89 / pico
+    return saida
+
+
+def narrar(batidas: list[dict], trabalho: Path, raiz: Path, *, equalizar=False, pausa_troca=None) -> dict:
     """Mesma interface do voz.narrar(): narracao.wav, narracao_master.wav, segs, lip."""
     import soundfile as sf
     trabalho.mkdir(parents=True, exist_ok=True)
@@ -130,7 +154,7 @@ def narrar(batidas: list[dict], trabalho: Path, raiz: Path) -> dict:
     audios, motores = [], []
     for quem, voz_edge, rate, pitch, texto in falas:
         audio, usado = sintetizar_fala(quem, texto, voz_edge, rate, pitch)
-        audios.append(audio)
+        audios.append(equalizar_fala(audio, quem) if equalizar else audio)
         motores.append(usado)
     motor = motores[0] if len(set(motores)) == 1 else "misto"
 
@@ -143,7 +167,7 @@ def narrar(batidas: list[dict], trabalho: Path, raiz: Path) -> dict:
         elif prox.get("tipo") in ("pergunta", "cta"):
             gap = GAP_PERGUNTA
         else:
-            gap = GAP_TROCA if prox.get("personagem", "rubro") != quem else GAP_MESMO
+            gap = (GAP_TROCA if pausa_troca is None else pausa_troca) if prox.get("personagem", "rubro") != quem else GAP_MESMO
         ini = t
         buf += [s, np.zeros(int(gap * SR), dtype=np.float32)]
         t += len(s) / SR
