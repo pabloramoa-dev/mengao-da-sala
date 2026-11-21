@@ -3257,6 +3257,38 @@
       "versao_editorial": 5,
       "container_id": "18135553882786157",
       "media_id": "18135916390777436"
+    },
+    {
+      "chave": "pre:401841322",
+      "formato": "pre_jogo",
+      "status": "publicado",
+      "atualizado_em": "2026-11-21T00:22:43.318977+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": null,
+      "interacao": null,
+      "dia": "2026-11-20",
+      "palpite": [
+        2,
+        1
+      ],
+      "jogo_utc": "2026-11-21T19:30Z",
+      "jogo_id": "401841322",
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-21T00:20:00.577934+00:00",
+      "duracao_segundos": 16.2,
+      "midia": null,
+      "engajamento": {
+        "versao": 2,
+        "variante": 0,
+        "gancho": "Contra o Palmeiras, eu iria pra cima desde o primeiro minuto. Meu palpite é vitória do Mengão.",
+        "acao": "compartilhar",
+        "cta": "Manda pra quem vai ver Flamengo e Palmeiras contigo."
+      },
+      "versao_editorial": 5,
+      "container_id": "18135597463786157",
+      "media_id": "18092863823244988"
     }
   ]
 }
