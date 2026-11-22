@@ -917,10 +917,55 @@
         "comments": 0,
         "shares_per_1000_reached": 9.17
       }
+    },
+    {
+      "media_id": "17905424073377629",
+      "window": "24h",
+      "age_hours": 29.43,
+      "collected_at": "2026-11-22T21:02:10.212119+00:00",
+      "media_type": "VIDEO",
+      "metrics": {
+        "reach": 130,
+        "shares": 0,
+        "saved": 0,
+        "likes": 1,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
+    },
+    {
+      "media_id": "18092863823244988",
+      "window": "24h",
+      "age_hours": 44.66,
+      "collected_at": "2026-11-22T21:02:10.212119+00:00",
+      "media_type": "VIDEO",
+      "metrics": {
+        "reach": 101,
+        "shares": 0,
+        "saved": 0,
+        "likes": 3,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
+    },
+    {
+      "media_id": "18357707938222836",
+      "window": "72h",
+      "age_hours": 88.83,
+      "collected_at": "2026-11-22T21:02:10.212119+00:00",
+      "media_type": "VIDEO",
+      "metrics": {
+        "reach": 128,
+        "shares": 0,
+        "saved": 0,
+        "likes": 1,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
     }
   ],
   "status": "ok",
   "errors": [],
-  "updated_at": "2026-11-21T20:53:34.025710+00:00",
+  "updated_at": "2026-11-22T21:02:10.212119+00:00",
   "account": "mengaodasala"
 }
