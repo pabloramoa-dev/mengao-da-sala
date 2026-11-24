@@ -992,10 +992,40 @@
         "comments": 0,
         "shares_per_1000_reached": 0.0
       }
+    },
+    {
+      "media_id": "17902261251678755",
+      "window": "24h",
+      "age_hours": 25.25,
+      "collected_at": "2026-11-24T23:52:52.835360+00:00",
+      "media_type": "VIDEO",
+      "metrics": {
+        "reach": 70,
+        "shares": 0,
+        "saved": 0,
+        "likes": 0,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
+    },
+    {
+      "media_id": "17905424073377629",
+      "window": "72h",
+      "age_hours": 80.27,
+      "collected_at": "2026-11-24T23:52:52.835360+00:00",
+      "media_type": "VIDEO",
+      "metrics": {
+        "reach": 130,
+        "shares": 0,
+        "saved": 0,
+        "likes": 1,
+        "comments": 0,
+        "shares_per_1000_reached": 0.0
+      }
     }
   ],
   "status": "ok",
   "errors": [],
-  "updated_at": "2026-11-24T02:11:13.593144+00:00",
+  "updated_at": "2026-11-24T23:52:52.835360+00:00",
   "account": "mengaodasala"
 }
