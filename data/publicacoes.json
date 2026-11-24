@@ -3532,6 +3532,29 @@
       "versao_editorial": 5,
       "container_id": "18136233889786157",
       "media_id": "17902261251678755"
+    },
+    {
+      "chave": "story-resposta:2026-11-24:idolo",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-11-24T18:07:32.814831+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "idolo",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-11-24",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-24T18:07:06.241313+00:00",
+      "duracao_segundos": null,
+      "midia": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18136391998786157",
+      "media_id": "18058453691807143"
     }
   ]
 }
