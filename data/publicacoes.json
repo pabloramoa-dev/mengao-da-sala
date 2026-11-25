@@ -3578,6 +3578,29 @@
       "versao_editorial": 5,
       "container_id": "18136462243786157",
       "media_id": "18079875278597764"
+    },
+    {
+      "chave": "story-resposta:2026-11-25:ritual",
+      "formato": "story_resposta",
+      "status": "publicado",
+      "atualizado_em": "2026-11-25T20:38:15.902383+00:00",
+      "memoria_editorial": [],
+      "analise_palpite": null,
+      "slot": "ritual",
+      "interacao": "resposta_ao_story",
+      "dia": "2026-11-25",
+      "palpite": null,
+      "jogo_utc": null,
+      "jogo_id": null,
+      "enquete": null,
+      "semana": null,
+      "coletado_em": "2026-11-25T20:37:49.758279+00:00",
+      "duracao_segundos": null,
+      "midia": null,
+      "engajamento": null,
+      "versao_editorial": 5,
+      "container_id": "18136626286786157",
+      "media_id": "17867286519694583"
     }
   ]
 }
